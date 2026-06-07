@@ -1,0 +1,9 @@
+{
+  "name": "rdco-example",
+  "description": "Minimal example plugin from Ray Data Co — demonstrates a slash command and a skill bundled in one plugin.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
