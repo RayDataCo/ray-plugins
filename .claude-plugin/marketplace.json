@@ -1,5 +1,6 @@
 {
   "name": "ray-plugins",
+  "description": "Ray Data Co's example Claude Code plugin marketplace — a minimal working template you can copy.",
   "owner": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"
