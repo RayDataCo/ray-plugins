@@ -62,19 +62,30 @@ There are **two different things called "Work IQ"** — the draft conflated them
 
 Ref: `use-work-iq`, `knowledge-copilot-studio` (Turn on Work IQ section).
 
+## Target environments (how deliverables are emitted)
+
+The plugin works in **two target systems** — detect which and emit accordingly:
+- **Claude Code** — emit each deliverable as a **markdown file** in the working directory.
+- **Claude Web / Desktop** — emit each deliverable as a **project asset**. If the user isn't already in a **Project**, nudge them to create one first, so the runbook + per-agent deliverables stay bundled and easy to update as the engineer tweaks the plans.
+
 ## Deliverables — the five documents
 
-The skill produces five docs. Generic/reusable = #1; per-agent = #2–#5. Each has a bundled template.
+Generic/reusable = #1; per-agent = #2–#5.
 
-1. **Generic Copilot Studio Runbook** (reusable, agent-agnostic) → `templates/01-generic-runbook.md`
+1. **Generic Copilot Studio Runbook** (reusable, agent-agnostic) — lives in the plugin as a **maintained reference doc**: `reference/generic-runbook.md`. A living document, not a frozen asset: pull it into a working project with `/copilot-studio-pull-runbook`; refresh it against the latest Microsoft Learn docs with `/copilot-studio-ground-runbook`.
 2. **Agent Implementation Plan** (per agent — the §4 mad-libs, filled in) → `templates/02-implementation-plan.md`
 3. **Agent Evaluation Plan** (per agent) → `templates/03-evaluation-plan.md`
 4. **Agent Documentation** (per agent) → `templates/04-documentation.md`
 5. **Agent Maintenance Runbook** (per agent) → `templates/05-maintenance-runbook.md`
 
+## Commands
+
+- **`/copilot-studio-pull-runbook`** — pulls the generic runbook (#1) into the current project for clear visibility/tweaking (markdown file in Claude Code; project asset in Web/Desktop).
+- **`/copilot-studio-ground-runbook`** — re-grounds the generic runbook in the latest Microsoft Learn docs and reports a sourced diff. Run it before relying on the runbook — the field changes fast.
+
 ## Workflow order (how to run this skill)
 
-1. **Draft the generic Runbook (#1) first** — it's agent-agnostic and validates the process before any specific agent.
+1. **Ground + pull the generic Runbook (#1) first.** Run `/copilot-studio-ground-runbook` to refresh it against current Microsoft Learn docs, then `/copilot-studio-pull-runbook` to drop it into the working project. It's agent-agnostic and sets the process before any specific agent.
 2. **Then request the engineer's example agent** to validate the per-agent templates (#2–#5). The example was deliberately withheld to avoid over-anchoring — **do not ask for it before the generic runbook exists.**
 3. For each new agent: fill #2 → derive #3 (evals must mirror the Topics/intents in #2) → write #4 → set up #5.
 4. At every step, **re-verify preview/pricing/model claims against `learn.microsoft.com`** and record the actual values chosen (esp. the model version — pick the **newest Claude Sonnet** the tenant's picker offers; do not hardcode a version).
@@ -89,9 +100,11 @@ Resolved already (do not re-litigate): orchestration mode = generative; Work IQ 
 
 ## Bundled files
 
+- `reference/generic-runbook.md` — deliverable #1, the maintained living runbook (pulled via `/copilot-studio-pull-runbook`, refreshed via `/copilot-studio-ground-runbook`).
 - `reference/copilot-studio-givens.md` — the verified facts the building agent draws on (knowledge-source limits, entities/slot filling, variables, triggers, multi-agent, full mental model, Work IQ disambiguation, eval methods table).
 - `reference/doc-endpoints.md` — the `learn.microsoft.com` endpoint index to read in full, grouped by topic.
-- `templates/01-generic-runbook.md` … `templates/05-maintenance-runbook.md` — the five deliverable templates.
+- `templates/02-implementation-plan.md` … `templates/05-maintenance-runbook.md` — the four per-agent deliverable templates (#2–#5).
+- `commands/copilot-studio-pull-runbook.md`, `commands/copilot-studio-ground-runbook.md` — the two slash commands.
 
 ## Provenance
 
