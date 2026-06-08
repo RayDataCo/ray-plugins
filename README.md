@@ -9,16 +9,16 @@ A minimal, working example of a [Claude Code plugin marketplace](https://code.cl
 /plugin install rdco-example@ray-plugins
 ```
 
-Then try the `/hello` slash command.
+Then say hello to it, or ask for a Ray Data Co greeting — both are skills.
 
 ## What's inside
 
 ```
 .claude-plugin/marketplace.json      # marketplace manifest (lists plugins)
-plugins/rdco-example/                 # minimal copy-me template
+plugins/rdco-example/                 # minimal copy-me template (skills-only)
   .claude-plugin/plugin.json          # plugin manifest
-  commands/hello.md                   # a slash command (/hello)
-  skills/rdco-greeting/SKILL.md       # a skill
+  skills/rdco-greeting/SKILL.md       # a skill (explains plugin structure)
+  skills/rdco-hello/SKILL.md          # a skill (say hello, by name)
 plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Studio agents (skills-only)
   .claude-plugin/plugin.json
   skills/copilot-studio-agent-builder/  # lifecycle orchestrator (plan->build->test->publish->maintain)
@@ -31,7 +31,7 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
 
 ## Plugins
 
-- **`rdco-example`** — minimal template (`/hello` + a skill). Copy it to start your own.
+- **`rdco-example`** — minimal template: two example skills (`rdco-greeting` + `rdco-hello`), skills-only. Copy it to start your own.
 - **`copilot-studio-agent-builder`** — guides the full lifecycle of building a Microsoft Copilot Studio agent and emits five standard deliverables (generic runbook + per-agent implementation / evaluation / documentation / maintenance docs). Generative-orchestration baseline; Work-IQ-off + grounded-internal defaults; built from a verified Microsoft Learn walkthrough. Works in **Claude Code** (deliverables as markdown files) and **Claude Web/Desktop** (deliverables as project assets). Skills-only (no slash commands) — ships two companion skills: `copilot-studio-pull-runbook` (pull the runbook into your project) and `copilot-studio-ground-runbook` (refresh it against the latest Microsoft docs — the field moves fast).
   ```
   /plugin install copilot-studio-agent-builder@ray-plugins
@@ -39,7 +39,7 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
 
 ## Copy it
 
-`plugins/rdco-example/` is a template. Copy the folder, rename it, edit `plugin.json`, add your own `commands/`, `skills/`, `agents/`, hooks, or MCP servers, then add an entry to `.claude-plugin/marketplace.json`.
+`plugins/rdco-example/` is a template. Copy the folder, rename it, edit `plugin.json`, add your own `skills/`, `agents/`, hooks, or MCP servers, then add an entry to `.claude-plugin/marketplace.json`. (RDCO standardizes on **skills** over slash commands — build capabilities as skills.)
 
 ## Other sources
 

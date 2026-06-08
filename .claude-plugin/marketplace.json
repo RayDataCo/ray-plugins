@@ -9,7 +9,7 @@
     {
       "name": "rdco-example",
       "source": "./plugins/rdco-example",
-      "description": "Minimal example plugin: one slash command (/hello) + one skill (rdco-greeting). Copy this folder as a template for your own plugin."
+      "description": "Minimal example plugin: two example skills (rdco-greeting + rdco-hello), skills-only. Copy this folder as a template for your own plugin."
     },
     {
       "name": "copilot-studio-agent-builder",
