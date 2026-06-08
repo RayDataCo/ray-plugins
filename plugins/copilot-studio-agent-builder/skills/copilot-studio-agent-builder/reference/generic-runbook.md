@@ -2,7 +2,7 @@
 
 > Deliverable #1 — and the plugin's **maintained reference doc**. The master process doc spanning **plan → build → test → publish → maintain**. Agent-agnostic; per-agent decisions go in deliverables #2–#5, never here.
 >
-> **This is a living document, not a frozen asset.** Copilot Studio changes fast. Pull a copy into your working project with `/copilot-studio-pull-runbook`, and refresh it against the latest Microsoft Learn docs with `/copilot-studio-ground-runbook` before relying on it.
+> **This is a living document, not a frozen asset.** Copilot Studio changes fast. Pull a copy into your working project with the **`copilot-studio-pull-runbook`** skill, and refresh it against the latest Microsoft Learn docs with the **`copilot-studio-ground-runbook`** skill before relying on it.
 
 ## 0. Build-time discipline (every time)
 - Prefer `learn.microsoft.com` over blogs/videos. Copilot Studio = formerly Power Virtual Agents; ignore old-UI / classic-mode content.
@@ -48,4 +48,4 @@ Order ≈ build order. All agents generative (no mode field).
 See `./doc-endpoints.md` for the full Microsoft Learn endpoint index and `./copilot-studio-givens.md` for the verified facts/limits/defaults.
 
 ---
-_Last grounded against Microsoft Learn: 2026-06-08 (initial build from the verified handoff spec). Re-run `/copilot-studio-ground-runbook` to refresh and update this date._
+_Last grounded against Microsoft Learn: 2026-06-08 (initial build from the verified handoff spec). Re-run the `copilot-studio-ground-runbook` skill to refresh and update this date._

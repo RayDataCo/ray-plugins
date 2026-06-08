@@ -1,7 +1,7 @@
 {
   "name": "copilot-studio-agent-builder",
-  "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent — plan, build, test, publish, maintain — and emits five standard deliverables (generic runbook + per-agent implementation/evaluation/documentation/maintenance docs). Standardizes on generative orchestration; bakes in the verified corrections and defaults from a Microsoft Learn walkthrough.",
-  "version": "0.1.0",
+  "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent \u2014 plan, build, test, publish, maintain \u2014 and emits five standard deliverables (generic runbook + per-agent implementation/evaluation/documentation/maintenance docs). Standardizes on generative orchestration; bakes in the verified corrections and defaults from a Microsoft Learn walkthrough.",
+  "version": "0.2.0",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"

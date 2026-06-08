@@ -72,20 +72,21 @@ The plugin works in **two target systems** — detect which and emit accordingly
 
 Generic/reusable = #1; per-agent = #2–#5.
 
-1. **Generic Copilot Studio Runbook** (reusable, agent-agnostic) — lives in the plugin as a **maintained reference doc**: `reference/generic-runbook.md`. A living document, not a frozen asset: pull it into a working project with `/copilot-studio-pull-runbook`; refresh it against the latest Microsoft Learn docs with `/copilot-studio-ground-runbook`.
+1. **Generic Copilot Studio Runbook** (reusable, agent-agnostic) — lives in the plugin as a **maintained reference doc**: `reference/generic-runbook.md`. A living document, not a frozen asset: pull it into a working project with the **`copilot-studio-pull-runbook`** skill; refresh it against the latest Microsoft Learn docs with the **`copilot-studio-ground-runbook`** skill.
 2. **Agent Implementation Plan** (per agent — the §4 mad-libs, filled in) → `templates/02-implementation-plan.md`
 3. **Agent Evaluation Plan** (per agent) → `templates/03-evaluation-plan.md`
 4. **Agent Documentation** (per agent) → `templates/04-documentation.md`
 5. **Agent Maintenance Runbook** (per agent) → `templates/05-maintenance-runbook.md`
 
-## Commands
+## Companion skills (this plugin)
 
-- **`/copilot-studio-pull-runbook`** — pulls the generic runbook (#1) into the current project for clear visibility/tweaking (markdown file in Claude Code; project asset in Web/Desktop).
-- **`/copilot-studio-ground-runbook`** — re-grounds the generic runbook in the latest Microsoft Learn docs and reports a sourced diff. Run it before relying on the runbook — the field changes fast.
+Two sibling skills handle the runbook lifecycle — they auto-activate on intent (no slash commands; this plugin is skills-only):
+- **`copilot-studio-pull-runbook`** — pulls the generic runbook (#1) into the current project for clear visibility/tweaking (markdown file in Claude Code; project asset in Web/Desktop). Trigger: "pull the Copilot Studio runbook into my project."
+- **`copilot-studio-ground-runbook`** — re-grounds the generic runbook in the latest Microsoft Learn docs and reports a sourced diff. Use it before relying on the runbook — the field changes fast. Trigger: "refresh/ground the Copilot Studio runbook."
 
 ## Workflow order (how to run this skill)
 
-1. **Ground + pull the generic Runbook (#1) first.** Run `/copilot-studio-ground-runbook` to refresh it against current Microsoft Learn docs, then `/copilot-studio-pull-runbook` to drop it into the working project. It's agent-agnostic and sets the process before any specific agent.
+1. **Ground + pull the generic Runbook (#1) first.** Use the **`copilot-studio-ground-runbook`** skill to refresh it against current Microsoft Learn docs, then **`copilot-studio-pull-runbook`** to drop it into the working project. It's agent-agnostic and sets the process before any specific agent.
 2. **Then request the engineer's example agent** to validate the per-agent templates (#2–#5). The example was deliberately withheld to avoid over-anchoring — **do not ask for it before the generic runbook exists.**
 3. For each new agent: fill #2 → derive #3 (evals must mirror the Topics/intents in #2) → write #4 → set up #5.
 4. At every step, **re-verify preview/pricing/model claims against `learn.microsoft.com`** and record the actual values chosen (esp. the model version — pick the **newest Claude Sonnet** the tenant's picker offers; do not hardcode a version).
@@ -100,11 +101,11 @@ Resolved already (do not re-litigate): orchestration mode = generative; Work IQ 
 
 ## Bundled files
 
-- `reference/generic-runbook.md` — deliverable #1, the maintained living runbook (pulled via `/copilot-studio-pull-runbook`, refreshed via `/copilot-studio-ground-runbook`).
+- `reference/generic-runbook.md` — deliverable #1, the maintained living runbook (pulled via the `copilot-studio-pull-runbook` skill, refreshed via the `copilot-studio-ground-runbook` skill).
 - `reference/copilot-studio-givens.md` — the verified facts the building agent draws on (knowledge-source limits, entities/slot filling, variables, triggers, multi-agent, full mental model, Work IQ disambiguation, eval methods table).
 - `reference/doc-endpoints.md` — the `learn.microsoft.com` endpoint index to read in full, grouped by topic.
 - `templates/02-implementation-plan.md` … `templates/05-maintenance-runbook.md` — the four per-agent deliverable templates (#2–#5).
-- `commands/copilot-studio-pull-runbook.md`, `commands/copilot-studio-ground-runbook.md` — the two slash commands.
+- Sibling skills `copilot-studio-pull-runbook/` and `copilot-studio-ground-runbook/` — the runbook pull/ground operations (skills, not commands).
 
 ## Provenance
 
