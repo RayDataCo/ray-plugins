@@ -15,11 +15,25 @@ Then try the `/hello` slash command.
 
 ```
 .claude-plugin/marketplace.json      # marketplace manifest (lists plugins)
-plugins/rdco-example/
+plugins/rdco-example/                 # minimal copy-me template
   .claude-plugin/plugin.json          # plugin manifest
   commands/hello.md                   # a slash command (/hello)
   skills/rdco-greeting/SKILL.md       # a skill
+plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Studio agents
+  .claude-plugin/plugin.json
+  skills/copilot-studio-agent-builder/
+    SKILL.md                          # lifecycle orchestrator (plan->build->test->publish->maintain)
+    reference/                        # verified Microsoft Learn facts + doc-endpoint index
+    templates/                        # the 5 deliverable templates
 ```
+
+## Plugins
+
+- **`rdco-example`** — minimal template (`/hello` + a skill). Copy it to start your own.
+- **`copilot-studio-agent-builder`** — guides the full lifecycle of building a Microsoft Copilot Studio agent and emits five standard deliverables (generic runbook + per-agent implementation / evaluation / documentation / maintenance docs). Generative-orchestration baseline; Work-IQ-off + grounded-internal defaults; built from a verified Microsoft Learn walkthrough.
+  ```
+  /plugin install copilot-studio-agent-builder@ray-plugins
+  ```
 
 ## Copy it
 
