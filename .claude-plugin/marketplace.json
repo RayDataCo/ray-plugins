@@ -10,6 +10,11 @@
       "name": "rdco-example",
       "source": "./plugins/rdco-example",
       "description": "Minimal example plugin: one slash command (/hello) + one skill (rdco-greeting). Copy this folder as a template for your own plugin."
+    },
+    {
+      "name": "copilot-studio-agent-builder",
+      "source": "./plugins/copilot-studio-agent-builder",
+      "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent (plan -> build -> test -> publish -> maintain) and emits five standard deliverables. Standardizes on generative orchestration; bakes in verified Microsoft Learn corrections + safe defaults (Work IQ off, newest Sonnet, grounded internal agents)."
     }
   ]
 }
