@@ -19,7 +19,7 @@
     {
       "name": "snowflake-cli",
       "source": "./plugins/snowflake-cli",
-      "description": "Teaches Claude Code to use the Snowflake CLI (`snow`) — primarily to execute SQL and deploy DDL — via a /prime-snow-cli index skill plus reference files that mirror the full `snow` command tree (connection, object, stage, snowpark, streamlit, app, spcs, cortex, dbt, git, notebook, dcm) with pointers to the official docs. Bakes in the RDCO key-pair/1Password no-secrets auth posture."
+      "description": "Teaches Claude Code to use the Snowflake CLI (`snow`) — primarily to execute SQL and deploy DDL — via a /prime-snow-cli index skill plus reference files that mirror the full `snow` command tree (connection, object, stage, snowpark, streamlit, app, spcs, cortex, dbt, git, notebook, dcm) with pointers to the official docs."
     }
   ]
 }
