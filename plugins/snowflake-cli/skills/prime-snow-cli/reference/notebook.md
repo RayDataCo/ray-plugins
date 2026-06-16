@@ -11,8 +11,8 @@ Manage Snowflake notebooks.
 | `open` | Open a notebook in the browser |
 
 ```bash
-snow notebook deploy -c caf_sandbox
-snow notebook execute <name> -c caf_sandbox
+snow notebook deploy -c dev
+snow notebook execute <name> -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/notebook-commands/overview

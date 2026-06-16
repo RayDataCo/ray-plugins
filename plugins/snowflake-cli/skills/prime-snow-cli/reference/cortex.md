@@ -11,8 +11,8 @@ Call Snowflake Cortex LLM features from the CLI.
 | `extract-answer` | Extract answers from a document |
 
 ```bash
-snow cortex complete "Explain VARIANT vs JSONB in one line" -c caf_sandbox
-snow cortex summarize -f long.txt -c caf_sandbox
+snow cortex complete "Explain VARIANT vs JSONB in one line" -c dev
+snow cortex summarize -f long.txt -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/cortex-commands/overview

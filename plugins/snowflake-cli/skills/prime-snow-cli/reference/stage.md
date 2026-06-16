@@ -14,12 +14,12 @@ Manage Snowflake stages and move files in/out. There is **no `put`/`get`** — u
 | `drop` | Remove a stage |
 
 ```bash
-snow stage create CAF.CATALOG.LOAD -c caf_sandbox
-snow stage copy ./seed/use_cases.csv @CAF.CATALOG.LOAD -c caf_sandbox   # upload
-snow stage copy @CAF.CATALOG.LOAD ./out/ -c caf_sandbox                 # download
-snow stage list-files @CAF.CATALOG.LOAD -c caf_sandbox
-snow stage execute @CAF.CATALOG.LOAD/setup.sql -c caf_sandbox
+snow stage create MYDB.PUBLIC.LOAD -c dev
+snow stage copy ./seed/use_cases.csv @MYDB.PUBLIC.LOAD -c dev   # upload
+snow stage copy @MYDB.PUBLIC.LOAD ./out/ -c dev                 # download
+snow stage list-files @MYDB.PUBLIC.LOAD -c dev
+snow stage execute @MYDB.PUBLIC.LOAD/setup.sql -c dev
 ```
-Typical CAF use: stage a CSV/Parquet of seed use-cases, then `COPY INTO` from SQL.
+Typical use: stage a CSV/Parquet file, then `COPY INTO` a table from SQL.
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/stage-commands/overview

@@ -11,9 +11,9 @@ Manage dbt projects as Snowflake objects (deploy + run them in-account).
 | `drop` | Remove a dbt project object |
 
 ```bash
-snow dbt deploy -c caf_sandbox
-snow dbt execute run -c caf_sandbox
+snow dbt deploy -c dev
+snow dbt execute run -c dev
 ```
-Relevant if the CAF catalog transforms move to dbt later.
+Relevant when your transformations are managed with dbt.
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/dbt-commands/overview

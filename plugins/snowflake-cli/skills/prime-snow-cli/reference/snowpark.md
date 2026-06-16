@@ -21,7 +21,7 @@ Build, deploy, and manage Snowpark (Python/Java/Scala) user-defined functions an
 ```bash
 snow snowpark package lookup pandas
 snow snowpark build
-snow snowpark deploy -c caf_sandbox
+snow snowpark deploy -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/snowpark-commands/overview

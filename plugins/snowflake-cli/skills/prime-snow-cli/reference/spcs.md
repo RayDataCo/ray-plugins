@@ -15,9 +15,9 @@ Manage container compute and services. Four subgroups.
 `create` · `deploy` · `list` · `list-images` · `list-tags` · `url` · `drop`
 
 ```bash
-snow spcs image-registry login -c caf_sandbox
-snow spcs service list -c caf_sandbox
-snow spcs service logs <name> -c caf_sandbox
+snow spcs image-registry login -c dev
+snow spcs service list -c dev
+snow spcs service logs <name> -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/spcs-commands/overview

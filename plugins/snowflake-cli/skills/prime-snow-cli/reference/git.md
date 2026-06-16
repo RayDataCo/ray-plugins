@@ -14,8 +14,8 @@ Manage Git repositories registered inside Snowflake (run SQL/files straight from
 | `drop` | Remove a Git repository |
 
 ```bash
-snow git list -c caf_sandbox
-snow git execute @my_repo/branches/main/deploy.sql -c caf_sandbox
+snow git list -c dev
+snow git execute @my_repo/branches/main/deploy.sql -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/git-commands/overview

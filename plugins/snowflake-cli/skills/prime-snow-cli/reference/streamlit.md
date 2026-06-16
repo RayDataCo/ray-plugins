@@ -14,8 +14,8 @@ Deploy and manage Streamlit apps that run inside Snowflake.
 | `drop` | Remove a Streamlit app |
 
 ```bash
-snow streamlit deploy -c caf_sandbox
-snow streamlit get-url <name> -c caf_sandbox
+snow streamlit deploy -c dev
+snow streamlit get-url <name> -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/streamlit-commands/overview

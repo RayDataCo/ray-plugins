@@ -24,9 +24,9 @@ Develop → run → version → publish a Snowflake Native Application.
 `list` · `set` · `unset` · `add-accounts` · `remove-accounts`
 
 ```bash
-snow app run -c caf_sandbox
-snow app version create v1 -c caf_sandbox
-snow app publish --version v1 -c caf_sandbox
+snow app run -c dev
+snow app version create v1 -c dev
+snow app publish --version v1 -c dev
 ```
 
 Docs: https://docs.snowflake.com/en/developer-guide/snowflake-cli/command-reference/native-apps-commands/overview

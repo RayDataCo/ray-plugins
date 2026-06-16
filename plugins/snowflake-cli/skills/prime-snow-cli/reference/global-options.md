@@ -10,7 +10,7 @@ Flags that ride on most `snow` commands. Commands that open a Snowflake session 
 ## Session / auth overrides (long flags only — no `-a/-u/-r/-d/-w`)
 `--account/--accountname` · `--user/--username` · `--password` · `--role/--rolename` · `--database/--dbname` · `--schema/--schemaname` · `--warehouse` · `--authenticator` · `--private-key-file` · `--token-file-path` · `--mfa-passcode`
 
-> Prefer env vars / 1Password over `--password` on the command line (it lands in shell history). See `connection-and-auth.md`.
+> Prefer env vars over `--password` on the command line (it lands in shell history). See `connection.md`.
 
 ## Output & logging
 - `--format TABLE|JSON|JSON_EXT|CSV` — output format. `--format json` for anything an agent parses.
