@@ -1,0 +1,9 @@
+{
+  "name": "skill-dev-pipeline",
+  "description": "Meta-pipeline for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that turns a one-line request + a competency source into a depth-forced, well-tested SKILL.md and gates slop with independent critics. Ships the orchestrator skill, a reference workflow, and a worked example (variance-analysis).",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
