@@ -79,26 +79,29 @@ The **competency excerpt** is the depth source. Certifications/BOKs encode what 
 - **progressive-disclosure-hygiene** — lean `SKILL.md`, depth in reference files, lazy pointers
 - **no-slop** — load-bearing specificity over plausible-generic filler
 
-**Planned (the stronger gate): an execution-eval critic** that actually *runs* the authored skill on the acceptance scenarios and grades the output against expected results — empirical performance, not just static review. For `variance-analysis` that means feeding the skill a real actual-vs-standard dataset and checking it decomposes the variances correctly. Static review catches structural and fidelity problems; execution-eval catches behavioral ones. The two run together.
+**The stronger gate: the execution-eval station** (wired — see [`skills/execution-eval-station/`](./skills/execution-eval-station/) and [DESIGN.md §5](./DESIGN.md)). It doesn't just check the skill got the right answer — it measures whether the skill **beats the base model**. Same fixture, two arms (base model alone vs base model + skill), N samples each, both graded against the known answer. **Lift = with-skill pass-rate minus baseline.** Lift ≈ 0 means the skill is dead weight and the orchestrator should kill the ticket; a positive lift that clears the noise band is the skill justifying its existence — and the number says *how much*. Because it executes the skill, needs N samples for variance, produces a measurement (not a vote), and must be re-runnable standalone for regression, it's its **own station, not a sixth critic axis**. Built on `skill-creator`'s benchmark machinery (two-arm runs, grader, `aggregate_benchmark` delta, analyzer lift-attribution); the fixtures are the acceptance contract's oracle set.
 
 ```mermaid
 flowchart TB
   SK["Authored skill"] --> STATIC
-  subgraph STATIC["Static critic — shipped"]
+  subgraph STATIC["Static critics — per revision (fast loop)"]
     A1["triggering-precision"]
     A2["domain-fidelity"]
     A3["procedure-not-dump"]
     A4["disclosure-hygiene"]
     A5["no-slop"]
   end
-  SK --> EXEC
-  subgraph EXEC["Execution-eval critic — planned"]
-    E1["load skill → run acceptance scenarios"]
-    E2["grade outputs vs expected"]
+  STATIC --> PASS{"static PASS?"}
+  PASS -->|yes| EXEC
+  subgraph EXEC["Execution-eval station — end gate + regression"]
+    E1["Arm A: base model (no skill)"]
+    E2["Arm B: base model + skill"]
+    E1 --> E3["grade vs oracle · N samples"]
+    E2 --> E3
+    E3 --> E4["lift = B − A (± band)"]
   end
-  STATIC --> AGG["aggregate → PASS/FAIL + confidence"]
-  EXEC --> AGG
-  AGG --> LOOP["convergence loop / orchestrator"]
+  EXEC --> DEC["expo: advance / kill / refire"]
+  DEC --> LOOP["orchestrator"]
 ```
 
 ## The worked example: variance-analysis
@@ -117,6 +120,6 @@ Add a skill by appending its input record to the backlog and running the pipelin
 
 ## Follow-ups
 
-- **Execution-eval critic** — wire the run-the-skill-against-the-acceptance-scenarios gate described above.
+- **Execution-eval station** — *wired* ([`skills/execution-eval-station/`](./skills/execution-eval-station/) + [`workflow/execution-eval-variance-analysis.run.js`](./workflow/execution-eval-variance-analysis.run.js)). Remaining: record the first measured `variance-analysis` lift number here, persist regression baselines to the rail, and have the orchestrator consume the lift signal as an advance/kill/refire decision.
 - **Seat genericization** — publish the four seat skills as standalone, environment-portable files (the canonical versions currently reference an internal harness layout).
 - **Orchestrator as a first-class loop** — see [`skills/skill-dev-orchestrator/`](./skills/skill-dev-orchestrator/) for the backlog-loop + phase-state + feedback-routing contract.

@@ -49,12 +49,44 @@ The pipeline's input generalizes from `{name, dept, competency_excerpt}` to **`{
 - **Internal / dev / demo:** a markdown corpus + local lexical+vector search (Obsidian + QMD-style). Cheap, versioned, no per-query cost, sufficient for building skills. Validated by the broader "context-as-files" movement (markdown corpora + `llms.txt`-style packaging; Shopify is showing it has legs).
 - **Enterprise / client production:** a governed store co-located with the data (e.g. Snowflake Cortex Search where the client already lives in Snowflake). The premium buys **governance (RBAC), scale, freshness, and data-gravity** — retrieval living where the data already is — *not* merely better relevance. Reserve it for where those actually matter; **default to the cheap local approach.**
 
-## 5. Evaluation: static + execution
+## 5. Evaluation: static critics + the execution-eval station
 
-- **Static critic (shipped):** N adversarial axes read the authored skill + spec + tests and judge structure/fidelity/specificity. Catches *structural* problems.
-- **Execution-eval critic (planned):** actually *runs* the authored skill on the acceptance scenarios and grades output vs expected. Catches *behavioral* problems.
+Two evaluation surfaces, deliberately different shapes:
 
-**Where the sample data lives:** in the acceptance contract. The test author already writes scenarios — extend it to emit **golden fixtures = `{input data, expected output}`.** For computational skills, fixtures are synthetic-with-known-answers (you own the ground truth). For corpus skills, package a representative sample document + expected extraction. The fixture is part of the contract, so the *same* artifact drives both static review and execution eval.
+- **Static critics (shipped):** N adversarial axes read the authored skill + spec + tests and judge structure/fidelity/specificity. Cheap, fast, read-only, fan out in parallel, vote PASS/FAIL. They answer *"is this well-built?"* and run on **every author revision** — the fast inner loop.
+- **Execution-eval station (this section):** actually *runs* the authored skill and measures whether it beats the base model. It answers a different question — *"does this skill earn its place?"* — and is expensive (multi-sample, two arms), so it runs as a **gate at the end of the build**, not every revision.
+
+### 5.1 It's a controlled comparison, not a correctness check
+
+The point of a skill is to make the model do something it *can't reliably do on its own*. So execution-eval is not "did the skill produce the right answer" — it's an **A/B ablation** on the same fixture:
+
+- **Arm A (baseline):** base model, the fixture input, **no skill**.
+- **Arm B (treatment):** base model + the skill, same input.
+- Both graded against the fixture's known-answer. **Lift = score(B) − score(A).**
+
+**Lift ≈ 0 means the skill is dead weight** — the base model already does the job — and the orchestrator should **kill (86) the ticket** rather than ship a skill that adds nothing. This turns the gate from a rubber stamp into a justification: a skill only advances if it demonstrably moves the needle, and the lift number *quantifies how much*.
+
+Because model output is **non-deterministic**, a single run is noise. Each arm runs **N samples**; we report **pass-rate ± stddev** per arm and the **delta**, not a single pass/fail. Lift has to clear the noise band to count.
+
+### 5.2 Reuse skill-creator — don't reinvent the harness
+
+`skill-creator` already ships most of this machinery. We **orchestrate it**, we don't rebuild it:
+
+| Need | skill-creator gives us | What the station adds |
+|---|---|---|
+| Two-arm runs | spawns with-skill **and** baseline subagents in the same turn | the arms are driven by the **ticket's** fixtures, not an ad-hoc `evals.json` |
+| Grading | `agents/grader.md` → per-assertion pass/fail + evidence + execution metrics | assertions derive from the acceptance contract's oracle answers (incl. trap-answer-must-not-appear) |
+| Lift number | `scripts/aggregate_benchmark.py` → pass-rate/time/tokens per config, **mean ± stddev + delta** | the delta *is* the lift; the expo consumes it as the advance/kill signal |
+| Lift *attribution* | `agents/analyzer.md` benchmark mode: flags "passes with skill but fails without" (skill adds value), "fails with skill but passes without" (**regression**), high-variance/flaky evals | scoped to the targeted-improvement areas so we can confirm lift landed *where we aimed it* |
+| Regression over time | `--previous-workspace` diffs this iteration vs the last | we persist the baseline to the **rail**, keyed to skill version (below) |
+
+### 5.3 Where the fixtures live — already in the acceptance contract
+
+The test author already emits the golden fixtures: in `variance-analysis` they're the **canonical oracle set** in `tests.md` — `{inputs, expected numbers, AND the trap answer the base model falls for}` (Oracle A: the AQ-purchased-vs-used DM trap; Oracle B: the FOH production-volume trap; etc.). That's exactly an execution-eval fixture, so the *same* contract artifact drives static review **and** the ablation. For corpus skills the fixture is a sample document + expected extraction; for generative skills, a rubric. **Fixture shape is set by the skill type** (§3) — computational → synthetic-known-answers, which is why `variance-analysis` is the clean first case.
+
+### 5.4 Regression as a first-class, re-runnable gate
+
+This is why execution-eval is its **own station, not a 6th critic axis**: a station can be **invoked standalone, decoupled from a build**, and a regression check is exactly that — re-run the fixture suite against a changed skill and compare to the stored baseline. We persist `{skill version, fixture, arm, score}` to the rail; on any change, **target areas must improve, everything else must not regress** (the analyzer's "fails with skill but passes without" flag is the regression tripwire). The fixture suite becomes the skill's **permanent benchmark** — the same machinery that justifies v1 guards v2…vN.
 
 ## 6. Production-wiring expectation (toy → system-of-record)
 
@@ -74,4 +106,4 @@ This separates **capability** (the skill — the procedure) from **integration**
 - **Context vault** — is QMD/Obsidian the standing internal backend, with an enterprise backend (Cortex Search / etc.) only behind the interface for governed client contexts? Cost vs governance tradeoff.
 - **Skill types** — is the 5-type taxonomy complete, or are there others (interactive/elicitation? multi-skill/composite?)?
 - **Context-prep skill** — build it next as its own seat, against the bundle interface?
-- **Execution-eval** — wire it as a 6th critic axis, or a separate gate after the static critic passes?
+- **Execution-eval** — ~~6th critic axis, or separate gate?~~ **RESOLVED: its own station** (§5). It's expensive (N-sample, two-arm), produces a *measurement* not a PASS/FAIL vote, and must be re-runnable standalone for regression — none of which fits inside the fast per-revision critic round. Built on `skill-creator`'s benchmark machinery. *Remaining sub-questions:* (a) N per arm — start at 3 (skill-creator's triggering default) and raise for high-variance fixtures; (b) the lift threshold below which the expo auto-kills — provisional ≥ +0.15 pass-rate over baseline AND outside the noise band, tune empirically once we have the first real variance-analysis lift number.

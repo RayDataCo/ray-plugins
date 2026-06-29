@@ -1,0 +1,193 @@
+/* ============================================================================
+ * EXECUTION-EVAL STATION — reference run for variance-analysis.
+ *
+ * Measures LIFT: does the authored skill beat the base model? Two arms on the
+ * SAME fixture (identical prompt) — base model alone vs base model + skill —
+ * N samples each, graded deterministically against the acceptance contract's
+ * oracle answers. Lift = with-skill pass-rate minus baseline pass-rate.
+ *
+ * Fixtures are the canonical oracle set from examples/variance-analysis/tests.md
+ * (A: DM price/qty AQ-purchased-vs-used trap; B: FOH spending vs production-volume
+ * trap; C: mix+yield; D: management-by-exception controllability trap). Grading is
+ * scripted (exact numeric/categorical match) per skill-creator's guidance to script
+ * programmatically-checkable assertions rather than use an LLM grader.
+ *
+ * Built on the design in DESIGN.md §5 and the contract in
+ * skills/execution-eval-station/SKILL.md.
+ * ============================================================================ */
+
+export const meta = {
+  name: 'execution-eval-variance-analysis',
+  description: 'Execution-eval station: two-arm ablation (base vs base+skill) on the variance-analysis oracle fixtures; reports lift with variance',
+  phases: [
+    { title: 'Run arms' },
+    { title: 'Report' },
+  ],
+}
+
+const SKILL_PATH = '/Users/ray/Projects/ray-plugins/plugins/discipline-skills/skills/variance-analysis'
+const N = 3 // samples per arm (skill-creator default; raise for high-variance fixtures)
+
+// Each fixture: a prompt (identical to both arms) + the gradeable answer keys.
+// `expect` values are normalized (uppercase, alphanumerics only) before compare.
+const FIXTURES = [
+  {
+    id: 'A-dm-price-qty-trap',
+    prompt: `Standard costing, direct materials. Standard price SP = $4.00/lb; standard 2 lb per unit. Actual output = 5,000 units. Materials PURCHASED = 12,000 lb at actual price $4.10/lb. Materials USED = 10,200 lb.
+Compute the direct materials PRICE variance and the direct materials QUANTITY (usage) variance. Express each as a dollar amount labeled F (favorable) or U (unfavorable).`,
+    keys: [
+      { name: 'DM price variance', expect: '1200 U' },
+      { name: 'DM quantity variance', expect: '800 U' },
+    ],
+  },
+  {
+    id: 'B-foh-volume-trap',
+    prompt: `Fixed overhead analysis. Budgeted fixed overhead = $100,000. Denominator capacity = 20,000 standard hours (so standard FOH rate = $5.00/hr). Standard 2 hours per unit. Actual output = 9,000 units. Actual fixed overhead = $104,000.
+Compute the FOH spending (budget) variance, the FOH production-volume variance, and applied FOH. Label each variance F or U.`,
+    keys: [
+      { name: 'FOH spending variance', expect: '4000 U' },
+      { name: 'FOH production-volume variance', expect: '10000 U' },
+      { name: 'Applied FOH', expect: '90000' },
+    ],
+  },
+  {
+    id: 'C-mix-yield',
+    prompt: `Materials mix and yield. Two inputs: Material X standard 60% at $3.00/lb; Material Y standard 40% at $5.00/lb (standard weighted price $3.80/lb). Standard total input for the actual output = 10,000 lb. Actual total input = 10,500 lb (actual X = 7,000 lb, actual Y = 3,500 lb).
+Compute the materials MIX variance, the materials YIELD variance, and the total materials usage variance. Label each F or U.`,
+    keys: [
+      { name: 'Mix variance', expect: '1400 F' },
+      { name: 'Yield variance', expect: '1900 U' },
+      { name: 'Total usage variance', expect: '500 U' },
+    ],
+  },
+  {
+    id: 'D-mgmt-by-exception',
+    prompt: `Management by exception. The month's variances: Direct labor EFFICIENCY 9,500 U (production); DM QUANTITY 8,000 U (production); FOH PRODUCTION-VOLUME 10,000 U (capacity); DM PRICE 1,200 F (purchasing); DL RATE 300 F; VOH SPENDING 500 U. Materiality threshold = at least $1,000 absolute AND at least 2% of that element's standard cost base.
+Answer with these exact figure names:
+- "FOH production-volume is the single #1 priority" → yes or no
+- "FOH production-volume is a controllable spending issue" → yes or no
+- "DM price (F) and DM quantity (U) form a cheap-material-causes-overusage gaming linkage" → yes or no`,
+    keys: [
+      { name: 'FOH production-volume is the single #1 priority', expect: 'NO' },
+      { name: 'FOH production-volume is a controllable spending issue', expect: 'NO' },
+      { name: 'DM price (F) and DM quantity (U) form a cheap-material-causes-overusage gaming linkage', expect: 'YES' },
+    ],
+  },
+]
+
+const norm = (s) => String(s == null ? '' : s).toUpperCase().replace(/[^A-Z0-9]/g, '')
+
+const EXEC_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    figures: {
+      type: 'array',
+      description: 'one entry per requested figure, using EXACTLY the requested figure names',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        properties: {
+          name: { type: 'string' },
+          value: { type: 'string', description: 'the answer, e.g. "$1,200 U" or "yes"' },
+        },
+        required: ['name', 'value'],
+      },
+    },
+    reasoning: { type: 'string', description: 'brief working' },
+  },
+  required: ['figures', 'reasoning'],
+}
+
+// Grade one executor result against a fixture's keys. Returns pass-rate 0..1.
+function grade(fixture, result) {
+  const figures = (result && result.figures) || []
+  let passed = 0
+  for (const k of fixture.keys) {
+    const want = norm(k.expect)
+    const wantName = norm(k.name)
+    // find the figure whose name best matches this key
+    const fig = figures.find(f => {
+      const fn = norm(f.name)
+      return fn === wantName || fn.includes(wantName) || wantName.includes(fn)
+    })
+    if (!fig) continue
+    const got = norm(fig.value)
+    // numeric/categorical exact-ish: equal, or got contains want (e.g. "1200U" within "1200UUNFAVORABLE")
+    if (got === want || got.includes(want)) passed++
+  }
+  return passed / fixture.keys.length
+}
+
+function arrPrompt(fixture, arm, k) {
+  const head = arm === 'with_skill'
+    ? `You have a skill available. FIRST read the skill at ${SKILL_PATH}/SKILL.md and any reference files it points to, then FOLLOW its procedure to solve the problem below.`
+    : `Solve the problem below using your own managerial-accounting knowledge.`
+  return `${head}
+
+PROBLEM (independent attempt #${k + 1}):
+${fixture.prompt}
+
+Return your final answer as the requested figures (name/value pairs), using EXACTLY the figure names requested. Numeric figures: give the dollar amount and an F or U label. Keep reasoning brief.`
+}
+
+// ---- Phase: run both arms, N samples each, for every fixture ----
+phase('Run arms')
+const arms = ['with_skill', 'without_skill']
+const jobs = []
+for (const fx of FIXTURES) {
+  for (const arm of arms) {
+    for (let k = 0; k < N; k++) {
+      jobs.push({ fx, arm, k })
+    }
+  }
+}
+
+const results = await parallel(jobs.map(j => () =>
+  agent(arrPrompt(j.fx, j.arm, j.k), {
+    phase: 'Run arms',
+    label: `${j.arm === 'with_skill' ? 'skill' : 'base'}:${j.fx.id}#${j.k + 1}`,
+    schema: EXEC_SCHEMA,
+  }).then(r => ({ ...j, passRate: grade(j.fx, r), figures: (r && r.figures) || [] }))
+    .catch(() => ({ ...j, passRate: null, figures: [] }))
+))
+
+// ---- Phase: aggregate lift ----
+phase('Report')
+const stats = (xs) => {
+  const v = xs.filter(x => x != null)
+  if (!v.length) return { mean: 0, stddev: 0, n: 0 }
+  const mean = v.reduce((a, b) => a + b, 0) / v.length
+  const variance = v.length > 1 ? v.reduce((a, b) => a + (b - mean) ** 2, 0) / (v.length - 1) : 0
+  return { mean: +mean.toFixed(4), stddev: +Math.sqrt(variance).toFixed(4), n: v.length }
+}
+
+const byArm = {}
+for (const arm of arms) byArm[arm] = stats(results.filter(r => r.arm === arm).map(r => r.passRate))
+
+const perFixture = FIXTURES.map(fx => {
+  const w = stats(results.filter(r => r.fx.id === fx.id && r.arm === 'with_skill').map(r => r.passRate))
+  const b = stats(results.filter(r => r.fx.id === fx.id && r.arm === 'without_skill').map(r => r.passRate))
+  return { fixture: fx.id, with_skill: w.mean, baseline: b.mean, lift: +(w.mean - b.mean).toFixed(4) }
+})
+
+const lift = +(byArm.with_skill.mean - byArm.without_skill.mean).toFixed(4)
+const band = +Math.sqrt(byArm.with_skill.stddev ** 2 + byArm.without_skill.stddev ** 2).toFixed(4)
+const action = (lift >= 0.15 && lift > band) ? 'advance'
+  : (perFixture.some(f => f.lift < -0.001) ? 'refire-to-author' : 'kill')
+
+log(`LIFT ${lift >= 0 ? '+' : ''}${lift} (band ±${band}) → ${action}`)
+for (const f of perFixture) log(`  ${f.fixture}: skill ${(f.with_skill * 100).toFixed(0)}% vs base ${(f.baseline * 100).toFixed(0)}% (Δ ${f.lift >= 0 ? '+' : ''}${(f.lift * 100).toFixed(0)}pp)`)
+
+return {
+  skill: 'variance-analysis',
+  n_per_arm: N,
+  arms: {
+    with_skill: byArm.with_skill,
+    baseline: byArm.without_skill,
+  },
+  lift,
+  band,
+  action,
+  per_fixture: perFixture,
+}
