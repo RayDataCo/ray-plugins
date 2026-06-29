@@ -55,10 +55,12 @@ A skill exists to make the model do something it can't reliably do alone. So the
 
 5. **Attribute the lift.** Run the analyzer (benchmark mode, `skill-creator/agents/analyzer.md`) to surface what the aggregate hides: which fixtures the skill carries ("passes with skill, fails without" = value added), any **regression** ("fails with skill, passes without"), non-discriminating fixtures (pass in both arms — they don't prove skill value), and high-variance fixtures that need more samples. Scope the read to the targeted-improvement areas so you can confirm the lift landed *where it was aimed*.
 
-6. **Return a measurement + a recommended action** (the orchestrator's expo decides; this station advises):
-   - **advance** — lift clears the threshold (provisional: ≥ +0.15 pass-rate over baseline AND the gap exceeds the combined stddev). The skill earns its place; ship it with the lift number recorded.
-   - **kill** — lift ≈ 0 (within the noise band). Base model already does it; don't ship dead weight. Surface the per-fixture table so the human can confirm the kill.
-   - **refire-to-author** — net positive lift but a **regression** on a fixture that previously passed, or a target area that didn't move. Route the analyzer's specifics back to the author.
+6. **Return a measurement + a recommended action — decided PER FIXTURE, not on the aggregate mean.** This is load-bearing: a skill that fixes one important failure mode gets washed out to a false "kill" if you average it against easy fixtures the base model already aces (observed directly on `variance-analysis` — see DESIGN.md §5 / the report). Classify each fixture, then decide:
+   - **per-fixture classes:** `regression` (lift < −band, skill made it worse) · `non-discriminating` (base already ≥ ~95%, no headroom to show lift) · `win` (base had headroom AND lift ≥ +0.15 and clears the fixture's own noise band) · `flat` (had headroom, skill didn't lift it).
+   - **advance** — at least one `win` and no `regression`. The skill earns its place on a fixture that actually discriminates; record which.
+   - **refire-to-author** — any `regression`. Route the analyzer's specifics back to the author.
+   - **inconclusive (fixtures don't discriminate)** — every fixture is `non-discriminating`. NOT a kill — the base model is at the ceiling everywhere, so nothing *could* show lift. Action: harden the fixtures (messier inputs, a weaker-model arm) before judging the skill.
+   - **kill** — there was headroom on at least one fixture (`flat`) and the skill lifted nothing. Genuine dead weight; surface the per-fixture table for the human to confirm.
 
 ## Regression mode (standalone, the reason this is a station)
 

@@ -23,7 +23,9 @@ So the honest verdict on `variance-analysis`: it adds little on the computationa
 
 ## Design lesson: report per-fixture lift, not just the aggregate mean
 
-The station's mechanical action came back **`kill`** for both Haiku and Sonnet — because the *aggregate* lift (+5.6 / +8.3 pp) sits inside the noise band, diluted by the three ceilinged fixtures. But the per-fixture view shows a clear, real +22 to +33 pp on D. **A skill that fixes one important failure mode gets washed out to "kill" by easy fixtures if you only look at the mean.** The expo must consume **per-fixture lift** (or weight discriminating fixtures), not the aggregate — and the fixture set should be pruned of non-discriminating cases or they drown the signal. This is the analyzer's "non-discriminating assertion" warning made consequential.
+The station's *first* mechanical action came back **`kill`** for both Haiku and Sonnet — because the *aggregate* lift (+5.6 / +8.3 pp) sits inside the noise band, diluted by the three ceilinged fixtures. But the per-fixture view shows a clear, real +22 to +33 pp on D. **A skill that fixes one important failure mode gets washed out to "kill" by easy fixtures if you only look at the mean.** This is the analyzer's "non-discriminating assertion" warning made consequential.
+
+**Now wired (the fix):** the workflow and station decide **per fixture**, classifying each as `win` / `regression` / `non-discriminating` / `flat`, and advancing on any `win` with no regression. A/B/C come back `non-discriminating` (base at ceiling); D comes back `win`. With that logic both Haiku and Sonnet read **`advance` (basis: win on D)** — the correct call — instead of the false aggregate `kill`. A fixture set that is *all* `non-discriminating` returns `inconclusive` (harden the fixtures), which is distinct from `kill` (had headroom, skill lifted nothing).
 
 ## Other places lift would show (untested here)
 

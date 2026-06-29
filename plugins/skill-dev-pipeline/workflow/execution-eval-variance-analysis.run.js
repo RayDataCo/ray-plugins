@@ -171,6 +171,19 @@ const stats = (xs) => {
   return { mean: +mean.toFixed(4), stddev: +Math.sqrt(variance).toFixed(4), n: v.length }
 }
 
+// Per-fixture decision thresholds. The expo reads PER-FIXTURE lift, not the
+// aggregate mean — a skill that fixes one real failure mode must not be washed
+// out by easy (ceilinged) fixtures diluting the average.
+const TH = 0.15   // a fixture's lift must clear this (and its own noise band) to count as a win
+const CEIL = 0.95 // base ≥ this on a fixture = non-discriminating (no headroom to show lift)
+
+function classify(f) {
+  if (f.lift < -Math.max(0.1, f.band)) return 'regression'      // skill made this worse
+  if (f.baseline >= CEIL) return 'non-discriminating'            // base already at ceiling
+  if (f.lift >= TH && f.lift > f.band) return 'win'              // skill lifts a fixture with headroom
+  return 'flat'                                                  // had headroom, skill didn't help
+}
+
 const byModel = MODELS.map(model => {
   const mr = results.filter(r => r.model === model)
   const w = stats(mr.filter(r => r.arm === 'with_skill').map(r => r.passRate))
@@ -178,18 +191,35 @@ const byModel = MODELS.map(model => {
   const perFixture = FIXTURES.map(fx => {
     const fw = stats(mr.filter(r => r.fx.id === fx.id && r.arm === 'with_skill').map(r => r.passRate))
     const fb = stats(mr.filter(r => r.fx.id === fx.id && r.arm === 'without_skill').map(r => r.passRate))
-    return { fixture: fx.id, with_skill: fw.mean, baseline: fb.mean, lift: +(fw.mean - fb.mean).toFixed(4) }
+    const f = {
+      fixture: fx.id,
+      with_skill: fw.mean,
+      baseline: fb.mean,
+      lift: +(fw.mean - fb.mean).toFixed(4),
+      band: +Math.sqrt(fw.stddev ** 2 + fb.stddev ** 2).toFixed(4),
+    }
+    f.class = classify(f)
+    return f
   })
-  const lift = +(w.mean - b.mean).toFixed(4)
-  const band = +Math.sqrt(w.stddev ** 2 + b.stddev ** 2).toFixed(4)
-  const action = (lift >= 0.15 && lift > band) ? 'advance'
-    : (perFixture.some(f => f.lift < -0.001) ? 'refire-to-author' : 'kill')
-  return { model: model || 'session', with_skill: w, baseline: b, lift, band, action, per_fixture: perFixture }
+  // Decide from the per-fixture classes, not the aggregate mean.
+  const classes = perFixture.map(f => f.class)
+  const action = classes.includes('regression') ? 'refire-to-author'
+    : classes.includes('win') ? 'advance'
+      : classes.every(c => c === 'non-discriminating') ? 'inconclusive-fixtures-dont-discriminate'
+        : 'kill' // had headroom on at least one fixture and didn't lift it
+  const wins = perFixture.filter(f => f.class === 'win')
+  return {
+    model: model || 'session',
+    aggregate_lift: +(w.mean - b.mean).toFixed(4), // kept for reference; NOT the decision basis
+    with_skill: w, baseline: b, action,
+    decision_basis: wins.length ? `win on ${wins.map(f => f.fixture).join(', ')}` : `no discriminating win (classes: ${classes.join(', ')})`,
+    per_fixture: perFixture,
+  }
 })
 
 for (const m of byModel) {
-  log(`[${m.model}] base ${(m.baseline.mean * 100).toFixed(0)}% → +skill ${(m.with_skill.mean * 100).toFixed(0)}% = LIFT ${m.lift >= 0 ? '+' : ''}${(m.lift * 100).toFixed(0)}pp (band ±${(m.band * 100).toFixed(0)}pp) → ${m.action}`)
-  for (const f of m.per_fixture) log(`    ${f.fixture}: skill ${(f.with_skill * 100).toFixed(0)}% vs base ${(f.baseline * 100).toFixed(0)}% (Δ ${f.lift >= 0 ? '+' : ''}${(f.lift * 100).toFixed(0)}pp)`)
+  log(`[${m.model}] base ${(m.baseline.mean * 100).toFixed(0)}% → +skill ${(m.with_skill.mean * 100).toFixed(0)}% (agg ${m.aggregate_lift >= 0 ? '+' : ''}${(m.aggregate_lift * 100).toFixed(0)}pp) → ${m.action} [${m.decision_basis}]`)
+  for (const f of m.per_fixture) log(`    ${f.fixture}: skill ${(f.with_skill * 100).toFixed(0)}% vs base ${(f.baseline * 100).toFixed(0)}% (Δ ${f.lift >= 0 ? '+' : ''}${(f.lift * 100).toFixed(0)}pp) — ${f.class}`)
 }
 
 return { skill: 'variance-analysis', n_per_arm: N, by_model: byModel }
