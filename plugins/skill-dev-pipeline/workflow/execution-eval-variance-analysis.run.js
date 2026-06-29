@@ -36,8 +36,8 @@ const FIXTURES = [
     prompt: `Standard costing, direct materials. Standard price SP = $4.00/lb; standard 2 lb per unit. Actual output = 5,000 units. Materials PURCHASED = 12,000 lb at actual price $4.10/lb. Materials USED = 10,200 lb.
 Compute the direct materials PRICE variance and the direct materials QUANTITY (usage) variance. Express each as a dollar amount labeled F (favorable) or U (unfavorable).`,
     keys: [
-      { name: 'DM price variance', expect: '1200 U' },
-      { name: 'DM quantity variance', expect: '800 U' },
+      { name: 'DM price variance', tokens: ['PRICE'], expect: '1200 U' },
+      { name: 'DM quantity variance', tokens: ['QUANTITY', 'USAGE'], expect: '800 U' },
     ],
   },
   {
@@ -45,9 +45,9 @@ Compute the direct materials PRICE variance and the direct materials QUANTITY (u
     prompt: `Fixed overhead analysis. Budgeted fixed overhead = $100,000. Denominator capacity = 20,000 standard hours (so standard FOH rate = $5.00/hr). Standard 2 hours per unit. Actual output = 9,000 units. Actual fixed overhead = $104,000.
 Compute the FOH spending (budget) variance, the FOH production-volume variance, and applied FOH. Label each variance F or U.`,
     keys: [
-      { name: 'FOH spending variance', expect: '4000 U' },
-      { name: 'FOH production-volume variance', expect: '10000 U' },
-      { name: 'Applied FOH', expect: '90000' },
+      { name: 'FOH spending variance', tokens: ['SPENDING', 'BUDGET'], expect: '4000 U' },
+      { name: 'FOH production-volume variance', tokens: ['VOLUME'], expect: '10000 U' },
+      { name: 'Applied FOH', tokens: ['APPLIED'], expect: '90000' },
     ],
   },
   {
@@ -55,9 +55,9 @@ Compute the FOH spending (budget) variance, the FOH production-volume variance, 
     prompt: `Materials mix and yield. Two inputs: Material X standard 60% at $3.00/lb; Material Y standard 40% at $5.00/lb (standard weighted price $3.80/lb). Standard total input for the actual output = 10,000 lb. Actual total input = 10,500 lb (actual X = 7,000 lb, actual Y = 3,500 lb).
 Compute the materials MIX variance, the materials YIELD variance, and the total materials usage variance. Label each F or U.`,
     keys: [
-      { name: 'Mix variance', expect: '1400 F' },
-      { name: 'Yield variance', expect: '1900 U' },
-      { name: 'Total usage variance', expect: '500 U' },
+      { name: 'Mix variance', tokens: ['MIX'], expect: '1400 F' },
+      { name: 'Yield variance', tokens: ['YIELD'], expect: '1900 U' },
+      { name: 'Total usage variance', tokens: ['TOTAL'], expect: '500 U' },
     ],
   },
   {
@@ -68,9 +68,9 @@ Answer with these exact figure names:
 - "FOH production-volume is a controllable spending issue" → yes or no
 - "DM price (F) and DM quantity (U) form a cheap-material-causes-overusage gaming linkage" → yes or no`,
     keys: [
-      { name: 'FOH production-volume is the single #1 priority', expect: 'NO' },
-      { name: 'FOH production-volume is a controllable spending issue', expect: 'NO' },
-      { name: 'DM price (F) and DM quantity (U) form a cheap-material-causes-overusage gaming linkage', expect: 'YES' },
+      { name: 'FOH production-volume is the single #1 priority', tokens: ['PRIORITY'], expect: 'NO', yesno: true },
+      { name: 'FOH production-volume is a controllable spending issue', tokens: ['CONTROLLABLE'], expect: 'NO', yesno: true },
+      { name: 'DM price (F) and DM quantity (U) form a cheap-material-causes-overusage gaming linkage', tokens: ['GAMING', 'LINKAGE'], expect: 'YES', yesno: true },
     ],
   },
 ]
@@ -100,21 +100,23 @@ const EXEC_SCHEMA = {
 }
 
 // Grade one executor result against a fixture's keys. Returns pass-rate 0..1.
+// Match a key to a figure by its IDENTIFYING TOKENS, not by exact name — the
+// with-skill arm legitimately paraphrases names ("direct materials price
+// variance" vs "DM price variance"); penalizing that is an eval bug, not a skill
+// failure. Consume each matched figure so two keys can't claim the same one.
 function grade(fixture, result) {
-  const figures = (result && result.figures) || []
+  const figures = [...((result && result.figures) || [])]
   let passed = 0
   for (const k of fixture.keys) {
     const want = norm(k.expect)
-    const wantName = norm(k.name)
-    // find the figure whose name best matches this key
-    const fig = figures.find(f => {
-      const fn = norm(f.name)
-      return fn === wantName || fn.includes(wantName) || wantName.includes(fn)
-    })
-    if (!fig) continue
-    const got = norm(fig.value)
-    // numeric/categorical exact-ish: equal, or got contains want (e.g. "1200U" within "1200UUNFAVORABLE")
-    if (got === want || got.includes(want)) passed++
+    const idx = figures.findIndex(f => k.tokens.some(t => norm(f.name).includes(norm(t))))
+    if (idx < 0) continue
+    const got = norm(figures[idx].value)
+    figures.splice(idx, 1) // consume the matched figure
+    // yes/no answers: match the leading token (handles "no, capacity artifact").
+    // numeric answers: substring (handles "1200U" inside "1200UUNFAVORABLE").
+    const ok = k.yesno ? got.startsWith(want) : got.includes(want)
+    if (ok) passed++
   }
   return passed / fixture.keys.length
 }
