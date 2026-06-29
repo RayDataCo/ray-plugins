@@ -1,6 +1,6 @@
 # Context Bundle — Schema Spec
 
-The **context bundle** is the brigade's only real input. The ticket is literally `{ bundle_ref }`; everything else (intent, type, fixtures, wiring) derives from the bundle.
+> **The bundle IS the ticket's context payload.** A bundle is not a standalone artifact and does not live in this repo — it is the *context section* of a mutable **ticket** that lives on the **rail** (see [RAIL-SPEC.md](./RAIL-SPEC.md)). This doc specifies the shape of that payload — the pointer schema. The ticket (= the bundle) is the brigade's only real input; everything else (intent, type, fixtures, wiring) derives from it.
 
 ## What a bundle is
 
@@ -62,4 +62,4 @@ resolve_bundle(ref) -> { manifest, resolved_sources[] }
 - Not a built knowledge graph (e.g. [graphify](https://github.com/safishamsi/graphify)) — that *compresses* a large corpus for cheap navigation; a bundle *curates and points* at the right depth for one build. graphify is a candidate `type: graph` resolver backend, not the bundle format.
 - Not a flat folder — sources are typed and live on different planes (vault file, web, MCP, retrieval) by design.
 
-See [`bundles/variance-analysis/`](./bundles/variance-analysis/) for a worked example bundle.
+Worked example: the `variance-analysis` ticket lives on the vault rail (`~/rdco-vault/08-tooling/brigade-rail/variance-analysis.ticket.md`), pointing at competency notes under `~/rdco-vault/10-source-material/competencies/variance-analysis/`. It is intentionally NOT in this repo — see [RAIL-SPEC.md](./RAIL-SPEC.md).
