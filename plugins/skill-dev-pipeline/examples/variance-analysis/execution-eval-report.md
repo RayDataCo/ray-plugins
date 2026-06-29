@@ -1,31 +1,34 @@
-# Execution-eval report — variance-analysis (first measurement)
+# Execution-eval report — variance-analysis
 
-The lift measurement from the execution-eval station ([`../../skills/execution-eval-station/`](../../skills/execution-eval-station/), run via [`../../workflow/execution-eval-variance-analysis.run.js`](../../workflow/execution-eval-variance-analysis.run.js)). Two arms — base model alone vs base model + skill — on the four oracle fixtures from [`tests.md`](./tests.md), 3 samples per arm, graded deterministically against the oracle answers.
+The lift measurement from the execution-eval station ([`../../skills/execution-eval-station/`](../../skills/execution-eval-station/), run via [`../../workflow/execution-eval-variance-analysis.run.js`](../../workflow/execution-eval-variance-analysis.run.js)). Two arms — base model alone vs base model + skill — on the four oracle fixtures from [`tests.md`](./tests.md), 3 samples per arm, graded deterministically against the oracle answers. Run across three model tiers (the fair ablation holds the model constant and toggles the skill).
 
-- **Base model:** Opus 4.8 (the session model — what a user actually experiences).
-- **Result: lift = 0.00 pp.** Both arms scored **100%** on all four oracles (mean 1.00 ± 0.00, n=12 per arm).
-- **Mechanical action:** `kill` (lift inside the noise band). **Analyst read: do not kill — the fixtures don't discriminate** (see below).
+**Headline: the skill brings every tier to a deterministic 100% on all four oracles (with-skill stddev = 0). The base model is already perfect on the computational fixtures (A/B/C) at every tier, so all the lift lives in fixture D — the management-by-exception *judgment* fixture — and it grows as the base model weakens.**
 
-| Fixture | base model | base + skill | lift |
-|---|---|---|---|
-| A — DM price/qty, AQ-purchased-vs-used trap | 100% | 100% | 0 |
-| B — FOH spending vs production-volume trap | 100% | 100% | 0 |
-| C — materials mix + yield | 100% | 100% | 0 |
-| D — management-by-exception (controllability trap) | 100% | 100% | 0 |
+| Tier (base model) | base all-fixtures | +skill | aggregate lift | **fixture D: base → +skill** |
+|---|---|---|---|---|
+| Opus 4.8 | 100% | 100% | 0 pp | 100% → 100% (0) |
+| Sonnet 4.6 | 92% ± 15 | 100% | +8.3 pp | **67% → 100% (+33 pp)** |
+| Haiku 4.5 | 94% ± 13 | 100% | +5.6 pp | **78% → 100% (+22 pp)** |
+
+Per fixture, across tiers: **A, B, C → 0 lift at every tier** (base already 100%). **D carries everything.** The verified base-model failure on D is the exact error the skill teaches against: 4 of 6 base runs answered "**yes**, the $10,000 FOH production-volume variance is the single #1 priority" — ranking by absolute dollar size while ignoring that it is a non-controllable capacity artifact. (Failures confirmed by reading transcripts, not just the score.)
 
 ## What this means (and what it doesn't)
 
-A 0-lift result here is **not** a verdict that the skill is worthless. It's the classic **non-discriminating fixture** signal — skill-creator's analyzer flags exactly this: *"passes 100% in both configurations — may not differentiate skill value."* Base Opus 4.8 is already at the ceiling on these textbook problems, including the two traps the skill was built to kill (it correctly computed the DM price variance on AQ *purchased* and the FOH production-volume variance as budgeted − applied). When the baseline is already perfect, no fixture can show lift.
+Two things separate cleanly here, and they're exactly what the station exists to tell apart:
 
-This is itself the point of the station: it tells you, empirically, when a skill is **not pulling weight on a given model** — before you ship it believing it does. `variance-analysis` passed 5/5 static critics and *reads* like it adds value; on a strong base model, on these problems, it adds no measured correctness lift. That gap between "reads well" and "demonstrably helps" is precisely what execution-eval exists to expose.
+- **Computational fixtures (A/B/C) — 0 lift, every tier.** Even Haiku gets standard-costing arithmetic right (DM price on AQ *purchased*, FOH production-volume as budgeted − applied, mix/yield). The base models have effectively memorized textbook mechanics; the skill can't lift a ceiling. These are **non-discriminating** fixtures — skill-creator's analyzer flags exactly this: *"passes 100% in both configurations."*
+- **Judgment fixture (D) — real, growing lift.** Management-by-exception isn't arithmetic; it's a *controllability* call. The base model reliably trips it (says the biggest-dollar variance is the #1 priority), and the rate of error rises as the model weakens. The skill closes it to 100% at every tier. **This** is where the procedure earns its place: encoding judgment the base model doesn't apply on its own.
 
-## To actually measure lift, the fixtures (or the arm) have to be harder
+So the honest verdict on `variance-analysis`: it adds little on the computational sub-tasks (the model already knows them) and **measurable, model-tier-dependent value on the judgment sub-task**. That is a far more useful answer than a single pass/fail — and it tells us where to point the skill (the interpretive call, not the arithmetic).
 
-Where a procedure skill like this should show real lift:
+## Design lesson: report per-fixture lift, not just the aggregate mean
 
-- **A weaker / cheaper model arm.** In production you'd run the skill on Haiku/Sonnet to save cost; a procedure skill earns its keep by lifting a smaller model up to the strong model's answer. Re-run with the baseline arm on a cheaper model.
-- **Messier, realistic inputs** — partial data, distractor figures, units to reconcile, multi-step compounded problems — rather than clean textbook setups the base model has effectively memorized.
-- **Consistency at scale / format adherence.** These binary correctness fixtures don't capture output-contract conformance or run-to-run consistency, which may be where the skill's value actually lives.
+The station's mechanical action came back **`kill`** for both Haiku and Sonnet — because the *aggregate* lift (+5.6 / +8.3 pp) sits inside the noise band, diluted by the three ceilinged fixtures. But the per-fixture view shows a clear, real +22 to +33 pp on D. **A skill that fixes one important failure mode gets washed out to "kill" by easy fixtures if you only look at the mean.** The expo must consume **per-fixture lift** (or weight discriminating fixtures), not the aggregate — and the fixture set should be pruned of non-discriminating cases or they drown the signal. This is the analyzer's "non-discriminating assertion" warning made consequential.
+
+## Other places lift would show (untested here)
+
+- **Messier, realistic inputs** — partial data, distractor figures, units to reconcile — rather than clean textbook setups.
+- **Consistency / format adherence** — the with-skill arm was deterministic (stddev 0) where the base arm was not; run-to-run consistency and output-contract conformance are skill value these binary fixtures only partly capture.
 
 ## Note on the grader (verify-before-assert)
 

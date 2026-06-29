@@ -133,28 +133,35 @@ ${fixture.prompt}
 Return your final answer as the requested figures (name/value pairs), using EXACTLY the figure names requested. Numeric figures: give the dollar amount and an F or U label. Keep reasoning brief.`
 }
 
-// ---- Phase: run both arms, N samples each, for every fixture ----
-phase('Run arms')
+// Model matrix. The fair ablation holds the MODEL constant and toggles the skill
+// (base-M vs M+skill); lift = how much the skill lifts model M. Pass
+// args = { models: ['haiku','sonnet'] } to sweep tiers; default = session model.
+// A weaker model has headroom, so that's where a procedure skill should show lift.
+const MODELS = (args && Array.isArray(args.models) && args.models.length) ? args.models : ['haiku', 'sonnet']
 const arms = ['with_skill', 'without_skill']
+
+// ---- Phase: run both arms, N samples each, for every fixture, per model ----
+phase('Run arms')
 const jobs = []
-for (const fx of FIXTURES) {
-  for (const arm of arms) {
-    for (let k = 0; k < N; k++) {
-      jobs.push({ fx, arm, k })
-    }
-  }
-}
+for (const model of MODELS)
+  for (const fx of FIXTURES)
+    for (const arm of arms)
+      for (let k = 0; k < N; k++)
+        jobs.push({ model, fx, arm, k })
 
-const results = await parallel(jobs.map(j => () =>
-  agent(arrPrompt(j.fx, j.arm, j.k), {
+const results = await parallel(jobs.map(j => () => {
+  const opts = {
     phase: 'Run arms',
-    label: `${j.arm === 'with_skill' ? 'skill' : 'base'}:${j.fx.id}#${j.k + 1}`,
+    label: `${j.model || 'session'}/${j.arm === 'with_skill' ? 'skill' : 'base'}:${j.fx.id}#${j.k + 1}`,
     schema: EXEC_SCHEMA,
-  }).then(r => ({ ...j, passRate: grade(j.fx, r), figures: (r && r.figures) || [] }))
-    .catch(() => ({ ...j, passRate: null, figures: [] }))
-))
+  }
+  if (j.model) opts.model = j.model
+  return agent(arrPrompt(j.fx, j.arm, j.k), opts)
+    .then(r => ({ ...j, passRate: grade(j.fx, r) }))
+    .catch(() => ({ ...j, passRate: null }))
+}))
 
-// ---- Phase: aggregate lift ----
+// ---- Phase: aggregate lift per model tier ----
 phase('Report')
 const stats = (xs) => {
   const v = xs.filter(x => x != null)
@@ -164,32 +171,25 @@ const stats = (xs) => {
   return { mean: +mean.toFixed(4), stddev: +Math.sqrt(variance).toFixed(4), n: v.length }
 }
 
-const byArm = {}
-for (const arm of arms) byArm[arm] = stats(results.filter(r => r.arm === arm).map(r => r.passRate))
-
-const perFixture = FIXTURES.map(fx => {
-  const w = stats(results.filter(r => r.fx.id === fx.id && r.arm === 'with_skill').map(r => r.passRate))
-  const b = stats(results.filter(r => r.fx.id === fx.id && r.arm === 'without_skill').map(r => r.passRate))
-  return { fixture: fx.id, with_skill: w.mean, baseline: b.mean, lift: +(w.mean - b.mean).toFixed(4) }
+const byModel = MODELS.map(model => {
+  const mr = results.filter(r => r.model === model)
+  const w = stats(mr.filter(r => r.arm === 'with_skill').map(r => r.passRate))
+  const b = stats(mr.filter(r => r.arm === 'without_skill').map(r => r.passRate))
+  const perFixture = FIXTURES.map(fx => {
+    const fw = stats(mr.filter(r => r.fx.id === fx.id && r.arm === 'with_skill').map(r => r.passRate))
+    const fb = stats(mr.filter(r => r.fx.id === fx.id && r.arm === 'without_skill').map(r => r.passRate))
+    return { fixture: fx.id, with_skill: fw.mean, baseline: fb.mean, lift: +(fw.mean - fb.mean).toFixed(4) }
+  })
+  const lift = +(w.mean - b.mean).toFixed(4)
+  const band = +Math.sqrt(w.stddev ** 2 + b.stddev ** 2).toFixed(4)
+  const action = (lift >= 0.15 && lift > band) ? 'advance'
+    : (perFixture.some(f => f.lift < -0.001) ? 'refire-to-author' : 'kill')
+  return { model: model || 'session', with_skill: w, baseline: b, lift, band, action, per_fixture: perFixture }
 })
 
-const lift = +(byArm.with_skill.mean - byArm.without_skill.mean).toFixed(4)
-const band = +Math.sqrt(byArm.with_skill.stddev ** 2 + byArm.without_skill.stddev ** 2).toFixed(4)
-const action = (lift >= 0.15 && lift > band) ? 'advance'
-  : (perFixture.some(f => f.lift < -0.001) ? 'refire-to-author' : 'kill')
-
-log(`LIFT ${lift >= 0 ? '+' : ''}${lift} (band ±${band}) → ${action}`)
-for (const f of perFixture) log(`  ${f.fixture}: skill ${(f.with_skill * 100).toFixed(0)}% vs base ${(f.baseline * 100).toFixed(0)}% (Δ ${f.lift >= 0 ? '+' : ''}${(f.lift * 100).toFixed(0)}pp)`)
-
-return {
-  skill: 'variance-analysis',
-  n_per_arm: N,
-  arms: {
-    with_skill: byArm.with_skill,
-    baseline: byArm.without_skill,
-  },
-  lift,
-  band,
-  action,
-  per_fixture: perFixture,
+for (const m of byModel) {
+  log(`[${m.model}] base ${(m.baseline.mean * 100).toFixed(0)}% → +skill ${(m.with_skill.mean * 100).toFixed(0)}% = LIFT ${m.lift >= 0 ? '+' : ''}${(m.lift * 100).toFixed(0)}pp (band ±${(m.band * 100).toFixed(0)}pp) → ${m.action}`)
+  for (const f of m.per_fixture) log(`    ${f.fixture}: skill ${(f.with_skill * 100).toFixed(0)}% vs base ${(f.baseline * 100).toFixed(0)}% (Δ ${f.lift >= 0 ? '+' : ''}${(f.lift * 100).toFixed(0)}pp)`)
 }
+
+return { skill: 'variance-analysis', n_per_arm: N, by_model: byModel }
