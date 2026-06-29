@@ -1,0 +1,65 @@
+# Context Bundle — Schema Spec
+
+The **context bundle** is the brigade's only real input. The ticket is literally `{ bundle_ref }`; everything else (intent, type, fixtures, wiring) derives from the bundle.
+
+## What a bundle is
+
+A bundle is a **progressive-disclosure pointer**, structured like a `SKILL.md`: a thin **manifest** that points at typed sources, each with a *when-to-read* description. Sources are pulled on demand, not all up front. One progressive-disclosure pattern serves both skills and bundles.
+
+Closest existing standard: [llms.txt](https://llmstxt.org/) — a curated markdown index of links-with-descriptions built for LLM context. This schema is llms.txt-flavored, extended two ways: **typed sources** (llms.txt is URL-only) and **when-to-read** semantics.
+
+## The manifest
+
+```yaml
+# bundle.yaml
+name: <handle>                 # required
+scope: <one-line nudge>        # optional — disambiguates which skill/slice when the bundle is broad
+provenance: <where it came from>
+type_hint: <skill type>        # optional — computational | corpus | generative | operational | advisory; derivable
+sources:
+  - id: <stable id>
+    type: file | url | mcp | qmd     # extensible
+    ref: <type-specific locator>
+    when: <when-to-read description>  # "always …" = eager; otherwise lazy
+```
+
+### Source types (the resolver dispatches by `type`)
+
+| type | `ref` shape | resolver (v1) | resolver (later) |
+|---|---|---|---|
+| `file` | a path | read the file | — |
+| `url` | a URL | fetch + convert to markdown | — |
+| `mcp` | `{ server, resource/tool, args }` | call the MCP (e.g. Atlassian → ticket JIRA-1234) | — |
+| `qmd` | a query string | local lexical+vector retrieval | enterprise governed store (RBAC) |
+| `graph` *(future)* | `{ graph, query }` | — | query a materialized graph (e.g. graphify) for big-corpus context |
+
+The bundle binds to the **resolve interface**, not to a retrieval tech:
+
+```
+resolve_bundle(ref) -> { manifest, resolved_sources[] }
+```
+
+### Reproducibility — snapshot live sources
+
+`file` sources are static. `url` / `mcp` / `qmd` sources are **live** — so at kickoff the resolver **resolves-and-snapshots** them into the versioned bundle. The build then runs against the snapshot, so `same ticket → same skill` even though some sources were fetched live. Want fresh context? Re-resolve = a new snapshot.
+
+## How the brigade consumes it
+
+1. **Ticket = `{ bundle_ref }`.** Nothing else required.
+2. **Expo phase-0 — sufficiency gate.** The expo reads the manifest + eager sources and returns one of:
+   - **Clear** → proceed to the build.
+   - **Ambiguous** → clarify ("this bundle spans N skills — which one / which slice?").
+   - **Thin** → specify-missing ("missing X; add it and here's how it sharpens the build").
+   This is a front-end gate that mirrors the back-end critic loop: context-prep builds the bundle → expo gates sufficiency → insufficient routes back for more.
+3. **Spec station** reads sources (eager first, lazy when its `when` fires) to translate competency *knowledge* → agent *procedure*.
+
+## Where bundles come from
+
+`context-prep` is the capability that **produces** bundles (gathering + curating from files, URLs, MCP, retrieval). All the retrieval smarts live there — **inside** context-prep — not in the brigade. The brigade only ever reads a resolved bundle. That boundary is what keeps the brigade domain-agnostic.
+
+## What this is NOT
+
+- Not a built knowledge graph (e.g. [graphify](https://github.com/safishamsi/graphify)) — that *compresses* a large corpus for cheap navigation; a bundle *curates and points* at the right depth for one build. graphify is a candidate `type: graph` resolver backend, not the bundle format.
+- Not a flat folder — sources are typed and live on different planes (vault file, web, MCP, retrieval) by design.
+
+See [`bundles/variance-analysis/`](./bundles/variance-analysis/) for a worked example bundle.

@@ -1,0 +1,26 @@
+# Context bundle — variance-analysis
+# The brigade's input for building the variance-analysis skill. Ticket = { bundle_ref: ./bundles/variance-analysis }.
+name: variance-analysis
+scope: "the standard-costing cost/revenue variance procedure — ONE computational Finance skill (not budgeting, not break-even)"
+provenance: "CMA Part 1 (managerial accounting) competency — standard costing & variance analysis"
+type_hint: computational   # derivable from the sources; declared for clarity
+
+# All sources here are type:file because this competency is self-contained.
+# The schema also supports url / mcp / qmd (see ../../BUNDLE-SPEC.md) — e.g. a real
+# client engagement might add { type: mcp, ref: {server: atlassian, resource: JIRA-xxx} }
+# to pull the client's specific reporting requirements.
+sources:
+  - id: core-competency
+    type: file
+    ref: ./sources/cma-variance-competency.md
+    when: "always — the variance hierarchy, the per-element formulas, and the standard-costing frame. The spec station reads this first to derive the procedure."
+
+  - id: worked-examples
+    type: file
+    ref: ./sources/worked-examples.md
+    when: "when the test station builds acceptance fixtures — these are the golden {input → expected} cases, including the AQ-purchased-vs-used trap and the FOH budget-vs-volume split."
+
+  - id: interpretation-and-pitfalls
+    type: file
+    ref: ./sources/interpretation-and-pitfalls.md
+    when: "when authoring the interpretation step and the domain-fidelity / no-slop guards — the F/U sign rule, materiality + controllability, gaming signatures, and the canonical mistakes to defend against."
