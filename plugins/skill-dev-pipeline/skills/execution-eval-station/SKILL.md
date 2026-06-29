@@ -49,7 +49,7 @@ A skill exists to make the model do something it can't reliably do alone. So the
 
 2. **Spawn both arms in the same turn, N samples each.** Per skill-creator step 1: for each fixture, launch with-skill and baseline subagents together (don't run all with-skill first). With-skill gets `skill_path`; baseline gets no skill (or the prior-version snapshot). Save outputs under `run_dir/iteration-<N>/<fixture>/{with_skill,without_skill}/`.
 
-3. **Grade every run.** Spawn a grader per run following `skill-creator/agents/grader.md`. Assertions = the oracle's expected numbers AND the trap-absent checks (e.g. "the DM price variance is **not** computed on AQ used"). Write `grading.json` with the exact `{text, passed, evidence}` fields the aggregator expects.
+3. **Grade every run.** Spawn a grader per run following `skill-creator/agents/grader.md`. Assertions = the oracle's expected numbers AND the trap-absent checks (e.g. "the DM price variance is **not** computed on AQ used"). Write `grading.json` with the exact `{text, passed, evidence}` fields the aggregator expects. **Constrain the run's output to the exact gradeable fields** — a fixed output schema (enum/named fields graded by direct lookup), not free-form prose matched by name. Models name free-form fields wildly differently (`test_1_severity` vs `severity_row_level_absolute`), so name-matching grades the wrong slot and manufactures fake lift; deterministic grading needs a fixed answer shape. (Learned the hard way — see the generate-tests report.)
 
 4. **Aggregate into the lift number.** Run skill-creator's `scripts/aggregate_benchmark.py` over the iteration dir. It yields pass-rate / time / tokens per arm as **mean ± stddev**, and the **delta** between arms. The delta pass-rate *is the lift*.
 
