@@ -1,5 +1,5 @@
 ---
-seat: pipeline-test-author (seat 2 of 4)
+station: pipeline-test-author (station 2 of 4)
 domain: variance-analysis
 spec_consumed: spec.md (iteration 0)
 target_artifact: Claude Code SKILL (variance-analysis/SKILL.md + references/)
@@ -9,8 +9,8 @@ confidence: high
 
 # ACCEPTANCE CONTRACT — `variance-analysis` skill
 
-This is the success-criteria checklist the code-author (seat 3) must satisfy and the
-critic (seat 4) verifies against. It was written from the spec ONLY — the test-author
+This is the success-criteria checklist the code-author (station 3) must satisfy and the
+critic (station 4) verifies against. It was written from the spec ONLY — the test-author
 never saw the skill that will be built.
 
 **Axis tags:** `[STRUCT]` deterministic file/grep/line-count check (runs before any critic
@@ -148,8 +148,8 @@ discriminating feature being the reason.
 - TR-N3 `[TRIGGER]` "What's the mean-variance optimal portfolio / return volatility for these assets?" → NO-FIRE (portfolio mean-variance).
 - TR-N4 `[TRIGGER]` "Compute the earned-value cost variance (CV) and schedule variance (SV) for the project." → NO-FIRE (EVM, not standard costing).
 - TR-N5 `[TRIGGER]` "Why don't these two tables reconcile — there's row-count drift between datasets?" → NO-FIRE (ETL data-diff).
-- TR-N6 `[TRIGGER]` "Explain the difference between accounting profit and economic profit." → NO-FIRE (managerial-econ definition; no actual-vs-standard data, no variance decomposition). *(orchestrator-named negative)*
-- TR-N7 `[TRIGGER]` "Analyze this budget" / "explain why marketing came in over budget" with one line-item delta and no standards. → NO-FIRE (generic FP&A commentary, no standard-costing structure). *(orchestrator-named negative)*
+- TR-N6 `[TRIGGER]` "Explain the difference between accounting profit and economic profit." → NO-FIRE (managerial-econ definition; no actual-vs-standard data, no variance decomposition). *(expo-named negative)*
+- TR-N7 `[TRIGGER]` "Analyze this budget" / "explain why marketing came in over budget" with one line-item delta and no standards. → NO-FIRE (generic FP&A commentary, no standard-costing structure). *(expo-named negative)*
 
 ### DISCRIMINATING BOUNDARY PAIR (the hard case — tests the Section-12 tension)
 - TR-B1 `[TRIGGER]` "Analyze this budget against actuals — here are our **standard costs and the units we produced**." → FIRE. This is deceptively close to TR-N7 ("analyze this budget"); the presence of standards + actual output volume is the discriminator that flips it to FIRE. The skill must fire here but NOT on bare TR-N7. A skill that fires on both, or neither, FAILS this pair.
@@ -173,7 +173,7 @@ discriminating feature being the reason.
 - CG-1 No per-domain `configs/variance-analysis.yaml` exists; structural checks S1–S17 are
   declared here from spec Sections 6 & 9. If the workflow expects a config-driven
   `structural_checks` list, generate it from S1–S17 before the deterministic gate runs.
-- CG-2 Triggering cannot be executed by a live router in this seat; TR-* cases are verified
+- CG-2 Triggering cannot be executed by a live router in this station; TR-* cases are verified
   by critic axis-1 simulation against the `description` plus the S5/S6 token greps. This is
   inherently fuzzier than a deterministic check — treat a TR-* miss as ITERATE, not hard-fail,
   unless an S5/S6 token check also fails.

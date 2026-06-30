@@ -2,7 +2,7 @@
 
 The execution-eval station run on a **second, different-type skill** to check it generalizes beyond `variance-analysis`. `generate-tests` is a *transform* skill (Scope×Basis matrix → dbt tests), not a computational one. Run via [`../workflow/execution-eval-generate-tests.run.js`](../workflow/execution-eval-generate-tests.run.js), three model tiers, 3 samples per arm, deterministic grading against fixed output schemas.
 
-> Note: `generate-tests` is an external RDCO skill referenced by absolute path in the workflow (path-coupled, like the canonical seats — a genericization follow-up). The oracle answers are grounded in the skill's own documented rules (severity mapping absolute/relative→error, temporal→warn, human→skip-no-code; flag any scope with zero tests).
+> Note: `generate-tests` is an external RDCO skill referenced by absolute path in the workflow (path-coupled, like the canonical stations — a genericization follow-up). The oracle answers are grounded in the skill's own documented rules (severity mapping absolute/relative→error, temporal→warn, human→skip-no-code; flag any scope with zero tests).
 
 ## Result — identical across all three tiers
 

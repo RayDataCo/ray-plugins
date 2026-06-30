@@ -17,14 +17,14 @@
       "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent (plan -> build -> test -> publish -> maintain) and emits five standard deliverables. Standardizes on generative orchestration; bakes in verified Microsoft Learn corrections + safe defaults (Work IQ off, newest Sonnet, grounded internal agents)."
     },
     {
-      "name": "skill-dev-pipeline",
-      "source": "./plugins/skill-dev-pipeline",
-      "description": "Meta-pipeline for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Ships the orchestrator, a reference workflow, and the variance-analysis worked example."
+      "name": "skill-agent-brigade",
+      "source": "./plugins/skill-agent-brigade",
+      "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / kill). Ships the expo, a reference workflow, and the variance-analysis worked example."
     },
     {
       "name": "discipline-skills",
       "source": "./plugins/discipline-skills",
-      "description": "Professional discipline skills produced by the skill-dev-pipeline. First skill: variance-analysis (Finance / managerial-accounting). Skills accrue here as the backlog is built out."
+      "description": "Professional discipline skills produced by the skill-agent-brigade. First skill: variance-analysis (Finance / managerial-accounting). Skills accrue here as the backlog is built out."
     }
   ]
 }

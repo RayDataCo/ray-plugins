@@ -2,21 +2,21 @@
 name: execution-eval-station
 description: >-
   Measure whether an authored skill actually beats the base model — the lift
-  station of the skill-development pipeline. Use after the static critics pass,
+  station of the brigade. Use after the static critics pass,
   when you need to prove a skill earns its place: run the skill against its
   acceptance-contract fixtures in a two-arm ablation (base model alone vs base
   model + skill), grade both against the known answers, and report the lift
   (with-skill pass-rate minus baseline) with variance. Also use standalone to
   regression-check an existing skill after a change. Built on skill-creator's
   benchmark machinery. NOT for judging structure/voice/fidelity (that's the
-  static critic seat) and NOT for authoring skill content (that's the author seat).
+  static critic station) and NOT for authoring skill content (that's the author station).
 ---
 
 # Execution-Eval Station
 
 The station that answers the one question the static critics can't: **does this skill add something the base model can't already do?** The static critics read the artifact and judge whether it's *well-built*. This station *runs* the skill and measures whether it's *worth shipping*.
 
-It is structurally different from the critic seat, which is why it's its own station and not a sixth critic axis:
+It is structurally different from the critic station, which is why it's its own station and not a sixth critic axis:
 
 - It **executes** the skill (multi-step, expensive), where the critics only read it.
 - It needs **N samples per arm** because model output is non-deterministic — a single run is noise.
@@ -31,7 +31,7 @@ A skill exists to make the model do something it can't reliably do alone. So the
 - **Arm B (treatment):** base model + the skill, same input.
 - Both graded against the fixture's known answer. **Lift = pass-rate(B) − pass-rate(A).**
 
-**Lift ≈ 0 means the skill is dead weight** — the base model already does the job — and the orchestrator should **kill the ticket** rather than ship a skill that adds nothing. A positive lift that clears the noise band is the skill justifying its existence, *and the number says how much*.
+**Lift ≈ 0 means the skill is dead weight** — the base model already does the job — and the expo should **kill the ticket** rather than ship a skill that adds nothing. A positive lift that clears the noise band is the skill justifying its existence, *and the number says how much*.
 
 ## Inputs
 
@@ -43,7 +43,7 @@ A skill exists to make the model do something it can't reliably do alone. So the
 
 ## Procedure (orchestrate skill-creator — don't reinvent the harness)
 
-`skill-creator` ships the ablation + grading + variance-aware benchmark. This station drives it with contract fixtures and turns the result into an orchestrator decision.
+`skill-creator` ships the ablation + grading + variance-aware benchmark. This station drives it with contract fixtures and turns the result into an expo decision.
 
 1. **Extract fixtures from the acceptance contract.** Read `tests.md`; turn each oracle into `{prompt, expected assertions, trap-absent assertions}`. The prompt feeds the skill the oracle's raw inputs and asks for the worked result; the expected numbers and trap-absence become the gradeable assertions.
 
@@ -94,5 +94,5 @@ benchmark: <run_dir>/iteration-<N>/benchmark.json
 ## Related
 
 - skill-creator (`agents/grader.md`, `agents/analyzer.md`, `scripts/aggregate_benchmark.py`) — the benchmark machinery this station orchestrates.
-- `../skill-dev-orchestrator/SKILL.md` — the outer loop whose expo consumes this station's lift number for the advance/kill/refire decision.
+- `../expo/SKILL.md` — the pass whose expo consumes this station's lift number for the advance/refire-to-author/reroute-to-spec/kill decision.
 - `../../DESIGN.md` §5 — the design rationale (controlled comparison, own-station decision, regression).

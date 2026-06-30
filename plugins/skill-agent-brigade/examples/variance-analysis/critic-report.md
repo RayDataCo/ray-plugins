@@ -1,6 +1,6 @@
 # Critic report — variance-analysis
 
-Verdict aggregate from the pipeline run that produced this skill.
+Verdict aggregate from the brigade run that produced this skill.
 
 - **Result:** PASS
 - **Rounds:** 1 (cleared on the first author draft; no revision needed)

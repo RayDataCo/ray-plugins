@@ -4,18 +4,18 @@ domain: variance-analysis
 department: Finance
 cert_anchor: CMA Part 1 (managerial accounting) / CFA
 target_artifact: Claude Code SKILL (SKILL.md + progressive-disclosure reference files)
-parent_workflow: skill-build-pipeline
-seat: pipeline-spec-author (seat 1 of 4)
+parent_workflow: skill-build-brigade
+station: pipeline-spec-author (station 1 of 4)
 confidence: high
 ---
 
 # BUILD SPEC — `variance-analysis` Finance skill
 
-## 0. What this seat is specifying
+## 0. What this station is specifying
 
-The downstream code-author (seat 3) must produce a **Claude Code skill**, not a memo or a study guide. That means a `variance-analysis/` directory with a `SKILL.md` (YAML frontmatter `{name, description}` + lean markdown body) plus progressive-disclosure reference files. The skill must encode the CMA variance-analysis competency **as an executable procedure the agent runs** — gather inputs → flex the budget → route to the right formula → compute with a fixed sign convention → reconcile → interpret by exception → emit an auditable table. It is NOT a restatement of the syllabus.
+The downstream code-author (station 3) must produce a **Claude Code skill**, not a memo or a study guide. That means a `variance-analysis/` directory with a `SKILL.md` (YAML frontmatter `{name, description}` + lean markdown body) plus progressive-disclosure reference files. The skill must encode the CMA variance-analysis competency **as an executable procedure the agent runs** — gather inputs → flex the budget → route to the right formula → compute with a fixed sign convention → reconcile → interpret by exception → emit an auditable table. It is NOT a restatement of the syllabus.
 
-This spec is the contract. The test-author (seat 2) writes tests against Section 9 (Success Criteria). The critic (seat 4) scores against the five axes in Section 10.
+This spec is the contract. The test-author (station 2) writes tests against Section 9 (Success Criteria). The critic (station 4) scores against the five axes in Section 10.
 
 ---
 
@@ -159,7 +159,7 @@ H. **Pitfall guards visible** — the four named pitfalls (AQ purchased vs used,
 
 I. **Worked example with a trap** — at least one fully reconciled numeric example exists in a reference file, including a case where AQ purchased ≠ AQ used and a case computing FOH production-volume, so the agent can pattern-match.
 
-## 10. Critic axes → where each is satisfied (for seat 4)
+## 10. Critic axes → where each is satisfied (for station 4)
 
 1. **Triggering-precision** → Sections 2, 7, 8 (positive surface + hard negative carve-outs).
 2. **Domain-fidelity** → Sections 3, 4, 9C/9D/9E; formulas match CMA exactly, flex step present, sign rule unambiguous.
@@ -198,7 +198,7 @@ variance-analysis/
 
 ---
 
-## 12. Tensions (flagged for the test-author per seat method)
+## 12. Tensions (flagged for the test-author per station method)
 
 - **Pushy description vs triggering-precision.** Skill-creator says lean pushy to fight undertriggering; critic axis 1 penalizes false fires. Resolution baked into Section 2/8: assertive on standard-costing phrasings, explicit hard carve-outs for statistical variance, mean-variance, EVM, and data-diff. Test-author should test BOTH a should-trigger near-miss (e.g., budget-to-actual *with* standards) and a should-NOT-trigger near-miss (e.g., "variance of this dataset").
 - **Completeness vs leanness.** Encoding all four elements + mix/yield + interpretation is a lot of surface, which fights "procedure-not-knowledge-dump" and disclosure hygiene. Resolution: SKILL.md carries only the routing workflow + sign rule + reconciliation identities + output contract; every formula/example/advanced-decomposition body goes to a reference file loaded on demand. The test for 9G should confirm SKILL.md did not absorb the depth.
