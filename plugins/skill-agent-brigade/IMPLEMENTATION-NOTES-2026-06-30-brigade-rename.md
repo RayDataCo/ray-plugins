@@ -198,4 +198,6 @@ stale strings.
 plugins/skill-agent-brigade/workflow/brigade-variance-analysis.run.js` → OK. (4) PASS — stale-ref
 grep (with `grep -v IMPLEMENTATION-NOTES`) returns ZERO across all live surfaces.
 
-**Commit SHA (rename content commit):** recorded in the follow-up doc commit below.
+**Commit SHA (rename content commit):** `277a1d90e9911006fb5e7cb9c74a55506b7281de`
+on branch `add-skill-dev-pipeline-and-variance-analysis` (this notes-only SHA line is a
+trailing doc commit on top). NOT merged.
