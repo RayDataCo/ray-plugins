@@ -5,7 +5,7 @@ department: Finance
 cert_anchor: CMA Part 1 (managerial accounting) / CFA
 target_artifact: Claude Code SKILL (SKILL.md + progressive-disclosure reference files)
 parent_workflow: skill-build-brigade
-station: pipeline-spec-author (station 1 of 4)
+station: station-spec-author (station 1 of 4)
 confidence: high
 ---
 

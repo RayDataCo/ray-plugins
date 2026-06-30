@@ -185,7 +185,7 @@ function skillLint(skillDir, { folderName = basename(skillDir) } = {}) {
 // Station 1 -- Spec
 phase('Spec')
 await agent(
-  `You are STATION 1 of the skill-build brigade (spec author). First read your station method at ~/.claude/skills/pipeline-spec-author/SKILL.md and follow it.
+  `You are STATION 1 of the skill-build brigade (spec author). First read your station method at ~/.claude/skills/station-spec-author/SKILL.md and follow it.
 FOUNDER ASK: build a Finance skill named "variance-analysis" -- the management-accounting procedure for computing and interpreting cost/revenue variances. Department=Finance, cert anchor=CMA/CFA.
 ${DOMAIN_CONFIG}
 ${CERT_SEED}
@@ -197,7 +197,7 @@ Write the spec to ${SCRATCH}/spec.md. Return a 4-line summary + the absolute pat
 // Station 2 -- Tests / acceptance contract
 phase('Tests')
 await agent(
-  `You are STATION 2 of the skill-build brigade (test / acceptance-contract author). First read your station method at ~/.claude/skills/pipeline-test-author/SKILL.md and follow it.
+  `You are STATION 2 of the skill-build brigade (test / acceptance-contract author). First read your station method at ~/.claude/skills/station-test-author/SKILL.md and follow it.
 Read ONLY the spec at ${SCRATCH}/spec.md (you are independent of how it gets implemented).
 ${DOMAIN_CONFIG}
 Produce the ACCEPTANCE CONTRACT for the variance-analysis skill: concrete scenarios it must handle (include at least: a DM price+quantity decomposition that exercises the AQ-purchased-vs-used trap; a FOH budget-vs-production-volume decomposition; a multi-input mix+yield case; and a management-by-exception interpretation that ranks variances by materiality+controllability), trigger-accuracy cases (asks it SHOULD fire on vs deceptively-similar asks it should NOT, e.g. generic "analyze this budget" vs "explain the difference between accounting profit and economic profit"), and a fat-content check (encodes real workflow steps, not generic advice). Make every item objectively checkable.
@@ -213,7 +213,7 @@ let passed = false
 while (round < 2) {
   phase('Author')
   await agent(
-    `You are STATION 3 of the skill-build brigade (author). First read your station method at ~/.claude/skills/pipeline-code-author/SKILL.md and follow it. Also follow skill-creator conventions (a lean, trigger-tuned SKILL.md + progressive-disclosure reference files).
+    `You are STATION 3 of the skill-build brigade (author). First read your station method at ~/.claude/skills/station-code-author/SKILL.md and follow it. Also follow skill-creator conventions (a lean, trigger-tuned SKILL.md + progressive-disclosure reference files).
 Read the spec at ${SCRATCH}/spec.md and the acceptance contract at ${SCRATCH}/tests.md.
 ${round > 0 ? 'THIS IS A REVISION ROUND. The critic FAILED the prior draft on these axes -- fix EXACTLY these, and do NOT regress what already passed:\n' + priorNotes + '\n' : ''}Write the ACTUAL SKILL: ${SCRATCH}/skill/SKILL.md (YAML frontmatter with name: variance-analysis and a precise trigger description) plus reference files under ${SCRATCH}/skill/ (e.g. reference/formulas.md, reference/worked-examples.md). Procedure-first: the SKILL.md is the executable workflow the agent runs; formulas/worked-examples/depth go to reference files. Encode the cert competency as STEPS the agent executes, not theory it recites. Create directories as needed with Bash.
 Return a 4-line summary of what you wrote + the file list (absolute paths).`,
@@ -224,7 +224,7 @@ Return a 4-line summary of what you wrote + the file list (absolute paths).`,
   const axes = ['triggering-precision', 'domain-fidelity', 'procedure-not-knowledge-dump', 'progressive-disclosure-hygiene', 'no-slop']
   const verdicts = (await parallel(axes.map(ax => () =>
     agent(
-      `You are a STATION 4 critic for the skill-build brigade, judging ONE axis only: "${ax}". First read ~/.claude/skills/pipeline-critic/SKILL.md for the critic method.
+      `You are a STATION 4 critic for the skill-build brigade, judging ONE axis only: "${ax}". First read ~/.claude/skills/station-critic/SKILL.md for the critic method.
 Read the authored skill at ${SCRATCH}/skill/SKILL.md and ALL files under ${SCRATCH}/skill/, plus the spec at ${SCRATCH}/spec.md and the acceptance contract at ${SCRATCH}/tests.md.
 ${DOMAIN_CONFIG}
 Judge ONLY the "${ax}" axis. Be adversarial -- default to FAIL if the axis is not clearly met. For domain-fidelity specifically, verify the formulas/decompositions against standard CMA managerial-accounting truth (materials PRICE variance uses AQ PURCHASED; QUANTITY variance uses AQ USED; production-volume variance = budgeted FOH - applied FOH; flexible budget is flexed to actual output). Return your verdict.`,

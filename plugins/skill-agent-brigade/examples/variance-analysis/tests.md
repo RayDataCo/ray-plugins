@@ -1,5 +1,5 @@
 ---
-station: pipeline-test-author (station 2 of 4)
+station: station-test-author (station 2 of 4)
 domain: variance-analysis
 spec_consumed: spec.md (iteration 0)
 target_artifact: Claude Code SKILL (variance-analysis/SKILL.md + references/)

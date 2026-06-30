@@ -106,3 +106,96 @@ dir is a generic scratch `skill/`.
 notes file and the branch name, which intentionally quote the old identifiers to document the rename.
 The functional tree (everything except this notes md) returns ZERO. The external `~/.claude/skills/pipeline-*`
 station-skill paths do not match check #3's three patterns and are kept by design.
+
+## Seat→station skill rename (follow-up)
+
+Date: 2026-06-30. Resolves the OPEN QUESTION flagged above (lines 58-66): the founder
+decided to rename the four EXTERNAL seat-skills from `pipeline-*` → `station-*`, closing the
+documented residual seam. These four skills live in `~/.claude/skills/` (NOT in this repo, NOT
+in any git repo) — each is a loose `SKILL.md` with NO `name:` frontmatter, so the directory name
+IS the skill name; renaming the dir renames the skill.
+
+### Final rename map
+- `~/.claude/skills/pipeline-spec-author/` → `station-spec-author/`
+- `~/.claude/skills/pipeline-test-author/` → `station-test-author/`
+- `~/.claude/skills/pipeline-code-author/` → `station-code-author/`
+- `~/.claude/skills/pipeline-critic/`      → `station-critic/`
+
+### Inventory (pre-edit grep over the live surfaces)
+Patterns `pipeline-spec-author|pipeline-test-author|pipeline-code-author|pipeline-critic`:
+- **`~/.claude/skills/` (the 4 SKILL.md bodies):** cross-link `[[...]]` references between the
+  four skills — spec-author:64-66, test-author:67-69, code-author:63-65, critic:84. Plus prose
+  references "after `pipeline-spec-author` returns" (test-author:17), "after both
+  `pipeline-spec-author` and `pipeline-test-author`" (code-author:15), "after `pipeline-code-author`"
+  (critic:17). Plus the `description:` frontmatter "Pipeline seat N of 4 ..." and the H1 titles.
+- **repo `plugins/skill-agent-brigade/`:** `workflow/brigade-variance-analysis.run.js` 4 path refs
+  (lines 188/200/216/227); `examples/variance-analysis/spec.md:8` (`station: pipeline-spec-author
+  (station 1 of 4)`); `examples/variance-analysis/tests.md:2` (`station: pipeline-test-author
+  (station 2 of 4)`). The `IMPLEMENTATION-NOTES-*.md` matches (lines 58, 65 + this section) are
+  historical/documentary and are EXCLUDED from acceptance check #4 by the `grep -v IMPLEMENTATION-NOTES`.
+- **vault:** `CAPABILITIES.md` lines 122, 124, 164; `01-projects/skill-pipelines/2026-05-29-v-model-build-workflow-spec.md`
+  lines 18, 24, 25, 26, 27 (lines 37/39/41/43 use bare `pipeline-*-author`/`pipeline-critic` in
+  backticks too — all updated).
+- **NOT touched (per spec):** `~/.claude/state/rdco-doctor-*.json` snapshots (historical diagnostics)
+  and `~/.claude/state/ray-handoff.md` (parent updates that).
+
+### Edits made (after the `mv` renames above)
+
+**Dirs renamed** (plain `mv`, NOT git mv — `~/.claude/skills/` is not a git repo):
+all four `pipeline-*` → `station-*`. Confirmed `ls -d ~/.claude/skills/station-*` shows 4,
+`ls -d ~/.claude/skills/pipeline-*` shows none.
+
+**`~/.claude/skills/station-*/SKILL.md` (4 files), per the rename map:**
+- `description:` — "Pipeline seat N of 4" → "Brigade station N of 4"; "...multi-agent skill
+  build-out pipeline" → "...skill-agent-brigade"; trailing "Domain-agnostic utility seat" →
+  "...utility station".
+- H1 title — "# Pipeline {Spec,Test,Code} Author" / "# Pipeline Critic" → "# Station ...".
+- body prose — "seat"→"station" throughout (unit vocab); "multi-agent skill build-out pipeline"
+  → "skill-agent-brigade"; the four cross-link wikilinks `[[pipeline-*]]` → `[[station-*]]`;
+  prose skill refs ("after `pipeline-spec-author` returns" etc.) → `station-*`.
+- station-test-author body: "same per-run scratch dir as the rest of the pipeline" → "...the
+  rest of the pass" (orchestrator-layer sense).
+- station-code-author body: "follows the founder's pipeline-architecture naming" → "...brigade-
+  architecture naming".
+
+**Tool used:** the Edit tool was NOT denied on `~/.claude/**`, but its read-tracking guard
+required re-Reading each renamed path; given the volume of order-sensitive replacements per file
+(and the need to preserve file-path "pipeline" tokens) I used a verified Python one-off
+(`scratchpad/rename_skills.py`, literal `str.replace` with an ordered list + per-file leftover
+audit) for the 4 SKILL.md bodies, and a second one (`rename_refs.py`, four exact-string swaps)
+for the repo + vault refs. Each script printed post-edit verification; final grep confirms zero
+stale strings.
+
+**Repo refs (`plugins/skill-agent-brigade/`):**
+- `workflow/brigade-variance-analysis.run.js` — 4 station-method path refs `~/.claude/skills/
+  pipeline-*/SKILL.md` → `station-*/SKILL.md` (lines 188/200/216/227).
+- `examples/variance-analysis/spec.md:8` `station: pipeline-spec-author` → `station-spec-author`.
+- `examples/variance-analysis/tests.md:2` `station: pipeline-test-author` → `station-test-author`.
+
+**Vault refs (surgical — skill-name strings only, no restructuring):**
+- `CAPABILITIES.md` — lines 122 (`pipeline-critic`→`station-critic`), 124 (all four names),
+  164 (`pipeline-critic`→`station-critic`).
+- `01-projects/skill-pipelines/2026-05-29-v-model-build-workflow-spec.md` — lines 18, 24-27,
+  37, 39, 41, 43 (all backticked skill-name occurrences) → `station-*`.
+
+**Judgment calls / kept-as-is:**
+- **File-path "pipeline" tokens preserved** in all SKILL.md `Related` wikilinks and config/template/
+  runs/axes paths: `skill-pipelines/`, `multi-agent-pipeline-architecture`, `multi-agent-pipeline-
+  config-schema`, `rdco-pipeline-rlhf-shaped`. These point at REAL vault files/folders that were
+  NOT renamed in this pass — changing them would break the links. The replacement logic targeted
+  product-vocab strings only, never these paths (verified by per-line leftover audit).
+- **Vault surrounding vocab left intact per the "surgical, skill-name strings only" instruction:**
+  `CAPABILITIES.md` still reads "**Pipeline seats (the 4-seat utility set):**" (header) and
+  "gate for pipeline-stage outputs" (line 164 prose); the v-model spec still reads "(seat 1/4)"…
+  "(seat 4/4)". Only the skill-name strings were swapped. Flagging these as a possible future
+  consistency follow-up if the founder wants the prose vocab aligned too.
+- **`station-code-author` description** keeps "(code, markdown, structured doc, etc.)" and the
+  body keeps the "the term 'code' follows..." caveat — these are functional explanation, not the
+  seat/pipeline vocab, so untouched.
+
+**Acceptance checks:** (1) PASS — 4 dirs renamed, no `pipeline-*` of the four remain.
+(2) PASS — each description begins "Brigade station N of 4". (3) PASS — `node --check
+plugins/skill-agent-brigade/workflow/brigade-variance-analysis.run.js` → OK. (4) PASS — stale-ref
+grep (with `grep -v IMPLEMENTATION-NOTES`) returns ZERO across all live surfaces.
+
+**Commit SHA (rename content commit):** recorded in the follow-up doc commit below.
