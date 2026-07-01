@@ -27,6 +27,16 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
     templates/                        # the 4 per-agent deliverable templates (#2-#5)
   skills/copilot-studio-pull-runbook/   # skill: pull the runbook into the current project
   skills/copilot-studio-ground-runbook/ # skill: re-ground the runbook in the latest MS docs
+plugins/skill-agent-brigade/          # real plugin: the agent brigade that manufactures skills
+  .claude-plugin/plugin.json
+  README.md + DESIGN.md + BUNDLE-SPEC.md + RAIL-SPEC.md  # pattern docs + interface specs
+  skills/expo/                        # the deciding role at the pass (routing + exit set)
+  skills/execution-eval-station/      # lift-over-base-model value gate (per-fixture, per-tier)
+  workflow/*.run.js                   # reference workflow runs (as-executed)
+  examples/                           # worked examples w/ real run reports (variance-analysis, generate-tests)
+plugins/discipline-skills/            # real plugin: skills produced BY the brigade
+  .claude-plugin/plugin.json
+  skills/variance-analysis/           # first produced skill (Finance / standard-costing variances)
 ```
 
 ## Plugins
@@ -36,6 +46,8 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
   ```
   /plugin install copilot-studio-agent-builder@ray-plugins
   ```
+- **`skill-agent-brigade`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
+- **`discipline-skills`** — professional discipline skills produced by the brigade. First skill: `variance-analysis` (Finance / standard-costing variances). Skills accrue here as the backlog is built out.
 
 ## Copy it
 

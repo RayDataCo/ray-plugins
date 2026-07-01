@@ -9,9 +9,9 @@
  * axis (skillLint(), below) to the same critic aggregation — a non-LLM hard gate.
  *
  * NOTE (portability): as-run, each station agent reads its canonical station
- * skill from the local RDCO harness (~/.claude/skills/pipeline-*) and writes to
- * a per-run scratch dir. (Those external station-skill names are pending
- * genericization — see README Follow-ups — so the harness paths are kept as-is.)
+ * skill from the local RDCO harness (~/.claude/skills/station-*) and writes to
+ * a per-run scratch dir. (Those station skills are external to this plugin and
+ * pending genericization — see README Follow-ups — so the harness paths are kept as-is.)
  * The station ROLES + contracts are documented in README.md. To adapt for
  * another environment, point the station-read paths at your own station skills
  * and set your own run dir. The cert-competency seed + per-domain config are

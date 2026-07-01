@@ -86,7 +86,7 @@ Use skill-creator's `--previous-workspace` to diff this iteration against the la
 ## Returns
 
 ```
-lift: <+delta pass-rate>  band: <±combined stddev>  action: advance|kill|refire-to-author
+lift: <+delta pass-rate>  band: <±combined stddev>  action: advance|kill|refire-to-author|inconclusive
 per-fixture: <fixture → with_skill% vs baseline% (Δ)>
 benchmark: <run_dir>/iteration-<N>/benchmark.json
 ```
