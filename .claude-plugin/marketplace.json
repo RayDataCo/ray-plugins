@@ -17,6 +17,11 @@
       "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent (plan -> build -> test -> publish -> maintain) and emits five standard deliverables. Standardizes on generative orchestration; bakes in verified Microsoft Learn corrections + safe defaults (Work IQ off, newest Sonnet, grounded internal agents)."
     },
     {
+      "name": "snowflake-cli",
+      "source": "./plugins/snowflake-cli",
+      "description": "Teaches Claude Code to use the Snowflake CLI (`snow`) — primarily to execute SQL and deploy DDL — via a /prime-snow-cli index skill plus reference files that mirror the full `snow` command tree (connection, object, stage, snowpark, streamlit, app, spcs, cortex, dbt, git, notebook, dcm) with pointers to the official docs."
+    },
+    {
       "name": "skill-agent-brigade",
       "source": "./plugins/skill-agent-brigade",
       "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / kill). Ships the expo, a reference workflow, and the variance-analysis worked example."
