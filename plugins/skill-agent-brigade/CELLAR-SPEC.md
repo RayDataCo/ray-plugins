@@ -20,7 +20,7 @@ Top level answers "what kind of thing is this"; the folder inside is the thing's
 ```
 <cellar-root>/
   companies/<canonical-id>/        # research subjects: identity.md · <kind>/<date>-artifacts · tickets/ (closed)
-  engagements/<client>/            # delivery subjects (e.g. CAF engagement records)
+  assessments/<subject>/           # assessment records — subjects span companies, disciplines/departments, more groups later
   brigades/<brigade>/              # capability knowledge: menu.md, roster notes
   rail/                            # in-flight tickets ONLY — the queue adapter scans just this
   competencies/<domain>/           # source material skills are built from
