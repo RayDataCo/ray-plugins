@@ -13,6 +13,7 @@ The settled brigade vocabulary — one place, one definition each. Use these exa
 - **steward** — the front-of-house role: pairs a request to the menu (use-case catalog), gathers + curates context from the cellar (vault-first, careful-external second), writes a contract-valid ticket, and enqueues it. Also repairs `needs-context` tickets. (See skills/steward/.)
 - **rail** — the queue/batch layer: the pluggable mutable ticket store with lease/ack semantics plus the loop that fans the pass over a backlog of tickets (see RAIL-SPEC.md).
 - **ticket** — the unit of work flowing through the brigade, defined once in **TICKET-CONTRACT.md** (the FOH↔brigade port): inline context manifest + Order + snapshot + work log + artifacts; it *is* the context bundle (payload schema: BUNDLE-SPEC.md), marked up at each station hop.
+- **menu** — a brigade's published input contract: artifact types offered + per-type payload requirements. Per-brigade asset, expo-authored via a discovery ticket (`artifact: menu`), published beside the rail, read by stewards (see MENU-SPEC.md). The envelope (TICKET-CONTRACT) is universal; the menu is what's kitchen-specific.
 - **exit set** — the expo's closed disposition vocabulary, used verbatim: `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`.
 
 ## 1. The composition pattern

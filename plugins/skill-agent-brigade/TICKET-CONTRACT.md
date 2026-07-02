@@ -23,7 +23,7 @@ A ticket is **one mutable, append-only markdown file**: YAML frontmatter (identi
 ```yaml
 ---
 ticket: variance-analysis        # id — kebab-case, unique on the rail
-artifact: skill                  # skill | brigade (what the brigade is asked to produce)
+artifact: skill                  # skill | brigade | menu (what the brigade is asked to produce)
 status: queued                   # rail status — see lifecycle below
 requested_by: founder            # who placed the order
 menu: fpna/variance-analysis     # optional — use-case catalog entry this order was paired to
@@ -73,7 +73,7 @@ Conflating these was a v1 bug (RAIL-SPEC's old lifecycle mixed them); they are n
 `ticketLint()` — pure pass/fail mechanics, the same move as the critic's `skillLint()` axis. No LLM judgment. Runs at **enqueue** (steward-side) and again at **pull** (expo-side).
 
 1. `ticket` id present, kebab-case, unique on the rail.
-2. `artifact` ∈ { `skill`, `brigade` }.
+2. `artifact` ∈ { `skill`, `brigade`, `menu` }.
 3. `status` ∈ { `queued`, `leased`, `in-build`, `needs-context`, `escalated`, `done`, `killed` }; `lease` is null unless status is `leased`/`in-build`, and well-formed (`worker`, `at`, `ttl_min`) when set.
 4. `context` has ≥ 1 source; every source has `id`, `type`, `ref`, `when`; every `type` is a registered resolver type.
 5. Every **eager** source (`when` starts with "always") resolves at enqueue-time — the steward must verify the pointers aren't dead before hanging the ticket.
@@ -92,6 +92,8 @@ The expo's **phase-0** call, made only after Gate A passes. The expo reads the O
 - **Thin** — intent is clear but named context is missing (e.g. a computational skill with no worked examples; a generative skill with no exemplars). The expo appends an itemized specify-missing list — *what* is missing and *how it would sharpen the build*. → **reroute-to-steward.**
 
 Two gates, deliberately not one: Gate A is schema truth a script can check; Gate B is a judgment call an agent must make. Folding them together either turns judgment into checkbox theater or buries mechanical failures in prose.
+
+**Menu tickets** (`artifact: menu`) are the discovery special case ([MENU-SPEC.md](./MENU-SPEC.md)): same envelope, same Gate A, but they never enter the stations — the expo answers one by introspecting its own brigade and publishing the menu beside the rail. Gate B for a menu ticket reduces to "does the pointer reach a brigade home?"; the sufficiency-by-type table above applies to build tickets, whose payload requirements come from the *target brigade's menu*.
 
 ## The exit set (amended: five exits)
 

@@ -31,8 +31,18 @@ Founder-directed evening push (iMessage go ~21:32 ET): make the FOH↔BOH handof
 - Execution-eval is still not sequenced into the expo's loop (known gap from the 7/1 review; not in this push's scope).
 - Snapshot storage for live sources (url/mcp/qmd) still lacks a content-addressed home — flagged in the 7/1 review, deferred.
 
-## Open questions for the founder
+## Open questions for the founder — ANSWERED (iMessage, 2026-07-01 ~22:01 ET)
 
-1. Gate-A rule 5 checks only `file`-type eager refs at pull; live-type (url/mcp/qmd) verification is steward-side at enqueue. Tight enough for v1?
-2. Steward rework budget: the SKILL.md says "third bounce → take it to the requester." Right number?
-3. When does the menu (use-case catalog) get stood up — before or with the Finance vertical slice?
+1. Gate-A rule 5 file-only at pull → **tight enough for v1.** ✓
+2. 3-bounce steward rework budget → **fine.** ✓
+3. Menu → **founder's design, blended into this PR (~22:10 go):** the menu is a **per-brigade asset** discovered **over the rail itself**.
+
+## Addendum — the menu blend (same evening, founder-designed)
+
+- **`MENU-SPEC.md`** (NEW): envelope-vs-menu two-layer split (envelope = universal TICKET-CONTRACT; menu = per-brigade payload requirements); discovery via an `artifact: menu` ticket the expo answers by introspection; published at `<rail>/menus/<brigade>.menu.md`; versioned by re-answering on brigade change. Precedent: MCP `tools/list` / A2A agent card, re-derived from the kitchen.
+- **`MENU.md`** (NEW): this brigade's own menu — skill/brigade/menu artifact types + per-`type_hint` payload requirements. **This is where the curate-to-type table moved**: the steward SKILL.md had hardcoded it (menu content leaked into the FOH role — the founder's decoupling question exposed the coupling within an hour of shipping it); the steward now reads requirements from the target brigade's menu.
+- **TICKET-CONTRACT**: `artifact` enum gains `menu` (Gate A rule 2 updated); menu tickets = same envelope + Gate A, never enter stations.
+- **Steward**: binds to envelope + rail + menus (explicitly decoupled, N stewards ↔ M brigades); no-menu-published → hang the discovery ticket first.
+- **Expo**: new "Menu tickets" section — introspect, publish, bump version, ack advance.
+- **rail-walk.run.js**: `artifact: menu` branch (single expo introspection agent, no stations); lint rule 2 enum updated.
+- **v1 pragmatism** (agreed): adopt the pattern, no live discovery protocol — one brigade + one steward means run discovery once, persist, re-run on change.

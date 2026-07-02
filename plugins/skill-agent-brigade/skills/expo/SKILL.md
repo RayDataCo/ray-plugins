@@ -29,7 +29,7 @@ The expo routes every ticket using one closed **exit set**: `advance · refire-t
 
 For each ticket pulled off the backlog:
 
-0. **Phase-0 — the two-gate entry** ([criteria in TICKET-CONTRACT.md](../../TICKET-CONTRACT.md)). **Gate A** (deterministic): re-run `ticketLint()` at pull — a failure here should have been impossible past the steward's enqueue check, so park `needs-context` AND flag the adapter defect. **Gate B** (judgment): read the Order + eager sources, render **Clear** (proceed) / **Ambiguous** (append the question, exit `reroute-to-steward`) / **Thin** (append the itemized specify-missing list, exit `reroute-to-steward`). Only Clear tickets enter the stations.
+0. **Phase-0 — the two-gate entry** ([criteria in TICKET-CONTRACT.md](../../TICKET-CONTRACT.md)). (If `artifact: menu`, skip the stations entirely — see **Menu tickets** below.) **Gate A** (deterministic): re-run `ticketLint()` at pull — a failure here should have been impossible past the steward's enqueue check, so park `needs-context` AND flag the adapter defect. **Gate B** (judgment): read the Order + eager sources, render **Clear** (proceed) / **Ambiguous** (append the question, exit `reroute-to-steward`) / **Thin** (append the itemized specify-missing list, exit `reroute-to-steward`). Only Clear tickets enter the stations.
 1. **Station 1 — Spec.** Run the spec author on the ticket's Order + resolved context. Output: `spec.md`. State = `spec_done`.
 2. **Station 2 — Tests.** Run the test author on `spec.md` **only**. Output: `tests.md`. State = `tests_done`.
 3. **Station 3 — Author.** Run the author on `spec.md` + `tests.md` (+ accumulated critic notes on a revision round). Output: `SKILL.md` + `references/`. State = `authored`.
@@ -61,6 +61,10 @@ stateDiagram-v2
     Killed --> [*]: drop, surface to human
     Escalate --> [*]: human review
 ```
+
+## Menu tickets (discovery)
+
+A ticket with `artifact: menu` is a steward asking "what can your brigade do?" ([MENU-SPEC.md](../../MENU-SPEC.md)). The expo answers it itself — no stations: **introspect the brigade** (stations on the roster, critic axes + deterministic gates, eval config, artifact types offered, per-type payload requirements), write/refresh the menu at `<rail>/menus/<brigade>.menu.md` (bump `version`), record the path in the ticket's Artifacts section, and ack `advance`. Re-answering after the brigade changes is how menus stay versioned.
 
 ## Responsibilities (what the expo owns vs delegates)
 

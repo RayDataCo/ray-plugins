@@ -142,7 +142,7 @@ function ticketLint(text, railFiles) {
     && railFiles.filter(f => f.startsWith(`${id}.`)).length <= 1, `id=${id}`)
 
   const artifact = fmField(text, 'artifact')
-  add(2, 'artifact ∈ {skill, brigade}', ['skill', 'brigade'].includes(artifact), `artifact=${artifact}`)
+  add(2, 'artifact ∈ {skill, brigade, menu}', ['skill', 'brigade', 'menu'].includes(artifact), `artifact=${artifact}`)
 
   const status = fmField(text, 'status')
   const lease = fmField(text, 'lease')
@@ -193,6 +193,22 @@ while (worked < MAX_TICKETS) {
     rail.append(t.path, `GATE-A FAIL at pull — rules ${lint.failedIds.join(',')} — ADAPTER DEFECT flagged`)
     rail.ack(t.path, 'reroute-to-steward')
     summary.push({ ticket: t.id, exit: 'reroute-to-steward', why: `gate-A rules ${lint.failedIds.join(',')}` })
+    continue
+  }
+
+  // Menu tickets (artifact: menu) never enter the stations — the expo answers
+  // by introspection and publishes the menu beside the rail (MENU-SPEC.md).
+  if (fmField(t.text, 'artifact') === 'menu') {
+    const menu = await agent(
+      `You are the EXPO answering a menu/discovery ticket ("what can your brigade do?"). Read the ticket at ${t.path} and ` +
+      `the brigade home its context points at (this brigade: ${PLUGIN_DIR} — read MENU-SPEC.md, MENU.md, the skills/ roster, ` +
+      `and the critic/eval config). Write or refresh the menu at ${join(RAIL_DIR, 'menus')}/skill-agent-brigade.menu.md ` +
+      `(frontmatter menu_of/version/generated_by: expo — bump version if it exists), then append a work-log line to the ` +
+      `ticket and add the menu path under ## Artifacts. Return the published path.`,
+      { label: `menu:${t.id}`, phase: 'Phase-0', model: MODEL.expo })
+    rail.append(t.path, `menu published: ${String(menu).trim()}`)
+    rail.ack(t.path, 'advance')
+    summary.push({ ticket: t.id, exit: 'advance', why: 'menu ticket — published by introspection' })
     continue
   }
 
