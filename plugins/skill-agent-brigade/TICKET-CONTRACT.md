@@ -28,6 +28,7 @@ artifact: skill                  # a type from the target brigade's menu (this b
 status: queued                   # rail status — see lifecycle below
 requested_by: founder            # who placed the order
 menu: fpna/variance-analysis     # optional — use-case catalog entry this order was paired to
+subject: companies/acme          # optional — canonical cellar subject key; where a closed ticket FILES, and the default subject for station kwargs. Fallback when absent: derived from the first cellar-typed context source. (Added 2026-07-02 with the filing rule.)
 type_hint: computational         # optional — computational | corpus | generative | operational | advisory
 lease: null                      # null, or { worker, at, ttl_min } while a pass works it
 context:                         # the payload — typed pointer sources (schema: BUNDLE-SPEC.md)
