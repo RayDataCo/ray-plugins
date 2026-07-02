@@ -14,6 +14,7 @@ The settled brigade vocabulary — one place, one definition each. Use these exa
 - **rail** — the queue/batch layer: the pluggable mutable ticket store with lease/ack semantics plus the loop that fans the pass over a backlog of tickets (see RAIL-SPEC.md).
 - **ticket** — the unit of work flowing through the brigade, defined once in **TICKET-CONTRACT.md** (the FOH↔brigade port): inline context manifest + Order + snapshot + work log + artifacts; it *is* the context bundle (payload schema: BUNDLE-SPEC.md), marked up at each station hop.
 - **menu** — a brigade's published input contract: artifact types offered + per-type payload requirements. Per-brigade asset, expo-authored via a discovery ticket (`artifact: menu`), published beside the rail, read by stewards (see MENU-SPEC.md). The envelope (TICKET-CONTRACT) is universal; the menu is what's kitchen-specific.
+- **cellar** — the house knowledge store, its own port (CELLAR-SPEC.md): brigades `land` provenance-stamped outputs, stewards `search`/`list` to gather. Filesystem/vault v1; Drive, S3, Snowflake Stage as driven adapters.
 - **exit set** — the expo's closed disposition vocabulary, used verbatim: `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`.
 
 ## 1. The composition pattern
@@ -28,7 +29,7 @@ Three layers, each a clean abstraction boundary. This is the **house pattern** �
 
 Naming is settled (see the **Naming (canonical)** block above) — `steward / station / the pass (expo) / rail`, with the whole = the **brigade** and the unit of work = a **ticket**. The expo routes each ticket via the closed exit set `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`.
 
-**The hexagonal frame (2026-07-01):** the brigade core (stations + the pass) talks only to three **ports** — the ticket contract (FOH↔brigade), the rail (storage/queue), and the resolver (context bytes by source type). The steward is a driving adapter; vault/Snowflake rails and the per-type resolvers are driven adapters. Contracts are enforced on both sides of the ticket port (steward at enqueue, expo at pull). Full port table + schema: [TICKET-CONTRACT.md](./TICKET-CONTRACT.md).
+**The hexagonal frame (2026-07-01, cellar added 2026-07-02):** the brigade core (stations + the pass) talks only to four **ports** — the ticket contract (FOH↔brigade), the rail (storage/queue), the resolver (context bytes by source type), and the cellar (durable knowledge: brigades land outputs, stewards gather — [CELLAR-SPEC.md](./CELLAR-SPEC.md)). The steward is a driving adapter; vault/Snowflake rails, the per-type resolvers, and the filesystem/Drive/S3/Stage cellar backends are driven adapters. Contracts are enforced on both sides of the ticket port (steward at enqueue, expo at pull). Full port table + schema: [TICKET-CONTRACT.md](./TICKET-CONTRACT.md).
 
 ## 2. The skill interface contract
 

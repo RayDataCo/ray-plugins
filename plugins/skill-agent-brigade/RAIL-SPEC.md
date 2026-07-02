@@ -1,6 +1,6 @@
 # The Rail — Spec
 
-The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. Our v1 rail is the Obsidian vault; the same interface is meant to sit on a Snowflake Stage or Cortex Search just as well. In hexagonal terms the rail is one of the brigade's three ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters.
+The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. Our v1 rail is the Obsidian vault; the same interface is meant to sit on a Snowflake Stage or Cortex Search just as well. In hexagonal terms the rail is one of the brigade's four ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters.
 
 ## The ticket (defined elsewhere, on purpose)
 

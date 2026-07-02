@@ -12,7 +12,7 @@ It produces **two assets** every run:
 
 ## Architecture
 
-The **steward** (front of house) turns a request into a contract-valid ticket and hangs it on the rail ([TICKET-CONTRACT.md](./TICKET-CONTRACT.md) is the port between them). The **expo** (the deciding agent at **the pass**) pulls tickets off the rail with a lease, gates each at **phase-0** (contract validity + context sufficiency — insufficient context exits `reroute-to-steward`), walks it through four stations, and owns a convergence loop: critic feedback routes back to the author (`refire-to-author`) or, for a spec-level gap, back to the spec station (`reroute-to-spec`); a passing verdict `advance`s the ticket and closes that turn.
+The **steward** (front of house) turns a request into a contract-valid ticket — gathering context from the **cellar**, the house knowledge store ([CELLAR-SPEC.md](./CELLAR-SPEC.md)) — and hangs it on the rail ([TICKET-CONTRACT.md](./TICKET-CONTRACT.md) is the port between them). The **expo** (the deciding agent at **the pass**) pulls tickets off the rail with a lease, gates each at **phase-0** (contract validity + context sufficiency — insufficient context exits `reroute-to-steward`), walks it through four stations, and owns a convergence loop: critic feedback routes back to the author (`refire-to-author`) or, for a spec-level gap, back to the spec station (`reroute-to-spec`); a passing verdict `advance`s the ticket and closes that turn. What a build produces lands back in the cellar, provenance-stamped — outputs compound into house knowledge.
 
 ```mermaid
 flowchart TB

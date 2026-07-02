@@ -4,13 +4,14 @@
 
 ## Why a contract (the hexagonal frame)
 
-The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to three **ports**:
+The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to four **ports**:
 
 | port | what crosses it | driving/driven adapters |
 |---|---|---|
 | **ticket contract** (this doc) | the unit of work, front-of-house → brigade | **steward** (driving: writes + enqueues tickets) · human hand-authoring (driving) |
 | **rail** ([RAIL-SPEC.md](./RAIL-SPEC.md)) | ticket storage + queue semantics | Obsidian vault (driven, v1) · Snowflake Stage · Cortex Search |
-| **resolver** ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)) | context bytes, on demand, by source type | `file` · `url` · `mcp` · `qmd` (· `graph` future) |
+| **resolver** ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)) | context bytes, on demand, by source type | `file` · `url` · `mcp` · `qmd` · `cellar` (· `graph` future) |
+| **cellar** ([CELLAR-SPEC.md](./CELLAR-SPEC.md)) | durable knowledge: brigades land outputs, the steward gathers context | filesystem/vault (driven, v1) · Google Drive · S3 · Snowflake Stage |
 
 The dividend: the core is testable with no adapter at all — hand a synthetic contract-valid ticket to the pass and the brigade runs (the variance-analysis fire-through did exactly this). Swapping the vault rail for a Snowflake Stage, or the steward for a human writing a ticket by hand, changes an adapter, never the core.
 
