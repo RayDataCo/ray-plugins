@@ -4,7 +4,7 @@
 
 ## Why a contract (the hexagonal frame)
 
-The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to four **ports**:
+The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to four **ports** (seam-by-seam handoff map: [PORTS.md](./PORTS.md)):
 
 | port | what crosses it | driving/driven adapters |
 |---|---|---|
