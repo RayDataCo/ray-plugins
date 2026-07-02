@@ -2,7 +2,7 @@
 
 The **cellar** is the house's shared knowledge store: where every brigade's outputs **land** (provenance-stamped, so all assets track back), and where the steward **gathers** context when writing tickets. It is the fourth port of the hexagonal system — bind to the interface, not the storage tech. Our v1 cellar is the local filesystem (the vault); the same interface is meant to sit on Google Drive, S3, or a Snowflake Stage as the processes harden.
 
-## Rail vs cellar (two stores, deliberately separate)
+## Rail vs cellar (two PORTS, one store)
 
 | | **rail** ([RAIL-SPEC.md](./RAIL-SPEC.md)) | **cellar** (this doc) |
 |---|---|---|
@@ -11,7 +11,26 @@ The **cellar** is the house's shared knowledge store: where every brigade's outp
 | written by | steward (enqueue), pass (work log) | any brigade (land), curators |
 | read by | the pass (pull) | the steward (gather), resolvers |
 
-Tickets *reference* the cellar (context pointers in, artifact refs out); the cellar never references the rail. A ticket is disposable once its build record is closed — what it produced lives in the cellar.
+The rail and the cellar stay separate **ports** — pull/lease/ack and land/gather are different access patterns — but in v1 they share one **store**: the rail is the cellar's hot section (`<cellar>/rail/`), the same way daily notes and reference notes are different workflows over one Obsidian vault. When a ticket closes, it **files to its subject** (`companies/<id>/tickets/…`) so the build record sits beside the artifacts it produced; `rail/` holds in-flight work only, never an archive. (2026-07-02, founder direction: centralize — everything writes back to the one house store.)
+
+## Organization — sections by kind, keys inside, links across
+
+Top level answers "what kind of thing is this"; the folder inside is the thing's natural key. Cross-cutting connections ride frontmatter + wikilinks, not the directory tree:
+
+```
+<cellar-root>/
+  companies/<canonical-id>/        # research subjects: identity.md · <kind>/<date>-artifacts · tickets/ (closed)
+  engagements/<client>/            # delivery subjects (e.g. CAF engagement records)
+  brigades/<brigade>/              # capability knowledge: menu.md, roster notes
+  rail/                            # in-flight tickets ONLY — the queue adapter scans just this
+  competencies/<domain>/           # source material skills are built from
+```
+
+Conventions that make the flat parts navigable:
+
+- **Frontmatter is the query plane.** Every landed artifact already carries `subject / kind / produced_by.{brigade,ticket,station}` — search and graph tooling slice by any of them regardless of which folder won the filing argument.
+- **Wikilinks are the connection plane.** Link by stable name (`[[lenovo — identity]]`), never by path — filing a closed ticket or reorganizing a section breaks nothing.
+- **The cellar is an Obsidian vault.** v1 is literally openable in Obsidian; qmd indexes it as a collection for the steward's `search` op. Keep filenames human-stable and markdown-first for exactly this reason.
 
 ## The two flows
 

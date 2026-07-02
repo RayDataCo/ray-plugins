@@ -20,7 +20,7 @@ The steward is a **driving adapter** on the ticket-contract port ([TICKET-CONTRA
 ## Inputs
 
 - **A request** — from a human or an upstream system: what capability is being ordered, for whom.
-- **The menus** — each brigade's published input contract ([MENU-SPEC.md](../../MENU-SPEC.md)), read from `<rail>/menus/<brigade>.menu.md`. The steward is **decoupled** from any one brigade: it binds to the envelope + the rail + menus, and can serve multiple brigades. If the target brigade has no menu yet, the steward hangs an `artifact: menu` discovery ticket first — "what can your brigade do?" — and gathers once the expo answers.
+- **The menus** — each brigade's published input contract ([MENU-SPEC.md](../../MENU-SPEC.md)), read from `<cellar>/brigades/<brigade>/menu.md`. The steward is **decoupled** from any one brigade: it binds to the envelope + the rail + menus, and can serve multiple brigades. If the target brigade has no menu yet, the steward hangs an `artifact: menu` discovery ticket first — "what can your brigade do?" — and gathers once the expo answers.
 - **The cellar** — the house knowledge store, behind its own port ([CELLAR-SPEC.md](../../CELLAR-SPEC.md)): `search`/`list` to gather, refs via the `cellar` source type. v1 backend is the filesystem/vault (qmd is the search op); when the cellar is dry, careful external sourcing.
 - **The rail** — where the finished ticket is enqueued ([RAIL-SPEC.md](../../RAIL-SPEC.md)).
 

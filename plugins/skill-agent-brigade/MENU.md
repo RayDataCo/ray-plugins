@@ -30,7 +30,7 @@ What this brigade can do for you, and what your ticket must carry so the kitchen
 
 ## `artifact: menu` — publish this menu
 
-**What you get:** this document, regenerated — the expo introspects stations, critic axes, and eval config, bumps `version`, publishes to `<rail>/menus/skill-agent-brigade.menu.md`.
+**What you get:** this document, regenerated — the expo introspects stations, critic axes, and eval config, bumps `version`, publishes to `<cellar>/brigades/skill-agent-brigade/menu.md`.
 
 **What the ticket must carry:** one pointer at this brigade's home (plugin dir). Order = "what can your brigade do?"
 

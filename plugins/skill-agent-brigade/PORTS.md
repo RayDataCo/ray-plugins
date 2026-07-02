@@ -50,7 +50,7 @@ And the long loop that makes the whole thing compound: seam 7 → seam 8 — one
 
 ## Discovery (menus over the rail — no extra machinery)
 
-A steward that doesn't know a brigade's requirements hangs an `artifact: menu` ticket (seam 2); the expo answers it by introspection instead of running stations, publishing to `<rail>/menus/<brigade>.menu.md` (seam 7, in spirit). Versioned by re-answering on brigade change. Same envelope, same gates.
+A steward that doesn't know a brigade's requirements hangs an `artifact: menu` ticket (seam 2); the expo answers it by introspection instead of running stations, publishing to `<cellar>/brigades/<brigade>/menu.md` (seam 7 — a menu is landed house knowledge). Versioned by re-answering on brigade change. Same envelope, same gates.
 
 ## Deployment note — domain ports
 
