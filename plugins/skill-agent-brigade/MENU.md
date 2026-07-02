@@ -10,6 +10,8 @@ What this brigade can do for you, and what your ticket must carry so the kitchen
 
 ## `artifact: skill` — build a Claude skill
 
+**Status:** live
+
 **What you get:** a trigger-tuned, procedure-first `SKILL.md` (+ progressive-disclosure references), passed through 5 LLM critic axes + deterministic skill-lint, with an optional execution-eval (measured lift over the base model, per-fixture, per-tier).
 
 **What the ticket must carry, by `type_hint`:**
@@ -24,11 +26,15 @@ What this brigade can do for you, and what your ticket must carry so the kitchen
 
 ## `artifact: brigade` — assemble a domain brigade
 
+**Status:** live
+
 **What you get:** a roster of stations (each an ordered `artifact: skill` build), a pass policy (expo decision config: exit criteria, round budgets), and a rail binding — a runnable brigade. *(Designed — the russian-doll ticket; not yet exercised end-to-end.)*
 
 **What the ticket must carry:** the domain's station roster intent in the Order (which phases, which handoffs), one context source per station-to-be (same per-type payload rules as above, applied per station), and the pass-policy constraints (budgets, gates) if they differ from house defaults.
 
 ## `artifact: menu` — publish this menu
+
+**Status:** live
 
 **What you get:** this document, regenerated — the expo introspects stations, critic axes, and eval config, bumps `version`, publishes to `<cellar>/brigades/skill-agent-brigade/menu.md`.
 

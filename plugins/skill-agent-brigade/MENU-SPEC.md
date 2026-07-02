@@ -23,7 +23,7 @@ generated_by: expo                # discovery answers are expo-authored (introsp
 ---
 ```
 
-Each artifact-type section states: **what you get** (the output artifact + its quality gates), **what the ticket must carry** (payload requirements by `type_hint`), and **what the Order should specify**. See [MENU.md](./MENU.md) — this brigade's own menu — for the worked example.
+Each artifact-type section opens with a machine-parseable **`**Status:** live`** (or `planned`) line — stewards and Gate-A lint discover live types by this marker, so it is contract, not decoration (pinned 2026-07-02 after two houses' menus diverged on it). Each section then states: **what you get** (the output artifact + its quality gates), **what the ticket must carry** (payload requirements by `type_hint`), and **what the Order should specify**. See [MENU.md](./MENU.md) — this brigade's own menu — for the worked example.
 
 ## Discovery — over the rail, no new machinery
 
