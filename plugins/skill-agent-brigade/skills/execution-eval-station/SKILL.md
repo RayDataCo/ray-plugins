@@ -94,5 +94,5 @@ benchmark: <run_dir>/iteration-<N>/benchmark.json
 ## Related
 
 - skill-creator (`agents/grader.md`, `agents/analyzer.md`, `scripts/aggregate_benchmark.py`) — the benchmark machinery this station orchestrates.
-- `../expo/SKILL.md` — the pass whose expo consumes this station's lift number for the advance/refire-to-author/reroute-to-spec/kill decision.
+- `../expo/SKILL.md` — the pass whose expo consumes this station's lift number for the advance/refire-to-author/reroute-to-spec/reroute-to-steward/kill decision.
 - `../../DESIGN.md` §5 — the design rationale (controlled comparison, own-station decision, regression).

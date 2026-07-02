@@ -24,7 +24,7 @@
     {
       "name": "skill-agent-brigade",
       "source": "./plugins/skill-agent-brigade",
-      "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / kill). Ships the expo, a reference workflow, and the variance-analysis worked example."
+      "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / reroute-to-steward / kill). Ships the steward (front-of-house context curation), the expo, reference workflows (single-ticket + rail queue-walk), and the variance-analysis worked example."
     },
     {
       "name": "discipline-skills",

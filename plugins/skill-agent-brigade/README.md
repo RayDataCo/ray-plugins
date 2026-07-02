@@ -12,11 +12,14 @@ It produces **two assets** every run:
 
 ## Architecture
 
-The **expo** (the deciding agent at **the pass**) pulls skill-build tickets off a backlog one at a time, walks each through four stations, and owns a convergence loop: critic feedback routes back to the author (`refire-to-author`) or, for a spec-level gap, back to the spec station (`reroute-to-spec`); a passing verdict `advance`s the ticket and closes that turn.
+The **steward** (front of house) turns a request into a contract-valid ticket and hangs it on the rail ([TICKET-CONTRACT.md](./TICKET-CONTRACT.md) is the port between them). The **expo** (the deciding agent at **the pass**) pulls tickets off the rail with a lease, gates each at **phase-0** (contract validity + context sufficiency — insufficient context exits `reroute-to-steward`), walks it through four stations, and owns a convergence loop: critic feedback routes back to the author (`refire-to-author`) or, for a spec-level gap, back to the spec station (`reroute-to-spec`); a passing verdict `advance`s the ticket and closes that turn.
 
 ```mermaid
 flowchart TB
-  BL[("Ticket backlog<br/>queue of build requests")] -->|pull next| ORCH
+  STW["Steward · front of house<br/>request → contract-valid ticket"] -->|enqueue| BL[("The rail<br/>queue of tickets")]
+  BL -->|"pull (lease)"| P0{"Phase-0<br/>Gate A + Gate B"}
+  P0 -- "ambiguous / thin: reroute-to-steward" --> STW
+  P0 -- clear --> ORCH
   subgraph ORCH["The pass · expo — holds phase state per ticket"]
     direction TB
     P1["Station 1 · SPEC<br/>cert/competency → procedure"] --> P2["Station 2 · TESTS<br/>reads spec ONLY"]
@@ -28,7 +31,8 @@ flowchart TB
     V -- "advance" --> DONE["Approve + close turn"]
     V -- "kill" --> DROP["Drop the ticket"]
   end
-  DONE -->|next ticket| BL
+  V -- "reroute-to-steward (context gap)" --> STW
+  DONE -->|"ack · next ticket"| BL
 ```
 
 ### The four phases (and their contracts)
@@ -37,7 +41,7 @@ Each phase is a **separate sub-agent** that hands off through a **file artifact*
 
 ```mermaid
 flowchart LR
-  IN["Input record<br/>{name, purpose,<br/>dept/context, competency excerpt}"] --> SPEC["1 · spec author"]
+  IN["Ticket (per TICKET-CONTRACT.md)<br/>Order + typed context sources"] --> SPEC["1 · spec author"]
   SPEC -->|writes| SPECF["spec.md"]
   SPECF -->|"reads ONLY"| TEST["2 · test author"]
   TEST -->|writes| TESTF["tests.md"]
@@ -59,16 +63,21 @@ flowchart LR
 
 ### The input contract
 
-A skill-build request is a 4-field record. The backlog is just a list of these:
+A skill-build request is a **ticket** — one canonical shape, defined in [TICKET-CONTRACT.md](./TICKET-CONTRACT.md). The rail is a queue of these:
 
+```yaml
+ticket: variance-analysis        # identity
+artifact: skill                  # skill | brigade
+context:                         # typed pointer sources — the depth source lives WHERE IT LIVES
+  - { id: core-competency, type: file, ref: "…/core.md",            when: "always — the knowledge to proceduralize" }
+  - { id: worked-examples, type: file, ref: "…/worked-examples.md", when: "always — the test station's oracle source" }
 ```
-{ name:               "variance-analysis",
-  purpose:            "compute & interpret standard-costing variances",
-  context:            "Finance",
-  competency_excerpt: "<the body-of-knowledge the skill must encode as a procedure>" }
+```markdown
+## Order
+Compute & interpret standard-costing variances — one computational Finance skill…
 ```
 
-The **competency excerpt** is the depth source. Certifications/BOKs encode what a practitioner *knows*; a skill encodes what they *do*. Phase 1 performs that knowledge → procedure translation. Transcribing a syllabus would be a knowledge dump; the brigade wants workflows.
+The **context sources** are the depth source. Certifications/BOKs encode what a practitioner *knows*; a skill encodes what they *do*. Phase 1 performs that knowledge → procedure translation. Transcribing a syllabus would be a knowledge dump; the brigade wants workflows. (The retired v1 shape — a 4-field `{name, purpose, context, competency_excerpt}` record — is recorded in the contract's Supersedes table.)
 
 ### The critic — and does it run the skill?
 
@@ -105,7 +114,7 @@ flowchart TB
     E2 --> E3
     E3 --> E4["lift = B − A (± band)"]
   end
-  EXEC --> DEC["expo: advance / refire-to-author / reroute-to-spec / kill"]
+  EXEC --> DEC["expo: advance / refire-to-author / reroute-to-spec / reroute-to-steward / kill"]
   DEC --> LOOP["the pass"]
 ```
 
