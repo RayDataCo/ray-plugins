@@ -1,6 +1,6 @@
 # Context Bundle — Schema Spec
 
-> **The bundle IS the ticket's context payload.** A bundle is not a standalone artifact and does not live in this repo — it is the *context section* of a mutable **ticket** that lives on the **rail** (see [RAIL-SPEC.md](./RAIL-SPEC.md)). This doc specifies the shape of that payload — the pointer schema. The ticket (= the bundle) is the brigade's only real input; everything else (intent, type, fixtures, wiring) derives from it.
+> **The bundle IS the ticket's context payload.** A bundle is not a standalone artifact and does not live in this repo — it is the `context:` section of a mutable **ticket** ([TICKET-CONTRACT.md](./TICKET-CONTRACT.md) owns the ticket's full shape) that lives on the **rail** ([RAIL-SPEC.md](./RAIL-SPEC.md)). This doc specifies the shape of that payload — the typed-source pointer schema and the resolver port. The ticket is the brigade's only real input; everything else (intent, type, fixtures, wiring) derives from it.
 
 ## What a bundle is
 
@@ -45,17 +45,13 @@ resolve_bundle(ref) -> { manifest, resolved_sources[] }
 
 ## How the brigade consumes it
 
-1. **Ticket = `{ bundle_ref }`.** Nothing else required.
-2. **Expo phase-0 — sufficiency gate.** The expo reads the manifest + eager sources and returns one of:
-   - **Clear** → proceed to the build.
-   - **Ambiguous** → clarify ("this bundle spans N skills — which one / which slice?").
-   - **Thin** → specify-missing ("missing X; add it and here's how it sharpens the build").
-   This is a front-end gate that mirrors the back-end critic loop: context-prep builds the bundle → expo gates sufficiency → insufficient routes back for more.
+1. **The manifest is inline in the ticket** — the `context:` frontmatter list, per [TICKET-CONTRACT.md](./TICKET-CONTRACT.md). (The earlier `Ticket = { bundle_ref }` indirection is retired; the contract's Supersedes table records it.)
+2. **Expo phase-0 — the two-gate entry** (criteria live in the contract): **Gate A** validates the payload deterministically (`ticketLint()` rules 4–5 + 8: typed sources well-formed, eager pointers live, pointers-not-copies); **Gate B** judges sufficiency — Clear / Ambiguous / Thin, with Ambiguous/Thin exiting `reroute-to-steward`. The front-end gate mirrors the back-end critic loop: the steward builds the payload → expo gates it → insufficient routes back for more.
 3. **Spec station** reads sources (eager first, lazy when its `when` fires) to translate competency *knowledge* → agent *procedure*.
 
 ## Where bundles come from
 
-`context-prep` is the capability that **produces** bundles (gathering + curating from files, URLs, MCP, retrieval). All the retrieval smarts live there — **inside** context-prep — not in the brigade. The brigade only ever reads a resolved bundle. That boundary is what keeps the brigade domain-agnostic.
+The **steward** ([skills/steward/](./skills/steward/)) — the brigade's front-of-house role — produces the payload: pairing the request to the use-case catalog, gathering + curating from files, URLs, MCP, retrieval (vault-first, careful-external second). All the retrieval smarts live there — **inside** the steward, behind the ticket-contract port — not in the brigade. The brigade only ever reads a resolved payload. That boundary is what keeps the brigade domain-agnostic.
 
 ## What this is NOT
 

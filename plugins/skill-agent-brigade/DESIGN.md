@@ -10,9 +10,10 @@ The settled brigade vocabulary — one place, one definition each. Use these exa
 - **station** — one atomic skill / one phase (spec, test, author, critic). Does its single job in isolation; hands off via a file artifact.
 - **the pass** — the layer that runs one ticket through the stations: sequencing, phase state, the convergence (rework) loop.
 - **expo** — the deciding agent *at* the pass. Routes each ticket using the exit set, holding the phase/ticket state and cross-station context a single-shot critic lacks. (The pass is the layer; the expo is the role inside it.)
-- **rail** — the queue/batch layer: the pluggable mutable ticket store plus the loop that fans the pass over a backlog of tickets (see RAIL-SPEC.md).
-- **ticket** — the unit of work flowing through the brigade; it *is* the context bundle (see BUNDLE-SPEC.md), marked up at each station hop.
-- **exit set** — the expo's closed disposition vocabulary, used verbatim: `advance · refire-to-author · reroute-to-spec · kill`.
+- **steward** — the front-of-house role: pairs a request to the menu (use-case catalog), gathers + curates context from the cellar (vault-first, careful-external second), writes a contract-valid ticket, and enqueues it. Also repairs `needs-context` tickets. (See skills/steward/.)
+- **rail** — the queue/batch layer: the pluggable mutable ticket store with lease/ack semantics plus the loop that fans the pass over a backlog of tickets (see RAIL-SPEC.md).
+- **ticket** — the unit of work flowing through the brigade, defined once in **TICKET-CONTRACT.md** (the FOH↔brigade port): inline context manifest + Order + snapshot + work log + artifacts; it *is* the context bundle (payload schema: BUNDLE-SPEC.md), marked up at each station hop.
+- **exit set** — the expo's closed disposition vocabulary, used verbatim: `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`.
 
 ## 1. The composition pattern
 
@@ -24,7 +25,9 @@ Three layers, each a clean abstraction boundary. This is the **house pattern** �
 | **The pass** | runs one ticket through the stations; the **expo** is the deciding agent | sequencing, phase state, the convergence (rework) loop, the exit-set routing decision |
 | **Rail** | the queue layer — fans the pass over a backlog of tickets | parallelism, the backlog walk, shared run state, the ticket store |
 
-Naming is settled (see the **Naming (canonical)** block above) — `station / the pass (expo) / rail`, with the whole = the **brigade** and the unit of work = a **ticket**. The expo routes each ticket via the closed exit set `advance · refire-to-author · reroute-to-spec · kill`.
+Naming is settled (see the **Naming (canonical)** block above) — `steward / station / the pass (expo) / rail`, with the whole = the **brigade** and the unit of work = a **ticket**. The expo routes each ticket via the closed exit set `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`.
+
+**The hexagonal frame (2026-07-01):** the brigade core (stations + the pass) talks only to three **ports** — the ticket contract (FOH↔brigade), the rail (storage/queue), and the resolver (context bytes by source type). The steward is a driving adapter; vault/Snowflake rails and the per-type resolvers are driven adapters. Contracts are enforced on both sides of the ticket port (steward at enqueue, expo at pull). Full port table + schema: [TICKET-CONTRACT.md](./TICKET-CONTRACT.md).
 
 ## 2. The skill interface contract
 
@@ -50,11 +53,11 @@ The skill *type* (below) determines what each of these looks like and how the sk
 
 The taxonomy isn't cosmetic — **type drives the input contract and the eval harness.** `variance-analysis` is computational, which is exactly why synthetic-with-known-answers fixtures work for it.
 
-## 4. Context bundles and context-prep
+## 4. Context bundles and the steward
 
-The brigade's input generalizes from `{name, dept, competency_excerpt}` to **`{name, context_bundle_ref}`**. The bundle is any depth source; a separate **context-prep skill** builds it. This keeps the brigade domain-agnostic and makes context-acquisition its own reusable capability.
+The brigade's input is **the ticket itself** — one canonical shape, defined in [TICKET-CONTRACT.md](./TICKET-CONTRACT.md): identity + inline typed-source context manifest + `## Order`. (Earlier iterations here — `{name, dept, competency_excerpt}`, then `{name, context_bundle_ref}` — are both retired; the contract's Supersedes table records them.) The **steward** (skills/steward/) builds the payload. This keeps the brigade domain-agnostic and makes context-acquisition its own reusable capability.
 
-**The symmetry:** context-prep (acquire + distill the depth source) → the brigade (build the artifact). The front step is a general "learn the domain / gather the inputs" move that recurs across artifact types, not just skills.
+**The symmetry:** the steward (acquire + distill the depth source, front of house) → the brigade (build the artifact, back of house). The front step is a general "learn the domain / gather the inputs" move that recurs across artifact types, not just skills — and phase-0's `reroute-to-steward` closes the front-end loop the way `refire-to-author` closes the back-end one.
 
 **Backend is pluggable — bind to the bundle *interface*, not a retrieval tech:**
 
@@ -130,7 +133,7 @@ This separates **capability** (the skill — the procedure) from **integration**
 
 ## Open questions (for discussion)
 
-- **Naming** — **RESOLVED: `station / the pass (expo) / rail`**, whole = **brigade**, unit = **ticket**, exit set `advance · refire-to-author · reroute-to-spec · kill`. Canonical definitions in the **Naming (canonical)** block at the top.
+- **Naming** — **RESOLVED: `steward / station / the pass (expo) / rail`**, whole = **brigade**, unit = **ticket**, exit set `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill` (5th exit added 2026-07-01 with the steward role). Canonical definitions in the **Naming (canonical)** block at the top.
 - **Context vault** — is QMD/Obsidian the standing internal backend, with an enterprise backend (Cortex Search / etc.) only behind the interface for governed client contexts? Cost vs governance tradeoff.
 - **Skill types** — is the 5-type taxonomy complete, or are there others (interactive/elicitation? multi-skill/composite?)?
 - **Context-prep skill** — build it next as its own station, against the bundle interface?
