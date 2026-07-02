@@ -1,0 +1,9 @@
+{
+  "name": "skill-agent-brigade",
+  "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that turns a one-line request + a competency source into a depth-forced, well-tested SKILL.md and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / kill). Ships the expo skill, a reference workflow, and a worked example (variance-analysis).",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
