@@ -6,8 +6,8 @@
 > else it exposes is house-specific extension.
 >
 > **Naming status (2026-07-03):** all five **founder-approved** (`mise`/`service`/`fire` "I like
-> those names"; `runner` "Runner too - I like that", iMessage 2026-07-03). Runner's *implementation
-> locus* is the open design conversation — see its contract below.
+> those names"; `runner` "Runner too - I like that", iMessage 2026-07-03). All five are also now
+> SETTLED in implementation terms: three built, two ruled no-build (see the table).
 
 ## The five commands
 
@@ -48,8 +48,9 @@ MCP connections, station resolution) are verified by the harness agent and merge
    factory: harness Workflow tool; a Python brigade: `python3` + its venv), plus every external
    dependency a station declares (CLI on PATH, MCP server connected, API credential resolvable
    *by name* — never printed). Mise checks the declared list — it doesn't guess.
-4. **Menu freshness** — `brigades/<name>/menu.md` exists and its `version` is not older than the
-   brigade's last capability-changing commit (staleness = warn, not fail).
+4. **Menu freshness** — the `menu_freshness` check: packaged `MENU.md` sha256 vs the published
+   copy's `source_hash` stamp (MENU-SPEC "Source vs publication"); mismatch or missing stamp = WARN,
+   remedy "re-hang a discovery ticket".
 5. **Model access** — one minimal model call per configured tier returns.
 
 **Output:** a mise report — one line per check, `PASS` / `FAIL` / `WARN`, and for every non-PASS a
