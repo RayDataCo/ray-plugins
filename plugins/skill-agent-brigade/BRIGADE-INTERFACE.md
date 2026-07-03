@@ -5,9 +5,9 @@
 > A brigade that implements these five (plus its stations à la carte) is interface-complete; anything
 > else it exposes is house-specific extension.
 >
-> **Naming status (2026-07-03):** `menu` is shipped; **`mise` is founder-named**; `service`, `fire`,
-> and `runner` are proposed names awaiting founder veto. The *slots* are settled (what-can-you-do /
-> are-you-ready / start-polling / do-this-now / close-out); only the labels for the last three are open.
+> **Naming status (2026-07-03):** `menu` shipped; **`mise`, `service`, `fire` founder-approved**
+> ("I like those names", iMessage 2026-07-03). **`runner` is the one open label** — slot settled
+> (close-out), name awaiting founder confirm.
 
 ## The five commands
 
