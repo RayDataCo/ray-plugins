@@ -28,7 +28,7 @@ What this brigade can do for you, and what your ticket must carry so the kitchen
 
 **Status:** live
 
-**What you get:** a roster of stations (each an ordered `artifact: skill` build), a pass policy (expo decision config: exit criteria, round budgets), and a rail binding — a runnable brigade. *(Exercised live twice on 2026-07-02: the assessment-agent-brigade and sales-collateral-brigade roster tickets both rode spec→tests→expo convergence to advance.)*
+**What you get:** a roster of stations (each an ordered `artifact: skill` build), a pass policy (expo decision config: exit criteria, round budgets), a rail binding, **and the standard five-command surface** (menu published · a `service` skill wrapping the new brigade's walk with start/end/status + a declared-deps manifest · mise/fire/runner spec'd with honest status markers — BRIGADE-INTERFACE.md's factory obligation, added 2026-07-03) — a runnable, interface-complete brigade. *(Exercised live twice on 2026-07-02: the assessment-agent-brigade and sales-collateral-brigade roster tickets both rode spec→tests→expo convergence to advance — note both predate the interface-completeness requirement; their five-command alignment was retrofitted 2026-07-03.)*
 
 **What the ticket must carry:** the domain's station roster intent in the Order (which phases, which handoffs), one context source per station-to-be (same per-type payload rules as above, applied per station), and the pass-policy constraints (budgets, gates) if they differ from house defaults.
 

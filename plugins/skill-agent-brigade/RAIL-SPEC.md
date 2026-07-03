@@ -47,7 +47,7 @@ The brigade only ever talks to the rail interface; swapping the vault for a Snow
 
 ## Walking the rail (the queue loop)
 
-The reference queue-walk runner ([workflow/rail-walk.run.js](./workflow/rail-walk.run.js)) is the loop that makes the rail a *queue* rather than a shelf:
+The reference queue-walk runner ([skills/service/rail-walk.run.js](./skills/service/rail-walk.run.js), packaged inside the `service` skill as of 2026-07-03) is the loop that makes the rail a *queue* rather than a shelf:
 
 ```
 while budget remains:

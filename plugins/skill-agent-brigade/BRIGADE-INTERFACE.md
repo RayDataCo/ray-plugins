@@ -15,7 +15,7 @@
 |---|---|---|---|
 | **`menu`** | "what can you do?" | the kitchen publishes what it serves | **LIVE** — [MENU-SPEC.md](./MENU-SPEC.md), discovery over the rail, `<cellar>/brigades/<name>/menu.md` |
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | ⚠️ **PROPOSED** — not built; contract below |
-| **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **PARTIAL** — reference loop exists ([workflow/rail-walk.run.js](./workflow/rail-walk.run.js): pull-with-lease → Gate A → phase-0 → stations → expo); the named command wrapper does not |
+| **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | ⚠️ **PROPOSED** — today you can hand the reference workflow a single ticket, but the ad-hoc path (Order-in-hand, no pre-written ticket) is unspecified; contract below |
 | **`runner`** | "order up — who tells the table?" | the food runner carries the finished plate to the guest | ⚠️ **PROPOSED / known gap** — step 9 of the teaching diagram; the one DESIGN-ONLY step in the Lenovo receipts audit. Nothing closes the loop to the requester today |
 
@@ -37,8 +37,12 @@ Deterministic-first, judgment-second — same two-gate shape as ticket intake (G
    be taken and released on a probe ticket.
 2. **Stations present** — every station skill named in the brigade's roster resolves (skill dir
    exists, SKILL.md parses, `skillLint()` passes).
-3. **Tooling** — every external dependency a station declares (CLI on PATH, MCP server connected,
-   API credential resolvable *by name* — never printed) is available.
+3. **Tooling** — every dependency in the brigade's **declared-deps manifest** is available. The
+   manifest lives in the brigade's own `service` skill (see the table in
+   [skills/service/SKILL.md](./skills/service/SKILL.md) for the pattern): the walk's runtime (this
+   factory: harness Workflow tool; a Python brigade: `python3` + its venv), plus every external
+   dependency a station declares (CLI on PATH, MCP server connected, API credential resolvable
+   *by name* — never printed). Mise checks the declared list — it doesn't guess.
 4. **Menu freshness** — `brigades/<name>/menu.md` exists and its `version` is not older than the
    brigade's last capability-changing commit (staleness = warn, not fail).
 5. **Model access** — one minimal model call per configured tier returns.
@@ -49,15 +53,33 @@ report is written to the ticket work-log when run as part of `service` startup, 
 when run ad hoc. A brigade whose mise has a FAIL must refuse `service` (a kitchen that isn't set up
 doesn't open).
 
-### `service` — attach to the rail and poll *(partial; name proposed)*
+### `service` — attach to the rail and poll *(contract settled 2026-07-03; built for the factory)*
 
-The standing loop: run `mise` (must be FAIL-free) → then repeatedly: pull-with-lease from the rail
-(filtered to tickets whose `artifact` type this brigade's menu marks `live`) → Gate A → phase-0 →
-stations → critic advises → expo decides → ack with one of the five exits → file closed tickets to
-their subject. The reference implementation is [workflow/rail-walk.run.js](./workflow/rail-walk.run.js);
-`service` is that loop given a standard name, a mise precondition, and a polling cadence parameter.
-One walker per rail in the v1 filesystem adapter (advisory lease — see [RAIL-SPEC.md](./RAIL-SPEC.md));
-real concurrency arrives with an atomic rail adapter.
+**Verbs:** `service [start|end|status]` — **no argument → `start`**, unless the service lock is
+already held, in which case say "already in service" and do nothing (founder-specified behavior).
+
+- **`start`** (default): lock check → **mise gate** (any FAIL refuses to start) → take the
+  **rail-level service lock** (`<rail>/.service/<brigade>.lock`) → run the walk loop: pull-with-lease
+  (filtered to `artifact` types this brigade's menu marks `live`) → Gate A → phase-0 → stations →
+  critic advises → expo decides → ack one of the five exits → file closed tickets to their subject.
+  The lock is what upgrades the filesystem rail from *one-walker-by-convention* to
+  **one-walker-enforced** (still advisory-grade — see the skill's failure-honesty note; real
+  atomicity arrives with an atomic rail adapter, [RAIL-SPEC.md](./RAIL-SPEC.md)).
+- **`end`**: graceful stand-down, issuable from any session via a stop flag the walker honors
+  **between tickets, never mid-ticket**. Current ticket is finished or its lease released **with a
+  work-log notation of exactly where it stopped** (phase, round, last station) — the append-only
+  work-log is the resume state. Then: drop lock + flag, journal the session (tickets processed).
+- **`status`**: read-only — in service? current ticket + phase, processed count, stop pending?
+
+**Service is a CONTRACT, the walk is per-brigade.** The verbs, lock, mise precondition, and
+teardown semantics above are identical across every house brigade; the walk *implementation* is the
+brigade's own (this factory: [skills/service/rail-walk.run.js](./skills/service/rail-walk.run.js),
+a Workflow script — packaged inside the skill; the domain brigades: their Python `rail_walk`/pass
+drivers, wrapped by their own `service` skills, queued). Each brigade's service skill **declares its
+runtime dependencies** in a manifest table — that manifest is exactly what `mise` checks.
+*(Impl-language fork decided in dialogue 2026-07-03: contract-standard / per-brigade-implementation
+[option A] recommended over one-canonical-JS-runner [option B]; note — the factory's walk runs via
+the harness Workflow tool, not `node`, which is itself the best argument for declared-deps-per-brigade.)*
 
 ### `fire` — ad-hoc direct request *(proposed)*
 
@@ -113,6 +135,20 @@ One discipline, stated plainly:
 This is the same two-fidelity honesty rule as everywhere else in the house: the value of a brigade
 artifact is the *build record* behind it; à la carte output has none, and pretending otherwise is
 how slop gets certified.
+
+## Factory obligation — brigades ship interface-complete
+
+**The meta rule (founder, 2026-07-03): the factory must structurally be unable to emit an
+interface-incomplete brigade.** An `artifact: brigade` (or `add-station` re-wire) build is not done
+until the new brigade ships the five commands: its menu published, a `service` skill wrapping *its*
+walk with the standard verbs + declared-deps manifest, and mise/fire/runner at minimum spec'd in its
+README with honest status markers. Enforcement lands in two places:
+
+1. **Acceptance contract** — the brigade acceptance checklist gains interface-completeness checks
+   (five commands present, service manifest declares the walk runtime). *(Wired into MENU.md's
+   `artifact: brigade` entry as of this commit.)*
+2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing any of the five →
+   FAIL). *Status: documented here, code wiring in the critic queued — do not claim it fires yet.*
 
 ## What this spec deliberately does not standardize
 
