@@ -14,8 +14,9 @@ brigade. This brigade's walk is [rail-walk.run.js](./rail-walk.run.js), packaged
 
 | dependency | why | check |
 |---|---|---|
-| Claude Code session with the **Workflow tool** | `rail-walk.run.js` is a Workflow script — it is executed by the harness's Workflow tool, **not** by `node` directly | Workflow tool callable |
+| Claude Code session with the **Workflow tool** | `rail-walk.run.js` is a Workflow script — it is executed by the harness's Workflow tool, **not** by `node` directly. It does only orchestration + pure-string/JSON logic (no fs/env access, per the Workflow tool's constraints); every rail mutation happens inside an `agent()` call | Workflow tool callable |
 | `node` on PATH | only for `node --check` syntax validation of the walk script (lint-time, not run-time) | `command -v node` |
+| `python3` on PATH | the walk's `agent()` calls run the vendored/canon adapter CLI (`../../adapter/rail_adapter.py {pull,lint,append,ack,...}`) via Bash for every rail read/mutation — see [ADAPTER-SPEC.md](../../adapter/ADAPTER-SPEC.md) | `command -v python3` |
 | rail root reachable + writable | pull/lease/ack | probe write |
 | cellar root reachable + writable | artifact landing + menu | probe write |
 
@@ -77,4 +78,7 @@ tickets processed this session (journal) · stop flag pending?
 - [BRIGADE-INTERFACE.md](../../BRIGADE-INTERFACE.md) — the standard contract this implements
 - [RAIL-SPEC.md](../../RAIL-SPEC.md) — pull/lease/ack the walk rides on
 - [rail-walk.run.js](./rail-walk.run.js) — this brigade's walk (Workflow script, moved here from
-  `workflow/` 2026-07-03 for skill-contained packaging per founder)
+  `workflow/` 2026-07-03 for skill-contained packaging per founder; rewritten same day for actual
+  Workflow-tool compatibility — see [IMPLEMENTATION-NOTES-2026-07-03-walk-workflow-rewrite.md](./IMPLEMENTATION-NOTES-2026-07-03-walk-workflow-rewrite.md))
+- [ADAPTER-SPEC.md](../../adapter/ADAPTER-SPEC.md) / [rail_adapter.py](../../adapter/rail_adapter.py) —
+  the canon rail-port CLI the walk shells out to for every pull/lint/append/ack
