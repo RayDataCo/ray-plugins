@@ -54,6 +54,15 @@ Check types implemented (executor = "script"):
                         reported as N/A ("no stamp yet"), never FAIL —
                         vendored-from-canon stamps don't exist until a
                         brigade has been through the retrofit pass.
+    menu_freshness    — source-vs-publication comparison (MENU-SPEC.md):
+                        `target` = the PACKAGED canonical menu (ships with
+                        the code); `published_target` = the cellar copy
+                        stewards read. The expo stamps `source_hash:` (the
+                        packaged file's sha256 at publish time) into the
+                        published frontmatter; this check recomputes the
+                        packaged hash and compares. Match = fresh; mismatch
+                        or missing stamp = stale -> remedy is always
+                        "re-hang a discovery ticket".
 
 `executor = "agent"` entries are never executed here — mise.py always
 reports them as UNCHECKED (agent). Only the checking agent (running the
@@ -93,6 +102,7 @@ SCRIPT_CHECK_TYPES = {
     "node_syntax",
     "python_module",
     "vendor_stamp",
+    "menu_freshness",
 }
 
 # Check types whose `target` (and, for vendor_stamp, `stamp_target`) is a
@@ -107,6 +117,7 @@ PATH_LIKE_TYPES = {
     "file_parses_toml",
     "node_syntax",
     "vendor_stamp",
+    "menu_freshness",
 }
 
 REQUIRED_CHECK_FIELDS = ("id", "description", "executor", "type", "target", "remedy", "severity")
@@ -172,6 +183,10 @@ def load_declaration(path: Path) -> dict[str, Any]:
         if check["type"] == "vendor_stamp" and "stamp_target" not in check:
             raise MiseEngineError(
                 f"check '{check['id']}' is type vendor_stamp but has no 'stamp_target' field"
+            )
+        if check["type"] == "menu_freshness" and "published_target" not in check:
+            raise MiseEngineError(
+                f"check '{check['id']}' is type menu_freshness but has no 'published_target' field"
             )
         if check["id"] in seen_ids:
             raise MiseEngineError(f"duplicate check id '{check['id']}'")
@@ -334,6 +349,37 @@ def check_vendor_stamp(target: Path, stamp_target: Path) -> tuple[str, str]:
     )
 
 
+def check_menu_freshness(packaged: Path, published: Path) -> tuple[str, str]:
+    if not packaged.exists():
+        return "broken", f"packaged canonical menu does not exist: {packaged}"
+    if not published.exists():
+        return "broken", f"menu not published yet: {published}"
+    try:
+        head = published.read_text()
+    except OSError as e:
+        return "broken", f"could not read published menu ({e}): {published}"
+    import re
+
+    fm = re.match(r"^---\n([\s\S]*?)\n---", head)
+    stamp = None
+    if fm:
+        m = re.search(r"^source_hash:\s*([0-9a-f]{64})\s*$", fm.group(1), re.M)
+        stamp = m.group(1) if m else None
+    if stamp is None:
+        return (
+            "broken",
+            f"published menu carries no source_hash stamp (predates freshness stamping): {published}",
+        )
+    actual = hashlib.sha256(packaged.read_bytes()).hexdigest()
+    if actual == stamp:
+        return "ok", f"published menu is fresh (source sha256 {actual[:12]}... matches stamp)"
+    return (
+        "broken",
+        f"packaged menu changed since last publish "
+        f"(stamped {stamp[:12]}..., current {actual[:12]}...)",
+    )
+
+
 # --------------------------------------------------------------------------
 # Dispatch
 # --------------------------------------------------------------------------
@@ -365,6 +411,10 @@ def run_check(check: dict[str, Any], roots: dict[str, str], toml_dir: Path) -> t
         target_path = resolve_path_target(raw_target, roots, toml_dir)
         stamp_path = resolve_path_target(check["stamp_target"], roots, toml_dir)
         return check_vendor_stamp(target_path, stamp_path)
+    if check_type == "menu_freshness":
+        packaged = resolve_path_target(raw_target, roots, toml_dir)
+        published = resolve_path_target(check["published_target"], roots, toml_dir)
+        return check_menu_freshness(packaged, published)
 
     # Should be unreachable — load_declaration() already validated known types.
     raise MiseEngineError(f"unhandled check type '{check_type}' for check '{check['id']}'")

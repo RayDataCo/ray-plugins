@@ -132,10 +132,11 @@ remedy      = "install/restore the station-critic skill under ~/.claude/skills/ 
 # --- Menu freshness (MENU-SPEC.md) ---
 
 [[checks]]
-id          = "menu-published"
-description = "The brigade's menu.md exists at <cellar>/brigades/skill-agent-brigade/menu.md"
-executor    = "script"
-type        = "path_exists"
-target      = "{cellar}/brigades/skill-agent-brigade/menu.md"
-severity    = "WARN"
-remedy      = "hang an `artifact: menu` discovery ticket and run the expo to regenerate the menu (MENU-SPEC.md)"
+id               = "menu-freshness"
+description      = "Published menu is fresh — packaged MENU.md (source) hash matches the published copy's source_hash stamp (MENU-SPEC source-vs-publication)"
+executor         = "script"
+type             = "menu_freshness"
+target           = "../../MENU.md"
+published_target = "{cellar}/brigades/skill-agent-brigade/menu.md"
+severity         = "WARN"
+remedy           = "re-hang an `artifact: menu` discovery ticket — the expo republishes from the current packaged source and re-stamps source_hash (MENU-SPEC.md)"

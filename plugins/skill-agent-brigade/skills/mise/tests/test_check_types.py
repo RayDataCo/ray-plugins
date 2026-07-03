@@ -218,3 +218,65 @@ def test_vendor_stamp_fail_when_target_missing_but_stamp_present(mise, tmp_path)
     state, detail = mise.check_vendor_stamp(target, stamp)
     assert state == "broken"
     assert "does not exist" in detail
+
+
+# --- menu_freshness -----------------------------------------------------------
+
+
+def _published(tmp_path, source_hash=None, body="# Menu\n"):
+    fm = "---\nmenu_of: x\nversion: 5\n"
+    if source_hash is not None:
+        fm += f"source_hash: {source_hash}\n"
+    fm += "---\n"
+    p = tmp_path / "menu-published.md"
+    p.write_text(fm + body)
+    return p
+
+
+def test_menu_freshness_pass_when_stamp_matches(mise, tmp_path):
+    import hashlib
+
+    packaged = tmp_path / "MENU.md"
+    packaged.write_text("# canonical menu v-current\n")
+    stamp = hashlib.sha256(packaged.read_bytes()).hexdigest()
+    published = _published(tmp_path, source_hash=stamp)
+    state, detail = mise.check_menu_freshness(packaged, published)
+    assert state == "ok"
+    assert "fresh" in detail
+
+
+def test_menu_freshness_fail_when_source_changed(mise, tmp_path):
+    import hashlib
+
+    packaged = tmp_path / "MENU.md"
+    packaged.write_text("# canonical menu OLD\n")
+    stale_stamp = hashlib.sha256(packaged.read_bytes()).hexdigest()
+    published = _published(tmp_path, source_hash=stale_stamp)
+    packaged.write_text("# canonical menu NEW — capability changed\n")
+    state, detail = mise.check_menu_freshness(packaged, published)
+    assert state == "broken"
+    assert "changed since last publish" in detail
+
+
+def test_menu_freshness_fail_when_published_missing(mise, tmp_path):
+    packaged = tmp_path / "MENU.md"
+    packaged.write_text("# canonical\n")
+    state, detail = mise.check_menu_freshness(packaged, tmp_path / "nope.md")
+    assert state == "broken"
+    assert "not published" in detail
+
+
+def test_menu_freshness_fail_when_no_stamp(mise, tmp_path):
+    packaged = tmp_path / "MENU.md"
+    packaged.write_text("# canonical\n")
+    published = _published(tmp_path, source_hash=None)
+    state, detail = mise.check_menu_freshness(packaged, published)
+    assert state == "broken"
+    assert "no source_hash stamp" in detail
+
+
+def test_menu_freshness_fail_when_packaged_missing(mise, tmp_path):
+    published = _published(tmp_path, source_hash="0" * 64)
+    state, detail = mise.check_menu_freshness(tmp_path / "gone.md", published)
+    assert state == "broken"
+    assert "packaged" in detail

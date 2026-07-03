@@ -174,3 +174,15 @@ def test_resolve_path_target_relative_to_toml_dir_when_no_placeholder(mise, tmp_
 
 def test_resolve_name_target_leaves_bare_command_alone(mise):
     assert mise.resolve_name_target("node", {"rail": "/whatever"}) == "node"
+
+
+def test_menu_freshness_requires_published_target(mise, tmp_path):
+    toml = tmp_path / "mise.toml"
+    toml.write_text(
+        '[[checks]]\nid = "m"\ndescription = "d"\nexecutor = "script"\n'
+        'type = "menu_freshness"\ntarget = "MENU.md"\nremedy = "r"\nseverity = "WARN"\n'
+    )
+    import pytest as _pytest
+
+    with _pytest.raises(mise.MiseEngineError, match="published_target"):
+        mise.load_declaration(toml)

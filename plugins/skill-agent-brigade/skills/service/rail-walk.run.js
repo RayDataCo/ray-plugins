@@ -204,7 +204,9 @@ while (worked < MAX_TICKETS) {
       `the brigade home its context points at (this brigade: ${PLUGIN_DIR} — read MENU-SPEC.md, MENU.md, the skills/ roster, ` +
       `and the critic/eval config). Write or refresh the menu at ${join(RAIL_DIR, '..', 'brigades', 'skill-agent-brigade')}/menu.md ` +
       `(the cellar brigades section per MENU-SPEC — menus moved there from <rail>/menus/ in the 2026-07-02 one-store centralization; ` +
-      `frontmatter menu_of/version/generated_by: expo — bump version if it exists), then append a work-log line to the ` +
+      `frontmatter menu_of/version/generated_by: expo — bump version if it exists — plus source_hash: the sha256 of the ` +
+      `packaged MENU.md you derived from, computed via Bash \`shasum -a 256\` at publish time; it is the freshness stamp ` +
+      `mise's menu_freshness check compares against, per MENU-SPEC "Source vs publication"), then append a work-log line to the ` +
       `ticket and add the menu path under ## Artifacts. Return the published path.`,
       { label: `menu:${t.id}`, phase: 'Phase-0', model: MODEL.expo })
     rail.append(t.path, `menu published: ${String(menu).trim()}`)

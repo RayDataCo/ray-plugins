@@ -20,8 +20,29 @@ A menu is one markdown file with a small frontmatter header and one section per 
 menu_of: skill-agent-brigade      # the brigade this menu describes
 version: 1                        # bumped every time the brigade re-answers a discovery ticket
 generated_by: expo                # discovery answers are expo-authored (introspection), or hand-maintained
+source_hash: <sha256>             # publication copies only — sha256 of the packaged MENU.md at publish time (freshness stamp)
 ---
 ```
+
+## Source vs publication *(settled 2026-07-03 — resolves the packaging question)*
+
+The menu has two homes, one role each:
+
+- **SOURCE — the packaged `MENU.md`** in the brigade's plugin: versioned with the code, updated as
+  part of the release cycle (the factory obligation enforces it — a capability-changing build that
+  doesn't touch the menu isn't done). This is what makes a fresh marketplace install
+  self-describing on day one, before any discovery has run.
+- **PUBLICATION — the cellar copy** at `<cellar>/brigades/<name>/menu.md`, created/refreshed by a
+  discovery ticket (the expo derives it from the packaged source + live introspection). This is the
+  copy **stewards read** — reachable across the rail boundary, which packaged plugin files are not
+  (in split-runtime deployments the steward may only see the shared store).
+
+**Freshness is checked, not assumed:** at publish time the expo stamps `source_hash` (sha256 of the
+packaged `MENU.md` it derived from) into the published frontmatter. The mise engine's
+`menu_freshness` check recomputes the packaged hash and compares — mismatch or missing stamp = WARN,
+remedy "re-hang a discovery ticket." Stale publications tell on themselves. Menus are never
+generated per-read: generation costs a model run and introspection output can vary — the payload
+requirements a steward relies on must be stable between publishes.
 
 Each artifact-type section opens with a machine-parseable **`**Status:** live`** (or `planned`) line — stewards and Gate-A lint discover live types by this marker, so it is contract, not decoration (pinned 2026-07-02 after two houses' menus diverged on it). Each section then states: **what you get** (the output artifact + its quality gates), **what the ticket must carry** (payload requirements by `type_hint`), and **what the Order should specify**. See [MENU.md](./MENU.md) — this brigade's own menu — for the worked example.
 
