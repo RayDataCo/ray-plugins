@@ -743,3 +743,13 @@ def test_cli_enqueue_failure_exits_nonzero(tmp_path, capsys):
     bad.write_text(make_ticket(order=""))
     exit_code = ra._cli(["enqueue", str(tmp_path / "rail"), str(bad), "sample-skill-2026-01-01"])
     assert exit_code == 1
+
+
+def test_find_unclosed_recognizes_signature_written_via_append(tmp_path):
+    """v1.0.1 regression: a close-out signature appended through this module's
+    own append() carries a `- <ts> · ` prefix — the sweep must still see it."""
+    cellar_root = tmp_path / "cellar"
+    ticket = _write_filed_ticket(cellar_root, "companies/acme", "closed-c-2026-01-01", "done", with_close_out=False)
+    assert ticket in ra.find_unclosed(cellar_root)
+    ra.append(ticket, "close-out: requester notified via iMessage (test)")
+    assert ticket not in ra.find_unclosed(cellar_root)

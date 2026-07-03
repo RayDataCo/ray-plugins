@@ -73,7 +73,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
-ADAPTER_VERSION = "1.0.0"
+ADAPTER_VERSION = "1.0.1"
 CANON_NAME = "skill-agent-brigade/adapter/rail_adapter.py"
 
 DEFAULT_LEASE_TTL_MIN = 60
@@ -714,7 +714,10 @@ def ack(
 # ---------------------------------------------------------------------------
 
 
-_CLOSE_OUT_RE = re.compile(r"(?m)^[ \t]*-\s*close-out:")
+# Matches both a bare signature line (`- close-out: ...`) and one written via
+# this module's own append() (`- <timestamp> · close-out: ...`). The un-anchored
+# form missed the latter — caught in the first live sweep, 2026-07-03 (v1.0.1).
+_CLOSE_OUT_RE = re.compile(r"(?m)^[ \t]*-\s*(?:[^\n·]*·\s*)?close-out:")
 
 
 def find_unclosed(cellar_root: str | Path, since_days: int = 30) -> list[Path]:
