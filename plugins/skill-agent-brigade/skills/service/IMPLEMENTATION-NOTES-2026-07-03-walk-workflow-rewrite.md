@@ -106,3 +106,21 @@ the record even though the filesystem `status:` field only has room for `escalat
   commit — this rewrite is validated structurally (`node --check`, meta-first, banned-pattern greps)
   but has not actually been exercised against a real rail/ticket. The adapter CLI itself has its own
   test suite (`adapter/tests/`) that was not re-run as part of this task.
+
+## Post-rewrite live-fire addendum (Ray, same day)
+
+Three live fires under the REAL Workflow tool against the house rail (dry — only the escalated
+lenovo ticket, correctly skipped by `pull`):
+
+1. `wf_474ff5f9` — script parsed + ran (the old version could not); pull agent ran the adapter CLI;
+   clean dry-rail exit. FINDING: summary showed `worker: rail-walk-reference` (the fallback) despite
+   args passed as an object in the tool call.
+2. `wf_2811b1c6` — reproduced: this harness delivers `args` to workflow scripts as a JSON-ENCODED
+   STRING; `args.worker` on a string is undefined, so every config fell back to defaults (which are
+   the correct house paths — the run was still valid, but parameterization was dead).
+3. Fix: defensive parse (`typeof args === 'string' ? JSON.parse(args) : args`) at the top of config.
+   `wf_8b356b28` confirmed: `worker: ray-args-check-2` returned. Parameterization live.
+
+Consequence for every other workflow script in this plugin: the same defensive parse belongs in
+`workflow/*.run.js` when they get their own Workflow-compat rewrite (they still have the node:fs
+violation anyway — known queued debt).

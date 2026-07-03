@@ -52,15 +52,23 @@ export const meta = {
 
 /* ------------------------------- config ---------------------------------- */
 /* Every path is an arg with a sensible fallback — no OS environment access,
- * this script has none under the Workflow tool.                             */
+ * this script has none under the Workflow tool.
+ * DEFENSIVE ARGS PARSE (verified live 2026-07-03): this harness delivers
+ * `args` to workflow scripts as a JSON-ENCODED STRING even when the tool
+ * call passes an object — two dry-rail live fires both saw args.worker
+ * undefined until this parse. Accept both forms.                            */
 
-const RAIL_DIR = (args && args.rail_dir) || '/Users/ray/Projects/phdata-private/cellar/rail'
-const CELLAR_ROOT = (args && args.cellar_root) || '/Users/ray/Projects/phdata-private/cellar'
-const PLUGIN_DIR = (args && args.plugin_dir) || '/Users/ray/Projects/ray-plugins/plugins/skill-agent-brigade'
-const WORKER = (args && args.worker) || 'rail-walk-reference'
-const NOW = (args && args.now) || 'unstamped' // ISO string, log-only — see NOTE above
-const MAX_TICKETS = (args && args.max_tickets) || 10
-const STATION_SKILLS = (args && args.station_skills_dir) || '/Users/ray/.claude/skills'
+let A = {}
+if (typeof args === 'string') { try { A = JSON.parse(args) } catch (e) { A = {} } }
+else if (args && typeof args === 'object') { A = args }
+
+const RAIL_DIR = A.rail_dir || '/Users/ray/Projects/phdata-private/cellar/rail'
+const CELLAR_ROOT = A.cellar_root || '/Users/ray/Projects/phdata-private/cellar'
+const PLUGIN_DIR = A.plugin_dir || '/Users/ray/Projects/ray-plugins/plugins/skill-agent-brigade'
+const WORKER = A.worker || 'rail-walk-reference'
+const NOW = A.now || 'unstamped' // ISO string, log-only — see NOTE above
+const MAX_TICKETS = A.max_tickets || 10
+const STATION_SKILLS = A.station_skills_dir || '/Users/ray/.claude/skills'
 
 const LEASE_TTL_MIN = 120
 const MAX_ROUNDS = 2
