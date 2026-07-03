@@ -1,0 +1,43 @@
+---
+ticket: factory-menu-restamp-2026-07-03
+artifact: menu
+status: done
+requested_by: founder
+menu: skill-agent-brigade
+subject: brigades/skill-agent-brigade
+lease: null
+context:
+  - id: brigade-home
+    type: file
+    ref: __BRIGADE_HOME__
+    when: always — the brigade home to introspect (MENU-SPEC.md incl. the new Source-vs-publication section, MENU.md, skills/ roster)
+  - id: menu-spec
+    type: file
+    ref: __MENU_SPEC_PATH__
+    when: always — defines the source_hash freshness stamp this publish must carry
+---
+
+## Order
+
+Re-publish this brigade's menu with the freshness stamp. The v4 publication (this morning) predates
+the source_hash mechanism settled in the 2026-07-03 source-vs-publication decision — mise's
+menu_freshness check currently WARNs on it. Derive from the packaged MENU.md as usual, bump to
+version 5, and stamp source_hash (sha256 of the packaged MENU.md, computed at publish time) into
+the published frontmatter per MENU-SPEC. Content should be unchanged v4→v5 unless introspection
+finds real drift — say so either way in the work log.
+
+## Resolved-context snapshot
+
+Both eager sources are local files resolved live at pull — no snapshot required for an
+introspection ticket.
+
+## Work log
+
+- 2026-07-03T12:46:43-04:00 · steward(ray): enqueued — v4 publication lacks the source_hash freshness stamp (mechanism postdates it); mise menu-freshness WARNs; re-stamp via discovery per MENU-SPEC
+- 2026-07-03T12:46:43-04:00 · expo: menu republished v4→v5 with source_hash stamp (d9b206286f42...); content corrected: the "Standard command surface" mise row was stale ("in build") — skills/mise/SKILL.md + mise.py/mise.toml have since shipped and BRIGADE-INTERFACE.md now reads "BUILT for this brigade"; row updated to match, and the "service start runs the check inline" note removed since service/SKILL.md step 2 now calls mise.py directly. All other sections verified unchanged vs the packaged source.
+
+- ack: advance → status done (2026-07-03T12:46:43-04:00)
+
+## Artifacts
+
+- brigades/skill-agent-brigade/menu.md (menu v5, source_hash-stamped, supersedes v4 in place)
