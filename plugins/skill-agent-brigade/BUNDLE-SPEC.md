@@ -18,7 +18,7 @@ provenance: <where it came from>
 type_hint: <skill type>        # optional — computational | corpus | generative | operational | advisory; derivable
 sources:
   - id: <stable id>
-    type: file | url | mcp | qmd     # extensible
+    type: file | url | mcp | qmd | cellar     # extensible
     ref: <type-specific locator>
     when: <when-to-read description>  # "always …" = eager; otherwise lazy
 ```
@@ -31,6 +31,7 @@ sources:
 | `url` | a URL | fetch + convert to markdown | — |
 | `mcp` | `{ server, resource/tool, args }` | call the MCP (e.g. Atlassian → ticket JIRA-1234) | — |
 | `qmd` | a query string | local lexical+vector retrieval | enterprise governed store (RBAC) |
+| `cellar` | a cellar ref (backend-relative path) | dispatch through the configured cellar adapter ([CELLAR-SPEC.md](./CELLAR-SPEC.md)) — filesystem v1 | Drive / S3 / Snowflake Stage, same ref |
 | `graph` *(future)* | `{ graph, query }` | — | query a materialized graph (e.g. graphify) for big-corpus context |
 
 The bundle binds to the **resolve interface**, not to a retrieval tech:

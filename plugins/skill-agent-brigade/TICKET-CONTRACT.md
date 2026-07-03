@@ -4,13 +4,14 @@
 
 ## Why a contract (the hexagonal frame)
 
-The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to three **ports**:
+The brigade is a hexagonal (ports-and-adapters) system. The core — the stations and the pass — never talks to a technology; it talks to four **ports** (seam-by-seam handoff map: [PORTS.md](./PORTS.md)):
 
 | port | what crosses it | driving/driven adapters |
 |---|---|---|
 | **ticket contract** (this doc) | the unit of work, front-of-house → brigade | **steward** (driving: writes + enqueues tickets) · human hand-authoring (driving) |
 | **rail** ([RAIL-SPEC.md](./RAIL-SPEC.md)) | ticket storage + queue semantics | Obsidian vault (driven, v1) · Snowflake Stage · Cortex Search |
-| **resolver** ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)) | context bytes, on demand, by source type | `file` · `url` · `mcp` · `qmd` (· `graph` future) |
+| **resolver** ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)) | context bytes, on demand, by source type | `file` · `url` · `mcp` · `qmd` · `cellar` (· `graph` future) |
+| **cellar** ([CELLAR-SPEC.md](./CELLAR-SPEC.md)) | durable knowledge: brigades land outputs, the steward gathers context | filesystem/vault (driven, v1) · Google Drive · S3 · Snowflake Stage |
 
 The dividend: the core is testable with no adapter at all — hand a synthetic contract-valid ticket to the pass and the brigade runs (the variance-analysis fire-through did exactly this). Swapping the vault rail for a Snowflake Stage, or the steward for a human writing a ticket by hand, changes an adapter, never the core.
 
@@ -23,10 +24,11 @@ A ticket is **one mutable, append-only markdown file**: YAML frontmatter (identi
 ```yaml
 ---
 ticket: variance-analysis        # id — kebab-case, unique on the rail
-artifact: skill                  # skill | brigade | menu (what the brigade is asked to produce)
+artifact: skill                  # a type from the target brigade's menu (this brigade: skill | brigade | menu)
 status: queued                   # rail status — see lifecycle below
 requested_by: founder            # who placed the order
 menu: fpna/variance-analysis     # optional — use-case catalog entry this order was paired to
+subject: companies/acme          # optional — canonical cellar subject key; where a closed ticket FILES, and the default subject for station kwargs. Fallback when absent: derived from the first cellar-typed context source. (Added 2026-07-02 with the filing rule.)
 type_hint: computational         # optional — computational | corpus | generative | operational | advisory
 lease: null                      # null, or { worker, at, ttl_min } while a pass works it
 context:                         # the payload — typed pointer sources (schema: BUNDLE-SPEC.md)
@@ -73,7 +75,7 @@ Conflating these was a v1 bug (RAIL-SPEC's old lifecycle mixed them); they are n
 `ticketLint()` — pure pass/fail mechanics, the same move as the critic's `skillLint()` axis. No LLM judgment. Runs at **enqueue** (steward-side) and again at **pull** (expo-side).
 
 1. `ticket` id present, kebab-case, unique on the rail.
-2. `artifact` ∈ { `skill`, `brigade`, `menu` }.
+2. `artifact` is a type the **target brigade's menu** offers (`menu` itself is universal — every brigade answers discovery). *(Amended 2026-07-02, stress-test finding SF-1: the original rule hardcoded this brigade's own enum `{skill, brigade, menu}` into the supposedly-universal envelope — a company-research ticket like `artifact: company-jobs-snapshot` failed a contract it should satisfy. Artifact vocabularies belong to menus; the envelope only checks the pairing.)*
 3. `status` ∈ { `queued`, `leased`, `in-build`, `needs-context`, `escalated`, `done`, `killed` }; `lease` is null unless status is `leased`/`in-build`, and well-formed (`worker`, `at`, `ttl_min`) when set.
 4. `context` has ≥ 1 source; every source has `id`, `type`, `ref`, `when`; every `type` is a registered resolver type.
 5. Every **eager** source (`when` starts with "always") resolves at enqueue-time — the steward must verify the pointers aren't dead before hanging the ticket.

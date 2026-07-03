@@ -23,7 +23,7 @@ generated_by: expo                # discovery answers are expo-authored (introsp
 ---
 ```
 
-Each artifact-type section states: **what you get** (the output artifact + its quality gates), **what the ticket must carry** (payload requirements by `type_hint`), and **what the Order should specify**. See [MENU.md](./MENU.md) — this brigade's own menu — for the worked example.
+Each artifact-type section opens with a machine-parseable **`**Status:** live`** (or `planned`) line — stewards and Gate-A lint discover live types by this marker, so it is contract, not decoration (pinned 2026-07-02 after two houses' menus diverged on it). Each section then states: **what you get** (the output artifact + its quality gates), **what the ticket must carry** (payload requirements by `type_hint`), and **what the Order should specify**. See [MENU.md](./MENU.md) — this brigade's own menu — for the worked example.
 
 ## Discovery — over the rail, no new machinery
 
@@ -31,7 +31,7 @@ The steward learns a brigade's menu by hanging a ticket, the same way it orders 
 
 1. **Steward enqueues a discovery ticket** — `artifact: menu`, Order = "what can your brigade do? publish your expected ticket input contract", context = a pointer to the brigade's own home (its plugin/docs dir). It's a contract-valid ticket like any other; Gate A applies.
 2. **The expo pulls it** and, instead of running the stations, **introspects its own brigade** — stations, per-domain config, critic axes, eval gates — and writes the menu.
-3. **The menu is published beside the rail** (`<rail>/menus/<brigade>.menu.md`) — where any steward serving that rail can read it — and the discovery ticket is acked `advance` with the menu path in its Artifacts section.
+3. **The menu is published into the cellar's brigades section** (`<cellar>/brigades/<brigade>/menu.md`) — capability knowledge is house knowledge; any steward serving the house reads it there — and the discovery ticket is acked `advance` with the menu path in its Artifacts section. *(Location amended 2026-07-02 with the one-store centralization; formerly `<rail>/menus/`.)*
 4. **Steward reads menus before gathering.** For every subsequent ticket aimed at that brigade, the menu tells the steward exactly what to track down.
 
 **Versioning:** re-hang the discovery ticket whenever the brigade changes (new station, new critic axis, new artifact type) — the expo bumps `version` and rewrites. The old menu is superseded in place; the discovery tickets themselves remain on the rail as the audit trail of when capability changed.
@@ -40,7 +40,7 @@ The steward learns a brigade's menu by hanging a ticket, the same way it orders 
 
 ## Where menus live
 
-- **Runtime (authoritative for stewards):** `<rail>/menus/<brigade>.menu.md` — published by discovery, read by stewards. Menus are rail-side assets like tickets, NOT repo code.
+- **Runtime (authoritative for stewards):** `<cellar>/brigades/<brigade>/menu.md` — published by discovery into the house store's brigades section, read by stewards. Menus are house knowledge, NOT repo code.
 - **In-repo (this plugin only):** [MENU.md](./MENU.md) ships with the skill-agent-brigade as its current self-description and the worked example of the format — the expo's discovery answer derives from it plus live introspection.
 
 ## v1 pragmatism (adopt the pattern, not a protocol)

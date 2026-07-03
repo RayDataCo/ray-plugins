@@ -1,6 +1,8 @@
 # The Rail — Spec
 
-The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. Our v1 rail is the Obsidian vault; the same interface is meant to sit on a Snowflake Stage or Cortex Search just as well. In hexagonal terms the rail is one of the brigade's three ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters.
+The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. In hexagonal terms the rail is one of the brigade's four ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters. In v1 the rail's store is the **cellar's hot section** (`<cellar>/rail/` — see [CELLAR-SPEC.md](./CELLAR-SPEC.md) § organization): separate port, one house store. The same interface is meant to sit on a Snowflake Stage or Cortex Search just as well.
+
+**Closed tickets file, the rail stays hot:** on a terminal `ack` (`done`/`killed`), the ticket moves out of `rail/` to its subject's folder (`companies/<id>/tickets/…`) — the build record lands beside the artifacts it produced, and `rail/` only ever holds in-flight work. Wikilinks (name-based, not path-based) are what make this move free.
 
 ## The ticket (defined elsewhere, on purpose)
 
@@ -37,7 +39,7 @@ Without a lease, two passes walking the same rail pull the same ticket and burn 
 
 | backend | a ticket is… | `pull(worker)` | context co-location |
 |---|---|---|---|
-| **Obsidian vault** *(v1)* | a markdown file in a rail folder (`08-tooling/brigade-rail/`) | scan for next `queued`/lease-expired file, write lease to frontmatter (advisory — see above) | pointers resolve to vault notes (wikilinks) |
+| **Obsidian vault** *(v1)* | a markdown file in the cellar's hot section (`<cellar>/rail/`; RDCO instance: `08-tooling/brigade-rail/`) | scan for next `queued`/lease-expired file, write lease to frontmatter (advisory — see above) | pointers resolve to vault notes (wikilinks) |
 | **Snowflake Stage** | a staged file/object + a row in a ticket table | transactional `UPDATE … WHERE status='queued' LIMIT 1` — a real atomic lease | context pointers resolve via Snowflake (stages, tables) |
 | **Cortex Search** | an indexed ticket document | query for next workable ticket, lease via the backing table | context pointers resolve via Cortex Search retrieval |
 

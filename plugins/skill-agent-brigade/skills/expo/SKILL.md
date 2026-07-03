@@ -64,7 +64,13 @@ stateDiagram-v2
 
 ## Menu tickets (discovery)
 
-A ticket with `artifact: menu` is a steward asking "what can your brigade do?" ([MENU-SPEC.md](../../MENU-SPEC.md)). The expo answers it itself — no stations: **introspect the brigade** (stations on the roster, critic axes + deterministic gates, eval config, artifact types offered, per-type payload requirements), write/refresh the menu at `<rail>/menus/<brigade>.menu.md` (bump `version`), record the path in the ticket's Artifacts section, and ack `advance`. Re-answering after the brigade changes is how menus stay versioned.
+A ticket with `artifact: menu` is a steward asking "what can your brigade do?" ([MENU-SPEC.md](../../MENU-SPEC.md)). The expo answers it itself — no stations: **introspect the brigade** (stations on the roster, critic axes + deterministic gates, eval config, artifact types offered, per-type payload requirements), write/refresh the menu at `<cellar>/brigades/<brigade>/menu.md` (bump `version`), record the path in the ticket's Artifacts section, and ack `advance`. Re-answering after the brigade changes is how menus stay versioned.
+
+## Per-type handling (menu v3 artifact types)
+
+- **`add-station`** — runs the normal four-station line on the station-as-skill, then on `advance` the expo ALSO executes the wiring the order names: update the target brigade's roster (README table), re-publish its menu with a version bump, and register the new artifact kind → station callable in that brigade's walk registry. The wiring is part of the advance, not a follow-up — an unwired station is not done. Precedent: the sec-filings station (2026-07-02), where the wiring was manual and the critic gates ran retroactively; this type exists to front-load both.
+- **`iterate-skill`** — after the critic passes the refined skill, the expo MUST run the execution-eval station two-arm (current skill vs refined, per-fixture, per-tier — the 2026-06-29 machinery) before deciding. `advance` requires: the targeted axis improves AND no other fixture regresses. Anything else → refire-to-author with the per-fixture table in the work log, or kill with the honest "refinement didn't beat baseline" note. No eval run = no advance, ever.
+- **`iterate-brigade`** — NOT live (menu: planned). Do not accept these tickets until the replay-eval (closed tickets re-run against the changed policy) exists; Gate A's menu check enforces this mechanically.
 
 ## Responsibilities (what the expo owns vs delegates)
 
