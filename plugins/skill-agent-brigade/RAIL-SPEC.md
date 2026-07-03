@@ -2,7 +2,7 @@
 
 The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. In hexagonal terms the rail is one of the brigade's four ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters. In v1 the rail's store is the **cellar's hot section** (`<cellar>/rail/` — see [CELLAR-SPEC.md](./CELLAR-SPEC.md) § organization): separate port, one house store. The same interface is meant to sit on a Snowflake Stage or Cortex Search just as well.
 
-**Closed tickets file, the rail stays hot:** on a terminal `ack` (`done`/`killed`), the ticket moves out of `rail/` to its subject's folder (`companies/<id>/tickets/…`) — the build record lands beside the artifacts it produced, and `rail/` only ever holds in-flight work. Wikilinks (name-based, not path-based) are what make this move free.
+**Closed tickets file, the rail stays hot:** on a terminal `ack` (`done`/`killed`), the ticket moves out of `rail/` to its subject's folder (`companies/<id>/tickets/…`) — the build record lands beside the artifacts it produced, and `rail/` only ever holds in-flight work. Wikilinks (name-based, not path-based) are what make this move free. **The pass shelf (added 2026-07-03, the close-out contract):** at the same terminal ack the expo also drops a pointer at `<rail>/pass/<ticket-id>.done` (containing the filed ticket's path) — the finished plate up under the heat lamp. The steward's close-out sweep delivers the outcome to the requester, appends a `close-out:` line to the filed ticket (truth lives on the ticket; the sweep is idempotent), and deletes the pointer — which is what finally clears the rail. The shelf is a transient index, never authoritative: if lost, a scan for terminal tickets without close-out lines rebuilds it. Sweep machinery builds at P2 intake; the expo-side pointer drop lands in the vendored adapter's `ack()`.
 
 ## The ticket (defined elsewhere, on purpose)
 
@@ -19,7 +19,7 @@ A rail backend implements:
 |---|---|
 | `enqueue(ticket)` | Gate-A-valid ticket goes on the rail, `status: queued` |
 | `pull(worker)` | **lease** the next workable ticket: atomically pick a `queued` (or lease-expired) ticket, set `status: leased` + `lease: {worker, at, ttl_min}`, return it. Returns nothing if the rail is dry. |
-| `ack(id, exit)` | close out a lease with the expo's terminal disposition: `advance → done`, `kill → killed`, `reroute-to-steward → needs-context`, escalate-pause → `escalated`. Clears the lease. |
+| `ack(id, exit)` | close out a lease with the expo's terminal disposition: `advance → done`, `kill → killed`, `reroute-to-steward → needs-context`, escalate-pause → `escalated`. Clears the lease; on `done`/`killed` also files the ticket to its subject and drops the pass-shelf pointer (`<rail>/pass/<id>.done`). |
 | `release(id)` | give a leased ticket back untouched (`status: queued`, lease cleared) — worker died, budget hit, orderly shutdown |
 | `read(id)` | load a ticket |
 | `append(id, entry)` | append work-state (append-only — never overwrite history) |

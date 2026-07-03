@@ -17,7 +17,7 @@
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
-| **`runner`** | "order up — who tells the table?" | the food runner carries the finished plate to the guest | **SETTLED — steward's outbound procedure, DEFERRED until P2 intake** (founder 7/3): expo makes the record; the signal needs FOH knowledge; no one to run to until requesters ≠ operators |
+| **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | the plate goes up on the pass shelf; front of house delivers it | **CONTRACT PINNED, absorbed into the steward**: expo drops a pointer on `<rail>/pass/` at terminal ack (lands free in the retrofit's `ack()`); steward sweep delivers + clears the shelf — sweep builds at P2 intake |
 
 ## Command contracts
 
@@ -101,41 +101,37 @@ non-negotiables:
 - **Gates still apply.** Phase-0 can still return Thin/Ambiguous and bounce the request back to the
   caller. Fire means "now", not "ungated".
 
-### `runner` — close-out to the requester *(settled 2026-07-03: the STEWARD's outbound procedure, deferred until P2 intake exists)*
+### Close-out — the FOH contract *(runner DROPPED as a role, founder 2026-07-03; absorbed into the steward)*
 
-**Founder ruling: no build until requesters and operators split.** The expo already produces the
-complete *record* (ack + completion event + filed ticket); what it can't and shouldn't produce is
-the *signal* — notifying requires requester identity + channel, which is FOH knowledge (pushing it
-into the expo would couple every brigade to every notification channel). But today's only requester
-stands at the pass — a runner has no one to run to. It becomes real at P2 (Jira-intake requesters
-who walk away), and then it's a *paragraph in the steward SKILL.md* — the steward knows requester +
-channel from intake, scans terminal tickets it enqueued, notifies — not a new agent. The contract
-below is what that paragraph implements; nothing else builds before then.
+**The full ruling chain:** runner is not a station (stations transform the artifact; this moves
+information) → so it sits *outside* the rail, FOH-side → and outside, there is nothing it does that
+the steward couldn't → so it is the **steward's close-out procedure**, not a role. The word "runner"
+survives at most as that procedure's nickname. What was worth keeping is the CONTRACT — how a
+completion crosses the rail boundary, clears the rail, and reaches the requester. Pinned:
 
-When the expo acks a terminal exit (`advance` or `kill`), the runner carries the outcome back:
+**Pull-based shared state — no push, so channel knowledge never enters the kitchen:**
 
-1. **Completion event** appended to the ticket (already happens — the work-log is the record).
-2. **Notification** to the ticket's `requester` field — the missing machinery. v1: the runner writes
-   a completion note to a standing `<cellar>/rail/completed/` feed the steward reads; richer adapters
-   (iMessage/Slack/email per requester preference) are driven-adapter territory, same pattern as the
-   rail itself.
-3. **Steward confirmation** closes the loop: the steward, not the kitchen, tells the guest — which
-   keeps the brigade decoupled from requester identity/channels.
+1. **Kitchen side — the pass shelf (one line in `ack()`):** at a terminal ack the expo already
+   appends the completion event and files the ticket to its subject. It additionally drops a pointer
+   on the **pass shelf** — `<rail>/pass/<ticket-id>.done`, containing the filed ticket's path. The
+   finished plate under the heat lamp. This is the expo's last touch; it requires zero FOH knowledge.
+   *(Lands nearly free: `ack()` is exactly what the retrofit centralizes into the vendored rail
+   adapter — one implementation, every brigade gets the shelf.)*
+2. **FOH side — the steward's sweep (deferred until P2 intake exists):** the steward sweeps the
+   pass shelf on its own cadence; per pointer: read the filed ticket (`requested_by`) + its own
+   intake record (channel) → respond to the requester → append a close-out line to the filed ticket
+   (`close-out: requester notified via <channel>`) → **delete the pointer (this is what clears the
+   rail — the hot section ends every cycle empty)**. Failed notification → pointer stays → next
+   sweep retries. Today's only requester stands at the pass, so this paragraph builds when P2 gives
+   it someone to deliver to.
+3. **Truth lives on the ticket:** the close-out line completes the order record
+   (placed → built → delivered) and makes the sweep idempotent. The pass shelf is a transient
+   index, never authoritative — if lost, a scan for terminal-tickets-without-close-out-lines
+   rebuilds it.
 
-The `requester` field and notification preference belong on the ticket envelope —
-[TICKET-CONTRACT.md](./TICKET-CONTRACT.md) needs a small amendment (one optional field) when `runner`
-is built.
-
-**Implementation locus (settled in the 7/3 dialogue): the runner is NOT a station.** The test:
-stations *transform the ticket's artifact*; the runner transforms nothing — it moves information.
-Role-class agrees: it needs requester identity + channel (front-of-house knowledge), not build
-knowledge. It is the **steward's mirror image** — same role class, opposite direction (order in:
-steward; plate out: runner). The kitchen's obligation ends at the pass: expo acks the terminal exit,
-writes the completion event, drops the ticket on the completed feed. **v1: runner is the steward
-skill's outbound procedure** (the steward already watches the rail for its rework loop; it also
-watches for terminal tickets it enqueued and notifies the requester). Factor it into a standalone
-runner agent only when scale demands (multi-steward houses, notification-channel fan-out) — the
-completed feed *is* the seam, so that split costs no redesign.
+Notification-channel adapters (iMessage/Slack/email/Jira-comment) are driven adapters behind the
+steward, same pattern as the rail itself. A standalone runner *agent* only ever exists if
+multi-steward scale demands it — the pass shelf is the seam, so that split costs no redesign.
 
 ## Stations à la carte
 
