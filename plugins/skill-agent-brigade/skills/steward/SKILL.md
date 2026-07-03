@@ -48,6 +48,31 @@ When the expo parks a ticket `needs-context`, the work log carries exactly why �
 
 This closes the front-end loop the same way `refire-to-author` closes the back-end one — and like the author loop, it's budgeted: if the same ticket comes back a third time, stop and take it to the requester; the order itself is probably wrong.
 
+## The close-out sweep (the capability formerly called "runner")
+
+The steward owns delivery — the kitchen's obligation ends when the expo acks a terminal exit and
+files the ticket to its subject in the cellar. On its own cadence (and always at the end of any
+session in which it enqueued tickets), the steward sweeps:
+
+1. **Scan** the cellar for recently-filed terminal tickets missing a close-out signature — the
+   canon adapter's `find_unclosed(cellar_root, since_days)`: tickets under `*/tickets/` with
+   `status: done` or `killed` whose work log has no `- close-out:` line. Scan-only by founder
+   decision 2026-07-03 — the expo's filing already clears the rail (zero residue); no pointer
+   shelf unless cellar scans ever get slow enough to need an index.
+2. **Read the filed ticket** — the full decision trace (order → markup → outcome → artifact
+   paths) is the communication context; nothing else needs looking up.
+3. **Respond to the requester** on the channel the intake recorded (`requested_by` + the
+   steward's own intake record). v1 default when no channel is recorded: report to the operator
+   directly. Say what was ordered, what shipped (with artifact paths), and the exit — including
+   `killed`, honestly, with the expo's rationale.
+4. **Sign the ticket**: append `- close-out: requester notified via <channel> (<timestamp>)`.
+   The signature is the idempotency marker — a signed ticket never gets re-delivered; an unsigned
+   one gets retried next sweep (a failed notification simply stays unsigned).
+
+`escalated` and `needs-context` tickets are NOT close-out material — they're still open work (the
+rework loop above handles `needs-context`; `escalated` waits on a human call and belongs in the
+steward's open-orders report, not a delivery).
+
 ## Honest defaults
 
 - If the cellar plus careful external sourcing cannot produce the mandatory oracle/exemplar sources for the type, **say so to the requester** — do not enqueue a thin ticket hoping phase-0 catches it.

@@ -17,7 +17,7 @@
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
-| **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | the plate goes up on the pass shelf; front of house delivers it | **CONTRACT PINNED, absorbed into the steward**: expo drops a pointer on `<rail>/pass/` at terminal ack (lands free in the retrofit's `ack()`); steward sweep delivers + clears the shelf — sweep builds at P2 intake |
+| **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | front of house checks the pass for finished plates and delivers | **CONTRACT PINNED, absorbed into the steward — scan-only (founder simplification)**: expo files at terminal ack (rail clear, zero residue); steward sweep scans filed tickets for terminal-without-`close-out:`-signature via the canon adapter's `find_unclosed()`, delivers, signs. Sweep = [skills/steward/SKILL.md](./skills/steward/SKILL.md) "The close-out sweep" |
 
 ## Command contracts
 
@@ -109,29 +109,27 @@ the steward couldn't → so it is the **steward's close-out procedure**, not a r
 survives at most as that procedure's nickname. What was worth keeping is the CONTRACT — how a
 completion crosses the rail boundary, clears the rail, and reaches the requester. Pinned:
 
-**Pull-based shared state — no push, so channel knowledge never enters the kitchen:**
+**Pull-based shared state, SCAN-ONLY (founder simplification, later on 2026-07-03 — supersedes the
+pass-shelf draft): no push, so channel knowledge never enters the kitchen, and no pointer files either.**
 
-1. **Kitchen side — the pass shelf (one line in `ack()`):** at a terminal ack the expo already
-   appends the completion event and files the ticket to its subject. It additionally drops a pointer
-   on the **pass shelf** — `<rail>/pass/<ticket-id>.done`, containing the filed ticket's path. The
-   finished plate under the heat lamp. This is the expo's last touch; it requires zero FOH knowledge.
-   *(Lands nearly free: `ack()` is exactly what the retrofit centralizes into the vendored rail
-   adapter — one implementation, every brigade gets the shelf.)*
-2. **FOH side — the steward's sweep (deferred until P2 intake exists):** the steward sweeps the
-   pass shelf on its own cadence; per pointer: read the filed ticket (`requested_by`) + its own
-   intake record (channel) → respond to the requester → append a close-out line to the filed ticket
-   (`close-out: requester notified via <channel>`) → **delete the pointer (this is what clears the
-   rail — the hot section ends every cycle empty)**. Failed notification → pointer stays → next
-   sweep retries. Today's only requester stands at the pass, so this paragraph builds when P2 gives
-   it someone to deliver to.
-3. **Truth lives on the ticket:** the close-out line completes the order record
-   (placed → built → delivered) and makes the sweep idempotent. The pass shelf is a transient
-   index, never authoritative — if lost, a scan for terminal-tickets-without-close-out-lines
-   rebuilds it.
+1. **Kitchen side (already exists):** at a terminal ack the expo appends the completion event and
+   **files the ticket to its subject in the cellar** — the rail is clear of it from that instant.
+   Zero residue; nothing extra to drop or clean. (Filing lives in the canon adapter's `ack()`.)
+2. **FOH side — the steward's close-out sweep** (procedure now written:
+   [skills/steward/SKILL.md](./skills/steward/SKILL.md) § "The close-out sweep"): scan recently-filed
+   tickets for terminal status without a `- close-out:` signature (`find_unclosed()` in the canon
+   adapter) → read the filed ticket (the decision trace IS the communication context) → respond to
+   the requester on the intake-recorded channel (v1 default: the operator directly) → **sign the
+   ticket** with the close-out line.
+3. **The signature is the whole mechanism:** it completes the order record (placed → built →
+   delivered), it is the idempotency marker (signed = never re-delivered), and its absence is the
+   retry queue (failed notification = unsigned = swept again). Truth lives on the ticket; there is
+   no second store to reconcile.
 
 Notification-channel adapters (iMessage/Slack/email/Jira-comment) are driven adapters behind the
-steward, same pattern as the rail itself. A standalone runner *agent* only ever exists if
-multi-steward scale demands it — the pass shelf is the seam, so that split costs no redesign.
+steward, same pattern as the rail itself. A pointer-shelf index returns only if cellar scans ever
+get slow; a standalone runner *agent* only if multi-steward scale demands it — the signature
+convention is the seam, so either upgrade costs no redesign.
 
 ## Stations à la carte
 
