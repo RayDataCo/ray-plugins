@@ -136,6 +136,33 @@ This is the same two-fidelity honesty rule as everywhere else in the house: the 
 artifact is the *build record* behind it; à la carte output has none, and pretending otherwise is
 how slop gets certified.
 
+## Adapter distribution — vendored from canon *(settled 2026-07-03)*
+
+The walk's *orchestration* is per-brigade (stations, gates, phase chaining — the legitimate
+variance). The **rail-adapter code** (enqueue / pull-with-lease / append / ack / file-to-subject
+against a backend) is not — today it is hand-implemented 3+ times across the house brigades, which
+is drift debt (the 7/2 shakedown's "inherited fix" is the receipt).
+
+The fix respects the distribution constraint the founder set: brigades ship through the Claude
+plugin marketplace, so **every brigade must be self-contained** — no shared pip package, no
+separately-installed CLI. Therefore:
+
+- **Canon lives here, once:** a single module (`rail_adapter.py`, part of the service-skill
+  template in this plugin) owns the rail port implementation, with backends (filesystem today;
+  Jira/Snowflake later) *inside* it as options.
+- **Vendored at build time:** the factory's `artifact: brigade` build copies the module into the
+  new brigade, stamped with canon version + content hash. Copies are **build artifacts, never
+  hand-edited** — the same generated-plus-drift-checked move as the frontend's embedded-schema
+  test and vocab.json.
+- **`mise` closes the loop:** compares the shipped stamp to canon and flags staleness ("adapter
+  v3, canon v5 — re-stamp via `iterate-brigade`"). Stale kitchens tell on themselves.
+- **The factory's own walk converges too:** its workflow agents call the vendored module (an
+  internal script of this plugin, not a separate tool).
+
+*Status, honestly: pattern settled in dialogue; `rail_adapter.py` canon not yet extracted — the
+retrofit pass (replace the 3 brigades' hand-rolled adapter code with vendored canon, suites green)
+is a queued build ticket, sequenced after the founder's P1 port validates and before P2/multi-walker.*
+
 ## Factory obligation — brigades ship interface-complete
 
 **The meta rule (founder, 2026-07-03): the factory must structurally be unable to emit an
@@ -145,7 +172,8 @@ walk with the standard verbs + declared-deps manifest, and mise/fire/runner at m
 README with honest status markers. Enforcement lands in two places:
 
 1. **Acceptance contract** — the brigade acceptance checklist gains interface-completeness checks
-   (five commands present, service manifest declares the walk runtime). *(Wired into MENU.md's
+   (five commands present, service manifest declares the walk runtime, rail adapter is a stamped
+   vendor copy of canon — see "Adapter distribution" above). *(Wired into MENU.md's
    `artifact: brigade` entry as of this commit.)*
 2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing any of the five →
    FAIL). *Status: documented here, code wiring in the critic queued — do not claim it fires yet.*
