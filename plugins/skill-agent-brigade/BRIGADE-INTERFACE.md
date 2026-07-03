@@ -16,8 +16,8 @@
 | **`menu`** | "what can you do?" | the kitchen publishes what it serves | **LIVE** — [MENU-SPEC.md](./MENU-SPEC.md), discovery over the rail, `<cellar>/brigades/<name>/menu.md` |
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
-| **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | ⚠️ **PROPOSED** — today you can hand the reference workflow a single ticket, but the ad-hoc path (Order-in-hand, no pre-written ticket) is unspecified; contract below |
-| **`runner`** | "order up — who tells the table?" | the food runner carries the finished plate to the guest | ⚠️ **PROPOSED / known gap** — step 9 of the teaching diagram; the one DESIGN-ONLY step in the Lenovo receipts audit. Nothing closes the loop to the requester today |
+| **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
+| **`runner`** | "order up — who tells the table?" | the food runner carries the finished plate to the guest | **SETTLED — steward's outbound procedure, DEFERRED until P2 intake** (founder 7/3): expo makes the record; the signal needs FOH knowledge; no one to run to until requesters ≠ operators |
 
 ## Command contracts
 
@@ -86,19 +86,30 @@ runtime dependencies** in a manifest table — that manifest is exactly what `mi
 [option A] recommended over one-canonical-JS-runner [option B]; note — the factory's walk runs via
 the harness Workflow tool, not `node`, which is itself the best argument for declared-deps-per-brigade.)*
 
-### `fire` — ad-hoc direct request *(proposed)*
+### `fire` — ad-hoc direct request *(settled 2026-07-03: an INVOCATION MODE of the expo, not a build)*
 
-For an operator with an Order in hand and no patience for the queue. `fire` takes an Order (+ optional
-context pointers), and the **expo itself performs minimal steward work**: wraps it in a
-contract-valid ticket (envelope + payload per its own menu), runs Gate A + phase-0 on it like any
-other ticket, then executes immediately — no rail wait. Two non-negotiables:
+**Founder ruling: no machinery.** Fire is what happens when you call the expo directly with an
+Order in hand — it already exists behaviorally (the 7/2 collateral stress run WAS a fire). The
+contract is two lines of discipline in the expo's procedure, not a skill: the **expo performs
+minimal steward work** — wraps the Order in a contract-valid ticket (envelope + payload per its own
+menu), runs Gate A + phase-0 like any other ticket, then executes immediately, no rail wait. Two
+non-negotiables:
 
 - **A ticket is still created.** `fire` skips the *queue*, never the *record* — the decision trace
   lands on the rail as a normal closed ticket, marked `origin: fire`.
 - **Gates still apply.** Phase-0 can still return Thin/Ambiguous and bounce the request back to the
   caller. Fire means "now", not "ungated".
 
-### `runner` — close-out to the requester *(proposed; fills the known step-9 gap)*
+### `runner` — close-out to the requester *(settled 2026-07-03: the STEWARD's outbound procedure, deferred until P2 intake exists)*
+
+**Founder ruling: no build until requesters and operators split.** The expo already produces the
+complete *record* (ack + completion event + filed ticket); what it can't and shouldn't produce is
+the *signal* — notifying requires requester identity + channel, which is FOH knowledge (pushing it
+into the expo would couple every brigade to every notification channel). But today's only requester
+stands at the pass — a runner has no one to run to. It becomes real at P2 (Jira-intake requesters
+who walk away), and then it's a *paragraph in the steward SKILL.md* — the steward knows requester +
+channel from intake, scans terminal tickets it enqueued, notifies — not a new agent. The contract
+below is what that paragraph implements; nothing else builds before then.
 
 When the expo acks a terminal exit (`advance` or `kill`), the runner carries the outcome back:
 
