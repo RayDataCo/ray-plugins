@@ -14,7 +14,7 @@
 | command | answers | kitchen reading | status today |
 |---|---|---|---|
 | **`menu`** | "what can you do?" | the kitchen publishes what it serves | **LIVE** — [MENU-SPEC.md](./MENU-SPEC.md), discovery over the rail, `<cellar>/brigades/<name>/menu.md` |
-| **`mise`** | "are you ready?" | mise en place — everything in its place before service | ⚠️ **PROPOSED** — not built; contract below |
+| **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | ⚠️ **PROPOSED** — today you can hand the reference workflow a single ticket, but the ad-hoc path (Order-in-hand, no pre-written ticket) is unspecified; contract below |
 | **`runner`** | "order up — who tells the table?" | the food runner carries the finished plate to the guest | ⚠️ **PROPOSED / known gap** — step 9 of the teaching diagram; the one DESIGN-ONLY step in the Lenovo receipts audit. Nothing closes the loop to the requester today |
