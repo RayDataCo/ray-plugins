@@ -5,9 +5,9 @@
 > A brigade that implements these five (plus its stations à la carte) is interface-complete; anything
 > else it exposes is house-specific extension.
 >
-> **Naming status (2026-07-03):** `menu` shipped; **`mise`, `service`, `fire` founder-approved**
-> ("I like those names", iMessage 2026-07-03). **`runner` is the one open label** — slot settled
-> (close-out), name awaiting founder confirm.
+> **Naming status (2026-07-03):** all five **founder-approved** (`mise`/`service`/`fire` "I like
+> those names"; `runner` "Runner too - I like that", iMessage 2026-07-03). Runner's *implementation
+> locus* is the open design conversation — see its contract below.
 
 ## The five commands
 
@@ -86,6 +86,17 @@ When the expo acks a terminal exit (`advance` or `kill`), the runner carries the
 The `requester` field and notification preference belong on the ticket envelope —
 [TICKET-CONTRACT.md](./TICKET-CONTRACT.md) needs a small amendment (one optional field) when `runner`
 is built.
+
+**Implementation locus (settled in the 7/3 dialogue): the runner is NOT a station.** The test:
+stations *transform the ticket's artifact*; the runner transforms nothing — it moves information.
+Role-class agrees: it needs requester identity + channel (front-of-house knowledge), not build
+knowledge. It is the **steward's mirror image** — same role class, opposite direction (order in:
+steward; plate out: runner). The kitchen's obligation ends at the pass: expo acks the terminal exit,
+writes the completion event, drops the ticket on the completed feed. **v1: runner is the steward
+skill's outbound procedure** (the steward already watches the rail for its rework loop; it also
+watches for terminal tickets it enqueued and notifies the requester). Factor it into a standalone
+runner agent only when scale demands (multi-steward houses, notification-channel fan-out) — the
+completed feed *is* the seam, so that split costs no redesign.
 
 ## Stations à la carte
 
