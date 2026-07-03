@@ -28,9 +28,14 @@ ticket; the expo introspects its own brigade and publishes `<cellar>/brigades/<n
 machine-parseable `**Status:**` markers per artifact type. Re-hang on any capability change; the
 discovery tickets are the audit trail.
 
-### `mise` — readiness check *(proposed; founder-named)*
+### `mise` — readiness check *(built for the factory 2026-07-03; declaration = mise.toml per D1)*
 
 Deterministic-first, judgment-second — same two-gate shape as ticket intake (Gate A then phase-0).
+Implementation: [skills/mise/](./skills/mise/SKILL.md) — stdlib `mise.py` engine + per-brigade
+`mise.toml` declaration (approved deviation from the plan's yaml: TOML parses with stdlib `tomllib`,
+keeping the zero-dependency marketplace constraint). The checks below are the contract the
+declaration encodes; script-executor checks run in the engine, agent-executor checks (Workflow tool,
+MCP connections, station resolution) are verified by the harness agent and merged into one report.
 
 **Checks (deterministic tier):**
 1. **Ports reachable** — cellar root exists + writable; rail dir/store exists + writable; a lease can

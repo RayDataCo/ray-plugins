@@ -32,9 +32,11 @@ already held, in which case report "already in service" (lock holder, since when
 1. **Lock check:** if `<rail>/.service/skill-agent-brigade.lock` exists and its holder is live →
    report "already in service", stop. This lock is what upgrades the filesystem rail from
    *one-walker-by-convention* to **one-walker-enforced** (see RAIL-SPEC's advisory-lease honesty note).
-2. **Mise gate:** run the readiness checks against the declared-dependency table above. Any FAIL →
-   refuse to start, print the remedy lines. (Until a standalone `mise` skill ships, this step IS the
-   mise check — same table, same discipline.)
+2. **Mise gate:** run `python3 ../mise/mise.py` (the engine reads [../mise/mise.toml](../mise/mise.toml),
+   the declared-deps source of truth — the table above is its human-readable mirror). Exit 1 (any
+   FAIL) → refuse to start, print the remedy lines. Then verify the `UNCHECKED (agent)` entries
+   yourself (Workflow tool callable, station skills resolve) and merge into one report — the static
+   gate alone is not the whole gate.
 3. **Take the lock:** write `{brigade, started_at, session, walker}` JSON to the lock path.
 4. **Walk:** invoke the Workflow tool on [rail-walk.run.js](./rail-walk.run.js) in bounded cycles
    (one backlog sweep per invocation). Between cycles, check for the stop flag
