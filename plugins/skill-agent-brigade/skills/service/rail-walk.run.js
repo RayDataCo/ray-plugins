@@ -202,8 +202,9 @@ while (worked < MAX_TICKETS) {
     const menu = await agent(
       `You are the EXPO answering a menu/discovery ticket ("what can your brigade do?"). Read the ticket at ${t.path} and ` +
       `the brigade home its context points at (this brigade: ${PLUGIN_DIR} — read MENU-SPEC.md, MENU.md, the skills/ roster, ` +
-      `and the critic/eval config). Write or refresh the menu at ${join(RAIL_DIR, 'menus')}/skill-agent-brigade.menu.md ` +
-      `(frontmatter menu_of/version/generated_by: expo — bump version if it exists), then append a work-log line to the ` +
+      `and the critic/eval config). Write or refresh the menu at ${join(RAIL_DIR, '..', 'brigades', 'skill-agent-brigade')}/menu.md ` +
+      `(the cellar brigades section per MENU-SPEC — menus moved there from <rail>/menus/ in the 2026-07-02 one-store centralization; ` +
+      `frontmatter menu_of/version/generated_by: expo — bump version if it exists), then append a work-log line to the ` +
       `ticket and add the menu path under ## Artifacts. Return the published path.`,
       { label: `menu:${t.id}`, phase: 'Phase-0', model: MODEL.expo })
     rail.append(t.path, `menu published: ${String(menu).trim()}`)
