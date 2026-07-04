@@ -2,7 +2,7 @@
 
 The **rail** is where tickets live and travel: a **pluggable mutable ticket store with queue semantics** — bind to the interface, not the backend. In hexagonal terms the rail is one of the brigade's four ports (see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md)); the backends below are its driven adapters. In v1 the rail's store is the **cellar's hot section** (`<cellar>/rail/` — see [CELLAR-SPEC.md](./CELLAR-SPEC.md) § organization): separate port, one house store. The same interface is meant to sit on a Snowflake Stage or Cortex Search just as well.
 
-**Closed tickets file, the rail stays hot:** on a terminal `ack` (`done`/`killed`), the ticket moves out of `rail/` to its subject's folder (`companies/<id>/tickets/…`) — the build record lands beside the artifacts it produced, and `rail/` only ever holds in-flight work. Wikilinks (name-based, not path-based) are what make this move free.
+**Closed tickets file, the rail stays hot:** on a terminal `ack` (`done`/`killed`), the ticket moves out of `rail/` to its subject's folder (`companies/<id>/tickets/…`) — the build record lands beside the artifacts it produced, and `rail/` only ever holds in-flight work. Wikilinks (name-based, not path-based) are what make this move free. **The close-out sweep (2026-07-03, scan-only per founder):** filing at ack means the rail is already clear the instant a ticket goes terminal — zero residue. Delivery is the steward's: its close-out sweep scans recently-filed tickets for terminal status without a `- close-out:` signature (`find_unclosed()` in the canon adapter), responds to the requester with the filed ticket as full context, and signs the ticket. The signature is the idempotency marker — signed tickets never re-deliver; unsigned ones retry next sweep. No pointer shelf: a shelf was considered and dropped (it added rail residue and a second thing to clean); it returns only as a scale optimization if cellar scans ever get slow.
 
 ## The ticket (defined elsewhere, on purpose)
 
@@ -19,7 +19,7 @@ A rail backend implements:
 |---|---|
 | `enqueue(ticket)` | Gate-A-valid ticket goes on the rail, `status: queued` |
 | `pull(worker)` | **lease** the next workable ticket: atomically pick a `queued` (or lease-expired) ticket, set `status: leased` + `lease: {worker, at, ttl_min}`, return it. Returns nothing if the rail is dry. |
-| `ack(id, exit)` | close out a lease with the expo's terminal disposition: `advance → done`, `kill → killed`, `reroute-to-steward → needs-context`, escalate-pause → `escalated`. Clears the lease. |
+| `ack(id, exit)` | close out a lease with the expo's terminal disposition: `advance → done`, `kill → killed`, `reroute-to-steward → needs-context`, escalate-pause → `escalated`. Clears the lease; on `done`/`killed` also files the ticket to its subject (the rail is clear of it from that instant — close-out is the steward's scan-side job). |
 | `release(id)` | give a leased ticket back untouched (`status: queued`, lease cleared) — worker died, budget hit, orderly shutdown |
 | `read(id)` | load a ticket |
 | `append(id, entry)` | append work-state (append-only — never overwrite history) |
@@ -47,7 +47,7 @@ The brigade only ever talks to the rail interface; swapping the vault for a Snow
 
 ## Walking the rail (the queue loop)
 
-The reference queue-walk runner ([workflow/rail-walk.run.js](./workflow/rail-walk.run.js)) is the loop that makes the rail a *queue* rather than a shelf:
+The reference queue-walk runner ([skills/service/rail-walk.run.js](./skills/service/rail-walk.run.js), packaged inside the `service` skill as of 2026-07-03) is the loop that makes the rail a *queue* rather than a shelf:
 
 ```
 while budget remains:

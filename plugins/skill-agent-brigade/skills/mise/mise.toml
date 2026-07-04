@@ -1,0 +1,142 @@
+# mise.toml — the skill-agent-brigade factory's own readiness declaration.
+#
+# This is the single source of truth for "is this brigade ready to go in
+# service" (Decision D1, 2026-07-03): skills/service/SKILL.md's declared-deps
+# table and this skill's SKILL.md both point back here rather than
+# duplicating the check list by hand. Edit checks here first; the prose
+# tables are documentation of what's here, not an independent source.
+#
+# Deviation from IMPLEMENTATION-PLAN.md: the plan specifies `mise.yaml`. This
+# file is TOML instead — YAML has no stdlib parser, and mise.py must stay
+# zero-pip-dependency (it gets vendored into every brigade and has to run on
+# a bare python3). See ../mise/IMPLEMENTATION-NOTES-2026-07-03-mise-build.md.
+#
+# Credentials: NONE needed for this brigade. The factory's stations
+# (steward/expo/spec/test/author/critic) operate entirely on local
+# ticket + cellar state — no external API calls, no MCP servers, from this
+# brigade's own stations. (Domain brigades that DO call external APIs will
+# declare `executor = "agent"` credential-resolvable-by-name checks in their
+# own mise.toml when they're retrofitted — BRIGADE-INTERFACE.md.)
+
+[roots]
+# Re-point these two paths to move this declaration to a different cellar
+# install without touching any check below.
+rail   = "~/Projects/phdata-private/cellar/rail"
+cellar = "~/Projects/phdata-private/cellar"
+
+# --- Ports: rail + cellar reachable and writable (RAIL-SPEC.md / CELLAR-SPEC.md) ---
+
+[[checks]]
+id          = "rail-root-exists"
+description = "Rail root exists — tickets live and travel here"
+executor    = "script"
+type        = "path_exists"
+target      = "{rail}"
+severity    = "FAIL"
+remedy      = "mkdir -p {rail} (or re-point [roots].rail in mise.toml if the rail lives elsewhere)"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail root is writable — enqueue/pull/append/ack all write here"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "FAIL"
+remedy      = "fix permissions on {rail} (chmod/chown) — the walk cannot lease or ack tickets on a read-only rail"
+
+[[checks]]
+id          = "cellar-root-exists"
+description = "Cellar root exists — artifact landing + menu publication"
+executor    = "script"
+type        = "path_exists"
+target      = "{cellar}"
+severity    = "FAIL"
+remedy      = "mkdir -p {cellar} (or re-point [roots].cellar in mise.toml)"
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar root is writable — stations file artifacts and the menu land here"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "FAIL"
+remedy      = "fix permissions on {cellar} (chmod/chown) — closed tickets and the menu cannot land on a read-only cellar"
+
+# --- Walk runtime (skills/service/SKILL.md's declared-deps table) ---
+
+[[checks]]
+id          = "workflow-tool-callable"
+description = "The Claude Code session has the Workflow tool available — rail-walk.run.js is a Workflow script, not a node script; the walk cannot execute without it"
+executor    = "agent"
+type        = "workflow_tool_callable"
+target      = "Workflow tool (harness-provided)"
+severity    = "FAIL"
+remedy      = "confirm the session's tool config includes the Workflow tool before running `service start`"
+
+[[checks]]
+id          = "node-on-path"
+description = "node is on PATH — lint-time only, for `node --check` on the walk script; the walk itself runs via the harness Workflow tool, not node"
+executor    = "script"
+type        = "command_on_path"
+target      = "node"
+severity    = "WARN"
+remedy      = "install node (e.g. `brew install node`) — only needed to lint-check rail-walk.run.js; the walk runtime does not require it"
+
+[[checks]]
+id          = "walk-script-syntax"
+description = "../service/rail-walk.run.js parses as valid JS (node --check)"
+executor    = "script"
+type        = "node_syntax"
+target      = "../service/rail-walk.run.js"
+severity    = "WARN"
+remedy      = "fix the syntax error `node --check` reports in skills/service/rail-walk.run.js; if node is absent this check cannot run (see node-on-path)"
+
+# --- Stations present (harness skills — the walk cannot run without them) ---
+
+[[checks]]
+id          = "station-spec-author-present"
+description = "station-spec-author skill resolves (harness skill dir exists, SKILL.md parses)"
+executor    = "agent"
+type        = "skill_resolves"
+target      = "~/.claude/skills/station-spec-author"
+severity    = "FAIL"
+remedy      = "install/restore the station-spec-author skill under ~/.claude/skills/ — the spec station cannot run without it"
+
+[[checks]]
+id          = "station-test-author-present"
+description = "station-test-author skill resolves (harness skill dir exists, SKILL.md parses)"
+executor    = "agent"
+type        = "skill_resolves"
+target      = "~/.claude/skills/station-test-author"
+severity    = "FAIL"
+remedy      = "install/restore the station-test-author skill under ~/.claude/skills/ — the test station cannot run without it"
+
+[[checks]]
+id          = "station-code-author-present"
+description = "station-code-author skill resolves (harness skill dir exists, SKILL.md parses)"
+executor    = "agent"
+type        = "skill_resolves"
+target      = "~/.claude/skills/station-code-author"
+severity    = "FAIL"
+remedy      = "install/restore the station-code-author skill under ~/.claude/skills/ — the author station cannot run without it"
+
+[[checks]]
+id          = "station-critic-present"
+description = "station-critic skill resolves (harness skill dir exists, SKILL.md parses)"
+executor    = "agent"
+type        = "skill_resolves"
+target      = "~/.claude/skills/station-critic"
+severity    = "FAIL"
+remedy      = "install/restore the station-critic skill under ~/.claude/skills/ — the critic station cannot run without it"
+
+# --- Menu freshness (MENU-SPEC.md) ---
+
+[[checks]]
+id               = "menu-freshness"
+description      = "Published menu is fresh — packaged MENU.md (source) hash matches the published copy's source_hash stamp (MENU-SPEC source-vs-publication)"
+executor         = "script"
+type             = "menu_freshness"
+target           = "../../MENU.md"
+published_target = "{cellar}/brigades/skill-agent-brigade/menu.md"
+severity         = "WARN"
+remedy           = "re-hang an `artifact: menu` discovery ticket — the expo republishes from the current packaged source and re-stamps source_hash (MENU-SPEC.md)"
