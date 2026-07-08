@@ -1,7 +1,7 @@
 {
   "name": "discipline-skills",
-  "description": "Professional discipline skills produced by the skill-agent-brigade. First skill: variance-analysis (Finance / managerial-accounting standard-costing variances — DM/DL/VOH/FOH price-quantity-rate-efficiency-spending-volume, sales-volume/flexible-budget, mix & yield). Skills accrue here as the backlog is built out.",
-  "version": "0.1.0",
+  "description": "Professional discipline skills produced by the skill-agent-brigade, shipped only with execution-eval evidence (two-arm lift vs base model). Finance: variance-analysis, annual-budget-build, close-management, treasury-liquidity-analysis, debt-schedule. Eval reports in evals/. Skills accrue here as the backlog is built out.",
+  "version": "0.2.0",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"
