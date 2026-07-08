@@ -1,0 +1,23 @@
+<!-- iteration: 2 -->
+
+# Pitfalls and scope boundaries
+
+## Day-count convention errors compound silently
+
+A day-count-convention error (using 30/360 — or the equivalent naive annual-rate-÷-4 shortcut — on an instrument actually governed by ACT/360, or vice versa) is invisible when spot-checked against a single period in isolation: both conventions produce a plausible-looking dollar figure for any one quarter, and without a side-by-side comparison there's no obvious "this looks wrong" signal. The error only becomes obvious in aggregate, over a full year or the full life of the instrument, where the small systematic per-period gap accumulates into a material miss. Worked illustration (see `worked-examples.md` Fixture B for the full derivation): a $2,000,000 SOFR+250bps quarterly ACT/360 loan's correct full-year interest is $156,582.22; the same instrument computed under 30/360 comes to $154,450.00 — a $2,132.22 (1.36%) understatement that would not have been obvious from checking any single quarter alone, since each individual quarter's 30/360 figure is itself an unremarkable, plausible-looking dollar amount. This is exactly why Step 2 of the procedure insists on confirming the convention from the governing document before computing anything, rather than treating a spot-check of the first period as sufficient validation.
+
+## Floating-rate schedules understate real-world rate risk if treated as single-path forecasts
+
+A floating-rate interest schedule computed with today's reference rate held flat for future periods is a mechanically correct calculation of *that period's* interest given *that period's* reset — but if extended forward as a forecast of future periods without flagging the reference rate as a point-in-time snapshot, it silently understates the real range of possible future outcomes (the reference rate will actually move at each future reset). This skill computes the interest mechanics correctly for a given, confirmed reset; it does not attempt to forecast or hedge future rate paths. Deciding how much of a debt portfolio should be fixed vs. floating, or whether to layer in rate hedges, is a portfolio-level treasury-liquidity-analysis / risk-management question, not an instrument-level mechanics question this skill answers.
+
+## Scope boundary — the three neighbor skills
+
+This skill computes single-instrument (or small-named-set) debt mechanics only. It deliberately does not attempt three adjacent, larger-scope analyses, even though each shares vocabulary with debt-schedule work:
+
+- **treasury-liquidity-analysis** — aggregates debt service and available liquidity (cash + undrawn revolver capacity) across *all* of an organization's facilities to answer portfolio-level questions like "can we cover everything due" or "what's our current ratio." This skill's output (an exact balance, an exact debt-service figure for one instrument) is a precise input that a liquidity analysis would consume — but this skill does not itself aggregate across the whole balance sheet, and should not attempt to when asked a portfolio-wide question.
+- **capital-budgeting-analysis** — evaluates whether a project, or the decision to take on debt to finance it, was or is worthwhile on the project's own cash flows (NPV, IRR, payback). This skill starts from the premise that the financing decision has already been made and tracks the resulting instrument's mechanics; it does not evaluate whether taking on that debt (or the project it funds) was a good decision.
+- **cash-flow-forecasting** — the forward-looking, whole-organization weekly cash view across all receipts and disbursements, not just debt service. This skill's debt-service output (exact dollar amounts, exact timing, derived directly from the amortization schedule) is exactly the kind of precisely-known input that forecast would want to consume — but this skill does not itself build or extend that forecast.
+
+## Adjacent-but-out-of-scope: balance-sheet current-portion presentation
+
+An amortization table naturally exposes, period by period, exactly how much principal comes due over the next 12 months — which is the raw input a balance-sheet current-portion-of-long-term-debt reclassification would consume. This skill may note that the table exposes those figures. It does not itself perform or present that balance-sheet current/non-current split — that presentation decision belongs to financial-statements work, not to this skill. When only an amortization table is asked for, the output should stop at the table (plus the cross-check and any requested caveats) and not editorialize into balance-sheet presentation language that wasn't asked for.
