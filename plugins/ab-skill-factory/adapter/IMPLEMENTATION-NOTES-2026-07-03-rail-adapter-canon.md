@@ -2,7 +2,7 @@
 
 Founder-directed build: extract the single canonical rail-port implementation BRIGADE-INTERFACE.md's
 "Adapter distribution" section calls for, killing the 3+-way hand-rolled drift across the house
-brigades (the 7/2 Lenovo shakedown's "inherited fix" was the receipt that made the drift visible).
+brigades (the 7/2 Acme shakedown's "inherited fix" was the receipt that made the drift visible).
 
 ## What landed
 
@@ -21,7 +21,7 @@ brigade/rail_walk.py` + `brigade/batch.py` (Sales-Collateral), `phdata-ai-wf-plu
 brigade/pass_driver.py` (Assessment), `skills/service/rail-walk.run.js`'s inline `rail` object (this
 factory's JS walk) — the four prior implementations this canon supersedes. Two real filed tickets
 for shape truth: `cellar/brigades/skill-agent-brigade/tickets/factory-menu-restamp-2026-07-03.ticket.md`
-(2-space-indent context entries) and `cellar/rail/lenovo-collateral-stress-2026-07-02.ticket.md`
+(2-space-indent context entries) and `cellar/rail/acme-collateral-stress-2026-07-02.ticket.md`
 (0-indent context entries, `type: cellar`, folded/quoted `when:` values — the shape that exposed the
 parser drift).
 
@@ -46,7 +46,7 @@ resolution, the five-exit map) — they just couldn't donate their literal front
 
 2. **Context-entry parsing: NEW indent-agnostic entry-boundary scanner — drift fix (a).** The JS
    reference's `contextEntries()` splits on `/^\s{2}- /m` — hardcoded 2-space indent. That's exactly
-   why the lenovo ticket (0-indent `context:\n- id: ...`, a legal YAML block-sequence-at-mapping-
+   why the acme ticket (0-indent `context:\n- id: ...`, a legal YAML block-sequence-at-mapping-
    indent PyYAML itself emits) silently produced ZERO parsed entries under the old logic: zero
    entries means zero eager sources checked, meaning rule 5 always trivially "passed" on that shape
    — a false green, not a real check. Fix: `parse_context_entries()` finds entry boundaries by
@@ -54,7 +54,7 @@ resolution, the five-exit map) — they just couldn't donate their literal front
    `_context_block()` extracts the raw `context:` lines by walking forward from the `context:` key
    until a line that is neither blank, indented, nor a 0-indent dash — i.e., the next real top-level
    key. Both real tickets lint 8/8 under this parser (`test_factory_menu_shape_2space_indent_lints_8_of_8`,
-   `test_lenovo_shape_0indent_context_lints_8_of_8`).
+   `test_acme_shape_0indent_context_lints_8_of_8`).
 
 3. **`allowed_artifacts`/`resolver_types` as parameters — drift fix (b), per TICKET-CONTRACT's own
    SF-1 amendment text.** The JS reference hardcoded `['skill', 'brigade', 'menu']` directly into
@@ -65,7 +65,7 @@ resolution, the five-exit map) — they just couldn't donate their literal front
    accepting the caller's menu as a parameter (fine for a single-brigade rail_walk.py, wrong for a
    shared canon). This module makes both `allowed_artifacts` and `resolver_types` parameters,
    defaulting to *this* brigade's own live menu — proven by `test_menu_driven_artifact_enum_accepts_and_rejects`,
-   which lints the SAME lenovo ticket text twice and gets opposite Gate-A-rule-2 verdicts depending
+   which lints the SAME acme ticket text twice and gets opposite Gate-A-rule-2 verdicts depending
    on which menu is passed.
 
 4. **`append()`/section-boundary rewriting: Company Research / Sales-Collateral's `_append_to_section`
@@ -74,7 +74,7 @@ resolution, the five-exit map) — they just couldn't donate their literal front
    it never looks at section boundaries, just the literal string `## Artifacts`. Traced by hand: every
    call inserts one NEW blank line right before `## Artifacts`, so N appends leave N accumulated
    blank lines between work-log bullets instead of the consecutive-bullets-then-one-blank-line shape
-   the real filed tickets actually show (`factory-menu-restamp` and `lenovo-collateral-stress` both
+   the real filed tickets actually show (`factory-menu-restamp` and `acme-collateral-stress` both
    have zero blank lines between their own work-log bullets, one blank line before `## Artifacts`).
    The Python references' `_append_to_section()` is section-heading-aware (find `## Work log`'s own
    span via `_h2_line_indices`, strip trailing blank lines from the existing section content, append

@@ -25,7 +25,7 @@ export const meta = {
   ],
 }
 
-const SKILL_PATH = '/Users/ray/Projects/ray-plugins/plugins/ab-managerial-accounting/skills/variance-analysis'
+const SKILL_PATH = '${HOME}/Projects/ray-plugins/plugins/ab-managerial-accounting/skills/variance-analysis'
 const N = 3 // samples per arm (skill-creator default; raise for high-variance fixtures)
 
 // Each fixture: a prompt (identical to both arms) + the gradeable answer keys.

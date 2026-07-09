@@ -29,7 +29,7 @@ Top level answers "what kind of thing is this"; the folder inside is the thing's
 Conventions that make the flat parts navigable:
 
 - **Frontmatter is the query plane.** Every landed artifact already carries `subject / kind / produced_by.{brigade,ticket,station}` — search and graph tooling slice by any of them regardless of which folder won the filing argument.
-- **Wikilinks are the connection plane.** Link by stable name (`[[lenovo — identity]]`), never by path — filing a closed ticket or reorganizing a section breaks nothing.
+- **Wikilinks are the connection plane.** Link by stable name (`[[acme — identity]]`), never by path — filing a closed ticket or reorganizing a section breaks nothing.
 - **The cellar is an Obsidian vault.** v1 is literally openable in Obsidian; qmd indexes it as a collection for the steward's `search` op. Keep filenames human-stable and markdown-first for exactly this reason.
 
 ## The two flows

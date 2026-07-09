@@ -23,7 +23,7 @@ export const meta = {
   phases: [{ title: 'Run arms' }, { title: 'Report' }],
 }
 
-const SKILL_PATH = '/Users/ray/.claude/skills/generate-tests'
+const SKILL_PATH = '${HOME}/.claude/skills/generate-tests'
 const N = 3
 const MODELS = (args && Array.isArray(args.models) && args.models.length) ? args.models : ['haiku', 'sonnet', 'opus']
 

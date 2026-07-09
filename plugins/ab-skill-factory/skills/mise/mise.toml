@@ -21,8 +21,8 @@
 [roots]
 # Re-point these two paths to move this declaration to a different cellar
 # install without touching any check below.
-rail   = "~/Projects/phdata-private/cellar/rail"
-cellar = "~/Projects/phdata-private/cellar"
+rail   = "~/rdco-cellar/rail"
+cellar = "~/rdco-cellar"
 
 # --- Ports: rail + cellar reachable and writable (RAIL-SPEC.md / CELLAR-SPEC.md) ---
 

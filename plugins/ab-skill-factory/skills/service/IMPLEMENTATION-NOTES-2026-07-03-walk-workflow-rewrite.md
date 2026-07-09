@@ -110,7 +110,7 @@ the record even though the filesystem `status:` field only has room for `escalat
 ## Post-rewrite live-fire addendum (Ray, same day)
 
 Three live fires under the REAL Workflow tool against the house rail (dry — only the escalated
-lenovo ticket, correctly skipped by `pull`):
+acme ticket, correctly skipped by `pull`):
 
 1. `wf_474ff5f9` — script parsed + ran (the old version could not); pull agent ran the adapter CLI;
    clean dry-rail exit. FINDING: summary showed `worker: rail-walk-reference` (the fallback) despite
