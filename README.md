@@ -27,23 +27,26 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
     templates/                        # the 4 per-agent deliverable templates (#2-#5)
   skills/copilot-studio-pull-runbook/   # skill: pull the runbook into the current project
   skills/copilot-studio-ground-runbook/ # skill: re-ground the runbook in the latest MS docs
-plugins/skill-agent-brigade/          # real plugin: the agent brigade that manufactures skills
+plugins/ab-skill-factory/          # real plugin: the agent brigade that manufactures skills
   .claude-plugin/plugin.json
   README.md + DESIGN.md + BUNDLE-SPEC.md + RAIL-SPEC.md  # pattern docs + interface specs
   skills/expo/                        # the deciding role at the pass (routing + exit set)
   skills/execution-eval-station/      # lift-over-base-model value gate (per-fixture, per-tier)
   workflow/*.run.js                   # reference workflow runs (as-executed)
   examples/                           # worked examples w/ real run reports (variance-analysis, generate-tests)
-plugins/ab-managerial-accounting/     # discipline brigade: eval-proven finance skills + menu/router
+plugins/ab-managerial-accounting/     # discipline brigade: mise + expo + service over finance stations
   .claude-plugin/plugin.json
-  MENU.md                             # the routing table (situation -> skill / base-model-covered)
-  skills/managerial-accounting/       # router skill (front of house for the brigade)
-  skills/variance-analysis/           # + 4 more eval-proven skills
+  MENU.md                             # the station roster (situation -> station / base-model-covered)
+  skills/mise/                        # readiness gate (mise.py engine + mise.toml)
+  skills/expo/                        # the composing coordinator (decompose -> select -> compose)
+  skills/service/                     # the mise-gated on/off switch
+  skills/variance-analysis/           # + 4 more eval-proven finance stations
   base-model-covered/                 # tasks the base model covers (exemplar prompts + evidence)
-plugins/ab-data-engineering/          # discipline brigade: eval-proven DE skills + menu/router
+plugins/ab-data-engineering/          # discipline brigade: mise + expo + service over DE stations
   .claude-plugin/plugin.json
   MENU.md
-  skills/pipeline-failure-triage/     # first eval-proven DE skill
+  skills/mise/ + skills/expo/ + skills/service/   # the standard brigade surface
+  skills/pipeline-failure-triage/     # first eval-proven DE station
 ```
 
 ## Plugins
@@ -53,9 +56,9 @@ plugins/ab-data-engineering/          # discipline brigade: eval-proven DE skill
   ```
   /plugin install copilot-studio-agent-builder@ray-plugins
   ```
-- **`skill-agent-brigade`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
-- **`ab-managerial-accounting`** — managerial-accounting discipline brigade (né `discipline-skills`): 5 eval-proven finance skills (`variance-analysis`, `annual-budget-build`, `close-management`, `treasury-liquidity-analysis`, `debt-schedule`), the `managerial-accounting` router skill + `MENU.md` (situation -> skill pairing), and the `base-model-covered/` registry (5 tasks with eval-verified base-model coverage). Only eval-passers ship.
-- **`ab-data-engineering`** — data-engineering discipline brigade: first eval-proven skill `pipeline-failure-triage` (+1.00 lift on silent zero-row failure classification) + the `data-engineering` router skill + `MENU.md` with honest per-task status (held-for-refire / weak-evidence / base-model-covered-pending). Only eval-passers ship.
+- **`ab-skill-factory`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
+- **`ab-managerial-accounting`** — managerial-accounting discipline brigade (né `discipline-skills`): the standard brigade surface — `mise` (readiness gate) + `expo` (the composing coordinator that decomposes a request, fires the finance stations it needs, and synthesizes one answer, incl. compound asks like a full due-diligence picture) + `service` (mise-gated on/off) — over 5 eval-proven finance stations (`variance-analysis`, `annual-budget-build`, `close-management`, `treasury-liquidity-analysis`, `debt-schedule`), plus `MENU.md` (the station roster) and the `base-model-covered/` registry (5 tasks with eval-verified base-model coverage). Only eval-passers ship.
+- **`ab-data-engineering`** — data-engineering discipline brigade: the same `mise` + `expo` + `service` surface over eval-proven DE stations. First station `pipeline-failure-triage` (+1.00 lift on silent zero-row failure classification); `MENU.md` carries honest per-task status for the rest (held-for-refire / weak-evidence / base-model-covered-pending). Only eval-passers ship.
 
 ## Copy it
 

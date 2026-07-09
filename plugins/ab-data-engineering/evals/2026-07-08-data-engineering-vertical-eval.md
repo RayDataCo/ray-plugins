@@ -1,7 +1,7 @@
 # Data-engineering vertical — execution-eval evidence (2026-07-08)
 
 Nine skills (8 data-engineering + one respec riding the same batch) were built by the
-skill-agent-brigade (spec → tests → author ⇄ critic → expo, 9/9 tickets `advance`, all
+ab-skill-factory (spec → tests → author ⇄ critic → expo, 9/9 tickets `advance`, all
 round 1) and measured by the execution-eval station: two-arm ablation (sonnet base vs
 sonnet + skill) on the oracle fixtures from each skill's acceptance contract, n=3
 samples per arm, fixed per-fixture output schemas graded deterministically in code (no

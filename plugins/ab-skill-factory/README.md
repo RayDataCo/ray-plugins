@@ -1,6 +1,15 @@
-# skill-agent-brigade
+# ab-skill-factory
+
+> Renamed from `skill-agent-brigade` (2026-07-09) to match the ab- brigade convention
+> and the house. This is the factory brigade — the first agent brigade, and the one that
+> builds the others. Deeper self-references in the spec docs (DESIGN, MENU-SPEC,
+> ADAPTER-SPEC) and the functional internals (adapter, tests, mise engine, run.js) still
+> carry the old name; those reconcile with the private house's `ab-skill-factory` as a
+> follow-up, tracked with the public↔house alignment.
 
 A **brigade for building skills** — a multi-agent assembly line that turns a one-line skill request plus a competency source into a well-tested, depth-forced `SKILL.md`, and gates slop out with independent critics before the skill ships. (Vocabulary: **station / the pass / expo / rail / ticket** — defined in [DESIGN.md → Naming (canonical)](./DESIGN.md).)
+
+**The expo is the general per-brigade station coordinator** — it knows its brigade's station roster and decides which stations a ticket needs, in what order, plus a finishing touch. This factory's stations are the build stations (spec → tests → author → critic); a **discipline brigade** (e.g. [`ab-managerial-accounting`](../ab-managerial-accounting/), [`ab-data-engineering`](../ab-data-engineering/)) is the same shape with its own domain stations, and every brigade holds the same surface: **mise + expo + service + menu**. Going forward the factory should *emit* that shape when it assembles a discipline brigade, so consistency is generated, not hand-built.
 
 It produces **two assets** every run:
 1. **The brigade itself** (this plugin) — reusable across any skill you want to build.

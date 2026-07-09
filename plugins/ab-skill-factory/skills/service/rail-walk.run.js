@@ -64,7 +64,7 @@ else if (args && typeof args === 'object') { A = args }
 
 const RAIL_DIR = A.rail_dir || '/Users/ray/Projects/phdata-private/cellar/rail'
 const CELLAR_ROOT = A.cellar_root || '/Users/ray/Projects/phdata-private/cellar'
-const PLUGIN_DIR = A.plugin_dir || '/Users/ray/Projects/ray-plugins/plugins/skill-agent-brigade'
+const PLUGIN_DIR = A.plugin_dir || '/Users/ray/Projects/ray-plugins/plugins/ab-skill-factory'
 const WORKER = A.worker || 'rail-walk-reference'
 const NOW = A.now || 'unstamped' // ISO string, log-only — see NOTE above
 const MAX_TICKETS = A.max_tickets || 10

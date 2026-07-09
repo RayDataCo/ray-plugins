@@ -69,5 +69,5 @@ the key was wrong, not the model. It does not affect this task's base-model cove
 
 This coverage claim holds for sonnet-tier, 2026-07-08. On any base-model or tier change adopted
 for finance work, re-run `eval/fixtures.json` for this task against the new model. If any fixture
-drops below 3/3, promote reconciliation to a built skill via the skill-agent-brigade factory,
+drops below 3/3, promote reconciliation to a built skill via the ab-skill-factory factory,
 using the regressing fixture as the oracle case.

@@ -47,5 +47,5 @@ does not change the sonnet-tier coverage claim, which is clean 3/3 across all fo
 
 This coverage claim holds for sonnet-tier, 2026-07-08. On any base-model or tier change adopted
 for finance work, re-run `eval/fixtures.json` for this task against the new model. If any fixture
-drops below 3/3, promote cash-flow-forecasting to a built skill via the skill-agent-brigade
+drops below 3/3, promote cash-flow-forecasting to a built skill via the ab-skill-factory
 factory, using the regressing fixture as the oracle case.

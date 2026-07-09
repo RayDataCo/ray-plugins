@@ -1,0 +1,102 @@
+# mise.toml — AB Managerial Accounting brigade readiness declaration.
+#
+# Single source of truth for "is this brigade ready to serve" (canon D1 pattern):
+# skills/service and skills/mise SKILL.md point back here rather than duplicating
+# the check list. Edit checks here first.
+#
+# Engine: mise.py is vendored from ab-skill-factory canon
+# (sha256 6a680f22ded56e74b44b544cc1d302f958b3e79dc4daf52d85def8a65cbd3774,
+# 2026-07-09). Zero pip deps — runs on a bare python3. Relative targets resolve
+# against this file's own directory (skills/mise/), so the pack is portable with
+# no absolute paths.
+#
+# Credentials: NONE. These are pure-computation finance stations — no external
+# API calls, no MCP servers, no connectors. (A discipline brigade that DID call a
+# connector — e.g. AB Data Engineering + a warehouse — would add an
+# executor="agent" reachability check here. This is where the onboarding gate
+# earns its keep once a pack has a system-of-record dependency.)
+
+# --- Stations present: every skill the expo can compose must be installed ---
+
+[[checks]]
+id          = "station-variance-analysis"
+description = "Station present: variance-analysis"
+executor    = "script"
+type        = "path_exists"
+target      = "../variance-analysis/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — variance-analysis station is missing; the expo cannot route to it"
+
+[[checks]]
+id          = "station-annual-budget-build"
+description = "Station present: annual-budget-build"
+executor    = "script"
+type        = "path_exists"
+target      = "../annual-budget-build/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — annual-budget-build station is missing"
+
+[[checks]]
+id          = "station-close-management"
+description = "Station present: close-management"
+executor    = "script"
+type        = "path_exists"
+target      = "../close-management/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — close-management station is missing"
+
+[[checks]]
+id          = "station-treasury-liquidity-analysis"
+description = "Station present: treasury-liquidity-analysis"
+executor    = "script"
+type        = "path_exists"
+target      = "../treasury-liquidity-analysis/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — treasury-liquidity-analysis station is missing"
+
+[[checks]]
+id          = "station-debt-schedule"
+description = "Station present: debt-schedule"
+executor    = "script"
+type        = "path_exists"
+target      = "../debt-schedule/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — debt-schedule station is missing"
+
+# --- Deciding agent + roster present ---
+
+[[checks]]
+id          = "expo-present"
+description = "Expo present: the composing coordinator"
+executor    = "script"
+type        = "path_exists"
+target      = "../expo/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — expo is missing; the brigade cannot compose stations"
+
+[[checks]]
+id          = "menu-present"
+description = "Menu present: the station roster the expo reads"
+executor    = "script"
+type        = "path_exists"
+target      = "../../MENU.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — MENU.md is missing; the expo has no roster to route against"
+
+[[checks]]
+id          = "base-model-covered-present"
+description = "Base-model-covered registry present (coverage claims + exemplar prompts)"
+executor    = "script"
+type        = "path_exists"
+target      = "../../base-model-covered/README.md"
+severity    = "WARN"
+remedy      = "base-model-covered registry missing — coverage claims for no-skill tasks unavailable; reinstall to restore"
+
+[[checks]]
+id          = "manifest-parses"
+description = "Plugin manifest is valid JSON"
+executor    = "script"
+type        = "file_parses_json"
+target      = "../../.claude-plugin/plugin.json"
+severity    = "FAIL"
+remedy      = "plugin.json is malformed — reinstall the plugin"

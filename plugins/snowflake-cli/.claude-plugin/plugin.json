@@ -1,5 +1,6 @@
 {
   "name": "snowflake-cli",
+  "displayName": "Snowflake CLI",
   "description": "Teaches Claude Code to use the Snowflake CLI (`snow`) — primarily to execute SQL and deploy DDL against Snowflake, plus a full reference of the command tree (connection, object, stage, snowpark, streamlit, app, spcs, cortex, dbt, and more), each mirroring `snow --help` with pointers to the official docs. Entry point: /prime-snow-cli.",
   "version": "0.1.0",
   "author": {
