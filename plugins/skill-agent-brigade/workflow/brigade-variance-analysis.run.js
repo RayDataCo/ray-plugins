@@ -1,7 +1,7 @@
 /* ============================================================================
  * REFERENCE IMPLEMENTATION — the exact workflow run that produced the
  * variance-analysis worked example (examples/variance-analysis/ + the installed
- * skill at plugins/discipline-skills/skills/variance-analysis/).
+ * skill at plugins/ab-managerial-accounting/skills/variance-analysis/).
  *
  * Runs the 4-station pass (spec -> tests -> author -> critic) with a convergence
  * loop, via the Claude Code Workflow tool. Result on this run: passed=true,
