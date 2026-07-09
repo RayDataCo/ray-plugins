@@ -13,10 +13,10 @@
 # state.
 
 [roots]
-# Re-point these two paths to move this declaration to a different cellar
-# install without touching any check below.
-rail   = "~/rdco-cellar/rail"
-cellar = "~/rdco-cellar"
+# The cellar is read from the CELLAR_ROOT env var — the same var the runtime
+# (cellar.py, the walk) resolves it from. Set CELLAR_ROOT to your cellar path;
+rail   = "${CELLAR_ROOT}/rail"
+cellar = "${CELLAR_ROOT}"
 
 # --- Ports: rail + cellar reachable and writable ---
 
@@ -27,7 +27,7 @@ executor    = "script"
 type        = "path_exists"
 target      = "{rail}"
 severity    = "FAIL"
-remedy      = "mkdir -p {rail} (or re-point [roots].rail in mise.toml if the rail lives elsewhere)"
+remedy      = "set CELLAR_ROOT to your cellar path (Claude Code/Cowork), then mkdir -p {rail}"
 
 [[checks]]
 id          = "rail-root-writable"
@@ -45,7 +45,7 @@ executor    = "script"
 type        = "path_exists"
 target      = "{cellar}"
 severity    = "FAIL"
-remedy      = "mkdir -p {cellar} (or re-point [roots].cellar in mise.toml)"
+remedy      = "set CELLAR_ROOT to your cellar path (Claude Code/Cowork), then mkdir -p {cellar}"
 
 [[checks]]
 id          = "cellar-root-writable"

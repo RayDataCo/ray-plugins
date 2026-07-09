@@ -2,7 +2,7 @@
 
 Every test in this package must operate only inside pytest's tmp_path
 fixture (or a subdirectory of it) — never against the real cellar/rail
-(~/rdco-cellar/...) and never against any path outside
+($CELLAR_ROOT/...) and never against any path outside
 the per-test tmp dir. That's the negative-control discipline the build
 task calls for: a broken test fixture must not be able to touch, or be
 confused with, the real brigade's declaration.

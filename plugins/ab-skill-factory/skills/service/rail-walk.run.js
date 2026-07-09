@@ -62,8 +62,8 @@ let A = {}
 if (typeof args === 'string') { try { A = JSON.parse(args) } catch (e) { A = {} } }
 else if (args && typeof args === 'object') { A = args }
 
-const RAIL_DIR = A.rail_dir || '~/rdco-cellar/rail'
-const CELLAR_ROOT = A.cellar_root || '~/rdco-cellar'
+const RAIL_DIR = A.rail_dir || (process.env.CELLAR_ROOT ? process.env.CELLAR_ROOT + '/rail' : '${CELLAR_ROOT}/rail')
+const CELLAR_ROOT = A.cellar_root || process.env.CELLAR_ROOT || '${CELLAR_ROOT}'
 const PLUGIN_DIR = A.plugin_dir || '${HOME}/Projects/ray-plugins/plugins/ab-skill-factory'
 const WORKER = A.worker || 'rail-walk-reference'
 const NOW = A.now || 'unstamped' // ISO string, log-only — see NOTE above
