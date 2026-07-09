@@ -8,33 +8,39 @@
   "plugins": [
     {
       "name": "rdco-example",
+      "displayName": "RDCO Example",
       "source": "./plugins/rdco-example",
       "description": "Minimal example plugin: two example skills (rdco-greeting + rdco-hello), skills-only. Copy this folder as a template for your own plugin."
     },
     {
       "name": "copilot-studio-agent-builder",
+      "displayName": "Copilot Studio Agent Builder",
       "source": "./plugins/copilot-studio-agent-builder",
       "description": "Guides the full lifecycle of building a Microsoft Copilot Studio agent (plan -> build -> test -> publish -> maintain) and emits five standard deliverables. Standardizes on generative orchestration; bakes in verified Microsoft Learn corrections + safe defaults (Work IQ off, newest Sonnet, grounded internal agents)."
     },
     {
       "name": "snowflake-cli",
+      "displayName": "Snowflake CLI",
       "source": "./plugins/snowflake-cli",
       "description": "Teaches Claude Code to use the Snowflake CLI (`snow`) — primarily to execute SQL and deploy DDL — via a /prime-snow-cli index skill plus reference files that mirror the full `snow` command tree (connection, object, stage, snowpark, streamlit, app, spcs, cortex, dbt, git, notebook, dcm) with pointers to the official docs."
     },
     {
-      "name": "skill-agent-brigade",
-      "source": "./plugins/skill-agent-brigade",
-      "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / reroute-to-steward / kill). Ships the steward (front-of-house context curation), the expo, reference workflows (single-ticket + rail queue-walk), and the variance-analysis worked example."
+      "name": "ab-skill-factory",
+      "displayName": "AB Skill Factory",
+      "source": "./plugins/ab-skill-factory",
+      "description": "The factory brigade — the first agent brigade, and the one that manufactures skills and whole discipline brigades. A multi-agent assembly line (spec -> tests -> author -> critic, convergence loop) that forces depth in from a competency source and gates slop with independent critics. The expo is the general per-brigade station coordinator; ships the steward, expo, the standard mise + service surface, reference workflows, and the variance-analysis worked example. (Renamed from skill-agent-brigade.)"
     },
     {
       "name": "ab-managerial-accounting",
+      "displayName": "AB Managerial Accounting",
       "source": "./plugins/ab-managerial-accounting",
-      "description": "Managerial-accounting agent brigade (né discipline-skills): 5 eval-proven finance skills (variance-analysis, annual-budget-build, close-management, treasury-liquidity-analysis, debt-schedule), a menu/router skill that pairs a situation to the right skill, and a base-model-covered registry (5 tasks with eval-verified base-model coverage). Every skill ships with two-arm execution-eval evidence."
+      "description": "Managerial-accounting agent brigade (né discipline-skills): the standard brigade surface — mise (readiness gate) + expo (composes the finance stations for a request, incl. compound asks like a full due-diligence picture) + service — over 5 eval-proven finance stations (variance-analysis, annual-budget-build, close-management, treasury-liquidity-analysis, debt-schedule) plus a base-model-covered registry. Every station ships with two-arm execution-eval evidence."
     },
     {
       "name": "ab-data-engineering",
+      "displayName": "AB Data Engineering",
       "source": "./plugins/ab-data-engineering",
-      "description": "Data-engineering agent brigade: eval-proven DE skills plus a menu/router skill. First skill: pipeline-failure-triage (+1.00 lift — classifies silent zero-row failures the base model misreads as transient infra). Menu carries honest status for the rest of the vertical (held-for-refire, weak-evidence, base-model-covered-pending)."
+      "description": "Data-engineering agent brigade: the standard brigade surface (mise + expo + service) over eval-proven DE stations. First station: pipeline-failure-triage (+1.00 lift — classifies silent zero-row failures the base model misreads as transient infra). Menu carries honest status for the rest of the vertical (held-for-refire, weak-evidence, base-model-covered-pending)."
     }
   ]
 }

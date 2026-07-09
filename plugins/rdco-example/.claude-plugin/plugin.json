@@ -1,6 +1,7 @@
 {
   "name": "rdco-example",
-  "description": "Minimal example plugin from Ray Data Co \u2014 demonstrates two skills bundled in one plugin (skills-only; RDCO standardizes on skills over slash commands).",
+  "displayName": "RDCO Example",
+  "description": "Minimal example plugin from Ray Data Co — demonstrates two skills bundled in one plugin (skills-only; RDCO standardizes on skills over slash commands).",
   "version": "0.2.0",
   "author": {
     "name": "Ray Data Co",

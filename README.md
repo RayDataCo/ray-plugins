@@ -27,7 +27,7 @@ plugins/copilot-studio-agent-builder/ # real plugin: build Microsoft Copilot Stu
     templates/                        # the 4 per-agent deliverable templates (#2-#5)
   skills/copilot-studio-pull-runbook/   # skill: pull the runbook into the current project
   skills/copilot-studio-ground-runbook/ # skill: re-ground the runbook in the latest MS docs
-plugins/skill-agent-brigade/          # real plugin: the agent brigade that manufactures skills
+plugins/ab-skill-factory/          # real plugin: the agent brigade that manufactures skills
   .claude-plugin/plugin.json
   README.md + DESIGN.md + BUNDLE-SPEC.md + RAIL-SPEC.md  # pattern docs + interface specs
   skills/expo/                        # the deciding role at the pass (routing + exit set)
@@ -53,7 +53,7 @@ plugins/ab-data-engineering/          # discipline brigade: eval-proven DE skill
   ```
   /plugin install copilot-studio-agent-builder@ray-plugins
   ```
-- **`skill-agent-brigade`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
+- **`ab-skill-factory`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
 - **`ab-managerial-accounting`** — managerial-accounting discipline brigade (né `discipline-skills`): 5 eval-proven finance skills (`variance-analysis`, `annual-budget-build`, `close-management`, `treasury-liquidity-analysis`, `debt-schedule`), the `managerial-accounting` router skill + `MENU.md` (situation -> skill pairing), and the `base-model-covered/` registry (5 tasks with eval-verified base-model coverage). Only eval-passers ship.
 - **`ab-data-engineering`** — data-engineering discipline brigade: first eval-proven skill `pipeline-failure-triage` (+1.00 lift on silent zero-row failure classification) + the `data-engineering` router skill + `MENU.md` with honest per-task status (held-for-refire / weak-evidence / base-model-covered-pending). Only eval-passers ship.
 

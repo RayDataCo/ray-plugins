@@ -1,6 +1,6 @@
 # Finance vertical — execution-eval evidence (2026-07-08)
 
-Ten finance skills were built by the skill-agent-brigade (spec → tests → author ⇄ critic →
+Ten finance skills were built by the ab-skill-factory (spec → tests → author ⇄ critic →
 expo, all tickets `advance`) and then measured by the execution-eval station: two-arm
 ablation (base model vs base model + skill) on the oracle fixtures from each skill's
 acceptance contract, n=3 samples per arm, fixed per-fixture output schemas graded

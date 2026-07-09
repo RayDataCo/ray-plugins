@@ -1,0 +1,10 @@
+{
+  "name": "ab-skill-factory",
+  "displayName": "AB Skill Factory",
+  "description": "The factory brigade — the first agent brigade, and the one that manufactures skills (and, going forward, whole discipline brigades). A multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that turns a one-line request + a competency source into a depth-forced, well-tested SKILL.md and gates slop with independent critics. Stations hand off through file artifacts; the expo — the general per-brigade station coordinator — routes each ticket (advance / refire-to-author / reroute-to-spec / reroute-to-steward / kill). Ships the steward (front-of-house context curation), the expo, the standard mise + service surface, reference workflows, and a worked example (variance-analysis). Renamed from skill-agent-brigade to match the ab- brigade convention and the house.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}

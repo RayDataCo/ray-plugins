@@ -3,10 +3,13 @@
 **Status:** live · 1 skill shipped (eval-proven) · rest of the vertical tracked below
 with honest status
 
-This is the packaged menu (source of truth, versioned with the plugin). It maps a
-situation to the right skill — the routing knowledge the `data-engineering` router
-skill serves at runtime. Only eval-passers ship as skills (see `evals/`); everything
-else on the menu carries its measured status.
+This is the packaged menu (source of truth, versioned with the plugin). It is the
+**station roster** the [expo](skills/expo/) reads to route and compose a request. Only
+eval-passers ship as stations (see `evals/`); everything else on the menu carries its
+measured status, and the expo reports that status honestly rather than faking a station.
+
+Brigade surface: `mise` (readiness gate) → `service` (on/off) → `expo` (composes the
+stations below).
 
 ## Route to a skill (live, eval-proven)
 

@@ -3,11 +3,16 @@
 **Status:** live · 5 skills shipped (eval-proven) · 5 tasks base-model-covered (registry) ·
 lineage: continues `discipline-skills` 0.2.1
 
-This is the packaged menu (source of truth, versioned with the plugin). It maps a
-situation to the right skill — the routing knowledge the `managerial-accounting` router
-skill serves at runtime. Every skill listed here shipped with two-arm execution-eval
-evidence (see `evals/`); every base-model-covered task listed here carries eval-verified
-coverage (see `base-model-covered/`).
+This is the packaged menu (source of truth, versioned with the plugin). It is the
+**station roster** the [expo](skills/expo/) reads to decompose a request, select which
+stations to fire, and compose their outputs. Every station listed here shipped with
+two-arm execution-eval evidence (see `evals/`); every base-model-covered task carries
+eval-verified coverage (see `base-model-covered/`).
+
+Brigade surface: `mise` (readiness gate) → `service` (on/off) → `expo` (composes the
+stations below). A single-station request routes to one skill; a compound request (e.g.
+"complete due-diligence financial picture, last two years") fires several stations and
+the expo synthesizes one answer.
 
 ## Route to a skill (live, eval-proven)
 
