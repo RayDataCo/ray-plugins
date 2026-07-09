@@ -17,7 +17,26 @@
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
-| **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | front of house checks the pass for finished plates and delivers | **CONTRACT PINNED, absorbed into the steward — scan-only (founder simplification)**: expo files at terminal ack (rail clear, zero residue); steward sweep scans filed tickets for terminal-without-`close-out:`-signature via the canon adapter's `find_unclosed()`, delivers, signs. Sweep = [skills/steward/SKILL.md](./skills/steward/SKILL.md) "The close-out sweep" |
+| **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | front of house checks the pass for finished plates and delivers | **CONTRACT PINNED, absorbed into the steward — scan-only (founder simplification)**: expo files at terminal ack (rail clear, zero residue); steward sweep scans filed tickets for terminal-without-`close-out:`-signature via the canon adapter's `find_unclosed()`, delivers, signs. Sweep = [skills/steward/SKILL.md](../ab-registrar/skills/steward/SKILL.md) "The close-out sweep" |
+
+## Two brigade kinds — kitchen brigades and house roles *(amendment 2026-07-06, with the ab-registrar extraction)*
+
+The five commands above describe a **kitchen brigade** — a thing that cooks: stations behind an
+expo, a walk that leases tickets, a menu it answers discovery with. The house also has
+**house roles**: install units that coordinate or keep records but never work a ticket. A house
+role ships `mise` + its role verbs and NOTHING kitchen-shaped — no `service` (it takes no rail
+lock), no stations, no `fire` (fire is an invocation mode of an expo), and no menu of its own
+(it is not orderable over the rail). Its mise declares only its own failure domain.
+
+First house role: **the registrar** ([../ab-registrar/](../ab-registrar/README.md)) — steward
+(intake/rework/close-out), registry (menu catalog, scan-on-demand), orders (open-orders
+report). The steward moved there from this plugin 2026-07-06; it was always declared
+brigade-decoupled, and the packaging now matches. Forcing a hollow `service` verb onto a house
+role for uniformity would be checkbox theater — the split is the honest contract.
+
+*(This "kitchen vs house-role" split is the top-level distinction. Within kitchen brigades there
+is a further split — **build** vs **discipline** brigades — see the Factory obligation section
+and [DISCIPLINE-BRIGADE-TEMPLATE.md](./DISCIPLINE-BRIGADE-TEMPLATE.md).)*
 
 ## Command contracts
 
@@ -116,7 +135,7 @@ pass-shelf draft): no push, so channel knowledge never enters the kitchen, and n
    **files the ticket to its subject in the cellar** — the rail is clear of it from that instant.
    Zero residue; nothing extra to drop or clean. (Filing lives in the canon adapter's `ack()`.)
 2. **FOH side — the steward's close-out sweep** (procedure now written:
-   [skills/steward/SKILL.md](./skills/steward/SKILL.md) § "The close-out sweep"): scan recently-filed
+   [skills/steward/SKILL.md](../ab-registrar/skills/steward/SKILL.md) § "The close-out sweep"): scan recently-filed
    tickets for terminal status without a `- close-out:` signature (`find_unclosed()` in the canon
    adapter) → read the filed ticket (the decision trace IS the communication context) → respond to
    the requester on the intake-recorded channel (v1 default: the operator directly) → **sign the

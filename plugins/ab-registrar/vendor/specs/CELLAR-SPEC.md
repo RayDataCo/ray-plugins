@@ -34,7 +34,7 @@ Conventions that make the flat parts navigable:
 
 ## The two flows
 
-- **Gather** (steward-side, read): search and pull context when writing a ticket. The steward's "cellar-first, careful-external-second" sourcing rule ([skills/steward/](../ab-registrar/skills/steward/)) runs against this port.
+- **Gather** (steward-side, read): search and pull context when writing a ticket. The steward's "cellar-first, careful-external-second" sourcing rule ([ab-registrar/skills/steward/](../ab-registrar/skills/steward/)) runs against this port.
 - **Land** (brigade-side, write): every artifact a brigade produces — research briefs, scraped snapshots, built skills' eval reports, assessment phase contracts, sales collateral — lands here with provenance. Landing is what makes an output *house knowledge* instead of a file lost in a run directory.
 
 ## The cellar interface
@@ -58,7 +58,7 @@ landed: 2026-07-02T05:40:00-04:00
 kind: company-jobs-snapshot        # what this artifact is, per the landing brigade's menu
 subject: companies/acme          # canonical subject key (see identity, below)
 produced_by:
-  brigade: company-research
+  brigade: ab-company-research
   ticket: acme-research-2026-07-02   # the build record that produced it
   station: job-scraping
 supersedes: null                    # or the ref this replaces (append-only chain)
