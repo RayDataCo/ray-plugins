@@ -52,7 +52,7 @@ resolve_bundle(ref) -> { manifest, resolved_sources[] }
 
 ## Where bundles come from
 
-The **steward** ([skills/steward/](../ab-registrar/skills/steward/)) — the brigade's front-of-house role — produces the payload: pairing the request to the use-case catalog, gathering + curating from files, URLs, MCP, retrieval (vault-first, careful-external second). All the retrieval smarts live there — **inside** the steward, behind the ticket-contract port — not in the brigade. The brigade only ever reads a resolved payload. That boundary is what keeps the brigade domain-agnostic.
+The **steward** ([ab-registrar/skills/steward/](../ab-registrar/skills/steward/)) — the brigade's front-of-house role — produces the payload: pairing the request to the use-case catalog, gathering + curating from files, URLs, MCP, retrieval (vault-first, careful-external second). All the retrieval smarts live there — **inside** the steward, behind the ticket-contract port — not in the brigade. The brigade only ever reads a resolved payload. That boundary is what keeps the brigade domain-agnostic.
 
 ## What this is NOT
 

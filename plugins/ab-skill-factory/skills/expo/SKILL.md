@@ -17,7 +17,7 @@ description: >-
 
 The deciding agent at **the pass** — the layer of the brigade that runs one ticket through the stations. The four stations (spec, test, author, critic) each do one job; the expo is what makes them a *loop* — it owns sequencing, phase state, the convergence (exit-set) decision, and the backlog walk. Its authority rests on an information advantage the single-shot critic lacks: it holds phase state, ticket history, and cross-station context.
 
-The expo routes every ticket using one closed **exit set**: `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`. (`escalate` on `max_rounds` is a budget stop that hands the ticket to a human — a pause awaiting a human's exit call, not a sixth exit.) `reroute-to-steward` closes the front-end loop: when the *context* is the problem rather than the build, the ticket goes back to the [steward](../steward/) as `needs-context`.
+The expo routes every ticket using one closed **exit set**: `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill`. (`escalate` on `max_rounds` is a budget stop that hands the ticket to a human — a pause awaiting a human's exit call, not a sixth exit.) `reroute-to-steward` closes the front-end loop: when the *context* is the problem rather than the build, the ticket goes back to the [steward](../../../ab-registrar/skills/steward/) as `needs-context`.
 
 ## Inputs
 

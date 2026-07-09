@@ -1,4 +1,4 @@
-# skill-agent-brigade — Working Design (v2)
+# ab-skill-factory — Working Design (v2)
 
 > **Status: living doc, co-developed.** PR #6 shipped v1 (the working pass + the variance-analysis worked example). This captures the v2 architecture as it's being designed. Open questions are at the bottom — edit freely.
 
@@ -6,11 +6,11 @@
 
 The settled brigade vocabulary — one place, one definition each. Use these exact terms in code and prose; this block is the single source of truth.
 
-- **brigade** — the whole system: the multi-agent assembly line that builds skills (this plugin, `skill-agent-brigade`).
+- **brigade** — the whole system: the multi-agent assembly line that builds skills (this plugin, `ab-skill-factory`).
 - **station** — one atomic skill / one phase (spec, test, author, critic). Does its single job in isolation; hands off via a file artifact.
 - **the pass** — the layer that runs one ticket through the stations: sequencing, phase state, the convergence (rework) loop.
 - **expo** — the deciding agent *at* the pass. Routes each ticket using the exit set, holding the phase/ticket state and cross-station context a single-shot critic lacks. (The pass is the layer; the expo is the role inside it.)
-- **steward** — the front-of-house role: pairs a request to the menu (use-case catalog), gathers + curates context from the cellar (vault-first, careful-external second), writes a contract-valid ticket, and enqueues it. Also repairs `needs-context` tickets. (See skills/steward/.)
+- **steward** — the front-of-house role: pairs a request to the menu (use-case catalog), gathers + curates context from the cellar (vault-first, careful-external second), writes a contract-valid ticket, and enqueues it. Also repairs `needs-context` tickets. (See ../ab-registrar/skills/steward/.)
 - **rail** — the queue/batch layer: the pluggable mutable ticket store with lease/ack semantics plus the loop that fans the pass over a backlog of tickets (see RAIL-SPEC.md).
 - **ticket** — the unit of work flowing through the brigade, defined once in **TICKET-CONTRACT.md** (the FOH↔brigade port): inline context manifest + Order + snapshot + work log + artifacts; it *is* the context bundle (payload schema: BUNDLE-SPEC.md), marked up at each station hop.
 - **menu** — a brigade's published input contract: artifact types offered + per-type payload requirements. Per-brigade asset, expo-authored via a discovery ticket (`artifact: menu`), published beside the rail, read by stewards (see MENU-SPEC.md). The envelope (TICKET-CONTRACT) is universal; the menu is what's kitchen-specific.
@@ -57,7 +57,7 @@ The taxonomy isn't cosmetic — **type drives the input contract and the eval ha
 
 ## 4. Context bundles and the steward
 
-The brigade's input is **the ticket itself** — one canonical shape, defined in [TICKET-CONTRACT.md](./TICKET-CONTRACT.md): identity + inline typed-source context manifest + `## Order`. (Earlier iterations here — `{name, dept, competency_excerpt}`, then `{name, context_bundle_ref}` — are both retired; the contract's Supersedes table records them.) The **steward** (skills/steward/) builds the payload. This keeps the brigade domain-agnostic and makes context-acquisition its own reusable capability.
+The brigade's input is **the ticket itself** — one canonical shape, defined in [TICKET-CONTRACT.md](./TICKET-CONTRACT.md): identity + inline typed-source context manifest + `## Order`. (Earlier iterations here — `{name, dept, competency_excerpt}`, then `{name, context_bundle_ref}` — are both retired; the contract's Supersedes table records them.) The **steward** (../ab-registrar/skills/steward/) builds the payload. This keeps the brigade domain-agnostic and makes context-acquisition its own reusable capability.
 
 **The symmetry:** the steward (acquire + distill the depth source, front of house) → the brigade (build the artifact, back of house). The front step is a general "learn the domain / gather the inputs" move that recurs across artifact types, not just skills — and phase-0's `reroute-to-steward` closes the front-end loop the way `refire-to-author` closes the back-end one.
 

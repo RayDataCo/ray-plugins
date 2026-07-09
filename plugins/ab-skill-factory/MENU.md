@@ -1,10 +1,10 @@
 ---
-menu_of: skill-agent-brigade
+menu_of: ab-skill-factory
 version: 3
 generated_by: hand-maintained   # v1 — the expo's first discovery answer will derive from this + live introspection
 ---
 
-# Menu — skill-agent-brigade
+# Menu — ab-skill-factory
 
 What this brigade can do for you, and what your ticket must carry so the kitchen can cook from it. Envelope shape (identity, status, context-manifest, Gate A) is universal — see [TICKET-CONTRACT.md](./TICKET-CONTRACT.md); this menu covers only what is specific to ordering from *this* brigade.
 
@@ -64,7 +64,7 @@ What this brigade can do for you, and what your ticket must carry so the kitchen
 
 **Status:** live
 
-**What you get:** this document, regenerated — the expo introspects stations, critic axes, and eval config, bumps `version`, publishes to `<cellar>/brigades/skill-agent-brigade/menu.md`.
+**What you get:** this document, regenerated — the expo introspects stations, critic axes, and eval config, bumps `version`, publishes to `<cellar>/brigades/ab-skill-factory/menu.md`.
 
 **What the ticket must carry:** one pointer at this brigade's home (plugin dir). Order = "what can your brigade do?"
 

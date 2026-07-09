@@ -1,4 +1,4 @@
-# mise.toml — the skill-agent-brigade factory's own readiness declaration.
+# mise.toml — the ab-skill-factory factory's own readiness declaration.
 #
 # This is the single source of truth for "is this brigade ready to go in
 # service" (Decision D1, 2026-07-03): skills/service/SKILL.md's declared-deps
@@ -137,6 +137,6 @@ description      = "Published menu is fresh — packaged MENU.md (source) hash m
 executor         = "script"
 type             = "menu_freshness"
 target           = "../../MENU.md"
-published_target = "{cellar}/brigades/skill-agent-brigade/menu.md"
+published_target = "{cellar}/brigades/ab-skill-factory/menu.md"
 severity         = "WARN"
 remedy           = "re-hang an `artifact: menu` discovery ticket — the expo republishes from the current packaged source and re-stamps source_hash (MENU-SPEC.md)"

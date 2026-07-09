@@ -1,0 +1,160 @@
+# mise.toml — the ab-registrar's readiness declaration.
+#
+# The registrar is a HOUSE ROLE, not a kitchen brigade (BRIGADE-INTERFACE.md,
+# house-role amendment 2026-07-06): it takes no rail lock, works no ticket,
+# and has no stations — so this declaration checks only the front-of-house
+# failure domain: can the steward reach the rail and cellar, are the vendored
+# canon files (adapter, engine, specs) undrifted, and is there at least one
+# published menu to pair orders against. No walk runtime, no station checks,
+# no menu-freshness (the registrar publishes no menu of its own — it is the
+# menus' reader).
+#
+# Credentials: NONE. Front of house operates entirely on local rail + cellar
+# state.
+
+[roots]
+# Re-point these two paths to move this declaration to a different cellar
+# install without touching any check below.
+rail   = "~/rdco-cellar/rail"
+cellar = "~/rdco-cellar"
+
+# --- Ports: rail + cellar reachable and writable ---
+
+[[checks]]
+id          = "rail-root-exists"
+description = "Rail root exists — the steward enqueues tickets here"
+executor    = "script"
+type        = "path_exists"
+target      = "{rail}"
+severity    = "FAIL"
+remedy      = "mkdir -p {rail} (or re-point [roots].rail in mise.toml if the rail lives elsewhere)"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail root is writable — enqueue and rework re-enqueue write here"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "FAIL"
+remedy      = "fix permissions on {rail} (chmod/chown) — the steward cannot hang tickets on a read-only rail"
+
+[[checks]]
+id          = "cellar-root-exists"
+description = "Cellar root exists — context gathering reads here; close-out signatures write here"
+executor    = "script"
+type        = "path_exists"
+target      = "{cellar}"
+severity    = "FAIL"
+remedy      = "mkdir -p {cellar} (or re-point [roots].cellar in mise.toml)"
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar root is writable — the close-out sweep signs filed tickets in place"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "FAIL"
+remedy      = "fix permissions on {cellar} (chmod/chown) — filed tickets cannot be close-out signed on a read-only cellar"
+
+[[checks]]
+id          = "cellar-env-agrees"
+description = "$CELLAR_ROOT is set and points at the same cellar as [roots].cellar — every front-of-house verb resolves the cellar from the env var at run time; this declaration is what mise checks. If they disagree, mise PASSes against one cellar while the steward serves another"
+executor    = "agent"
+type        = "env_root_agreement"
+target      = "CELLAR_ROOT == [roots].cellar"
+severity    = "FAIL"
+remedy      = "export CELLAR_ROOT to match [roots].cellar (e.g. via the workspace .claude/settings.json env block), or re-point the declaration"
+
+# --- Runtime: Gate A + the close-out sweep are plain python ---
+
+[[checks]]
+id          = "python3-on-path"
+description = "python3 is on PATH — ticket_lint (Gate A) and find_unclosed (close-out sweep) run via the vendored stdlib-only rail_adapter"
+executor    = "script"
+type        = "command_on_path"
+target      = "python3"
+severity    = "FAIL"
+remedy      = "install python3 — the steward cannot Gate-A-check or sweep close-outs without it (the vendored adapter is stdlib-only; no pip deps)"
+
+# --- Vendored canon undrifted (ADAPTER-SPEC distribution discipline) ---
+
+[[checks]]
+id           = "rail-adapter-vendor-stamp"
+description  = "vendor/rail_adapter.py matches its vendoring stamp — no drift from canon"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/rail_adapter.py"
+stamp_target = "../../vendor/rail_adapter.py.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor: copy ab-skill-factory/adapter/rail_adapter.py over vendor/rail_adapter.py verbatim and re-run its stamp() — never hand-edit the vendored copy"
+
+[[checks]]
+id           = "mise-py-vendor-stamp"
+description  = "this plugin's own skills/mise/mise.py matches its vendoring stamp — no drift from canon"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "mise.py"
+stamp_target = "mise.py.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor: copy ab-skill-factory/skills/mise/mise.py over skills/mise/mise.py verbatim and re-stamp"
+
+[[checks]]
+id           = "ticket-contract-vendor-stamp"
+description  = "vendor/specs/TICKET-CONTRACT.md matches its vendoring stamp — the steward's Gate A binds to this contract"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/specs/TICKET-CONTRACT.md"
+stamp_target = "../../vendor/specs/TICKET-CONTRACT.md.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor from ab-skill-factory/TICKET-CONTRACT.md (canon home) and re-stamp"
+
+[[checks]]
+id           = "menu-spec-vendor-stamp"
+description  = "vendor/specs/MENU-SPEC.md matches its vendoring stamp — the registry verb binds to this publication contract"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/specs/MENU-SPEC.md"
+stamp_target = "../../vendor/specs/MENU-SPEC.md.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor from ab-skill-factory/MENU-SPEC.md (canon home) and re-stamp"
+
+[[checks]]
+id           = "rail-spec-vendor-stamp"
+description  = "vendor/specs/RAIL-SPEC.md matches its vendoring stamp"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/specs/RAIL-SPEC.md"
+stamp_target = "../../vendor/specs/RAIL-SPEC.md.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor from ab-skill-factory/RAIL-SPEC.md (canon home) and re-stamp"
+
+[[checks]]
+id           = "cellar-spec-vendor-stamp"
+description  = "vendor/specs/CELLAR-SPEC.md matches its vendoring stamp"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/specs/CELLAR-SPEC.md"
+stamp_target = "../../vendor/specs/CELLAR-SPEC.md.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor from ab-skill-factory/CELLAR-SPEC.md (canon home) and re-stamp"
+
+[[checks]]
+id           = "bundle-spec-vendor-stamp"
+description  = "vendor/specs/BUNDLE-SPEC.md matches its vendoring stamp — context source entries the steward writes are schema'd here"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../../vendor/specs/BUNDLE-SPEC.md"
+stamp_target = "../../vendor/specs/BUNDLE-SPEC.md.stamp.json"
+severity     = "WARN"
+remedy       = "re-vendor from ab-skill-factory/BUNDLE-SPEC.md (canon home) and re-stamp"
+
+# --- The registry has something to read ---
+
+[[checks]]
+id          = "published-menus-readable"
+description = "At least one published menu exists at {cellar}/brigades/*/menu.md and parses (MENU-SPEC frontmatter) — with zero menus the steward can only hang discovery tickets"
+executor    = "agent"
+type        = "registry_readable"
+target      = "{cellar}/brigades/*/menu.md"
+severity    = "WARN"
+remedy      = "hang `artifact: menu` discovery tickets and put the target brigades in service — the registry verb offers this directly"

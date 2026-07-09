@@ -28,7 +28,13 @@
       "name": "ab-skill-factory",
       "displayName": "AB Skill Factory",
       "source": "./plugins/ab-skill-factory",
-      "description": "The factory brigade — the first agent brigade, and the one that manufactures skills and whole discipline brigades. A multi-agent assembly line (spec -> tests -> author -> critic, convergence loop) that forces depth in from a competency source and gates slop with independent critics. The expo is the general per-brigade station coordinator; ships the steward, expo, the standard mise + service surface, reference workflows, and the variance-analysis worked example. (Renamed from skill-agent-brigade.)"
+      "description": "The factory brigade — the first agent brigade, and the one that manufactures skills and whole discipline brigades. A multi-agent assembly line (spec -> tests -> author -> critic, convergence loop) that forces depth in from a competency source and gates slop with independent critics. The expo is the general per-brigade station coordinator; ships the expo, the build stations, the standard mise + service surface, reference workflows, and the variance-analysis worked example. (Renamed from skill-agent-brigade.)"
+    },
+    {
+      "name": "ab-registrar",
+      "displayName": "AB Registrar",
+      "source": "./plugins/ab-registrar",
+      "description": "The registrar — the house's first 'house role' (a coordinator/record-keeper install unit, not a kitchen brigade that cooks tickets). Ships mise + three role skills: steward (front-of-house intake, context curation, the needs-context rework loop, and the close-out sweep — moved here from the factory), registry (the menu catalog, scan-on-demand over published menus), and orders (open-orders report). No service/fire/stations — a house role never works a ticket."
     },
     {
       "name": "ab-managerial-accounting",
