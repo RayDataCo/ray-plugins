@@ -34,9 +34,16 @@ plugins/skill-agent-brigade/          # real plugin: the agent brigade that manu
   skills/execution-eval-station/      # lift-over-base-model value gate (per-fixture, per-tier)
   workflow/*.run.js                   # reference workflow runs (as-executed)
   examples/                           # worked examples w/ real run reports (variance-analysis, generate-tests)
-plugins/discipline-skills/            # real plugin: skills produced BY the brigade
+plugins/ab-managerial-accounting/     # discipline brigade: eval-proven finance skills + menu/router
   .claude-plugin/plugin.json
-  skills/variance-analysis/           # first produced skill (Finance / standard-costing variances)
+  MENU.md                             # the routing table (situation -> skill / base-model-covered)
+  skills/managerial-accounting/       # router skill (front of house for the brigade)
+  skills/variance-analysis/           # + 4 more eval-proven skills
+  base-model-covered/                 # tasks the base model covers (exemplar prompts + evidence)
+plugins/ab-data-engineering/          # discipline brigade: eval-proven DE skills + menu/router
+  .claude-plugin/plugin.json
+  MENU.md
+  skills/pipeline-failure-triage/     # first eval-proven DE skill
 ```
 
 ## Plugins
@@ -47,7 +54,8 @@ plugins/discipline-skills/            # real plugin: skills produced BY the brig
   /plugin install copilot-studio-agent-builder@ray-plugins
   ```
 - **`skill-agent-brigade`** — the agent brigade that manufactures Claude skills: stations (spec → tests → author → critic) coordinated at **the pass** by an **expo** that decides routing via a closed exit set (`advance · refire-to-author · reroute-to-spec · kill`), pulling mutable **tickets** off a **rail**. Includes the `execution-eval-station` (measures a produced skill's lift over the base model, per-fixture and per-tier), a deterministic skill-lint gate, full pattern docs (README/DESIGN/BUNDLE-SPEC/RAIL-SPEC), reference workflow runs, and two worked examples with real measured-lift reports.
-- **`discipline-skills`** — professional discipline skills produced by the brigade. First skill: `variance-analysis` (Finance / standard-costing variances). Skills accrue here as the backlog is built out.
+- **`ab-managerial-accounting`** — managerial-accounting discipline brigade (né `discipline-skills`): 5 eval-proven finance skills (`variance-analysis`, `annual-budget-build`, `close-management`, `treasury-liquidity-analysis`, `debt-schedule`), the `managerial-accounting` router skill + `MENU.md` (situation -> skill pairing), and the `base-model-covered/` registry (5 tasks with eval-verified base-model coverage). Only eval-passers ship.
+- **`ab-data-engineering`** — data-engineering discipline brigade: first eval-proven skill `pipeline-failure-triage` (+1.00 lift on silent zero-row failure classification) + the `data-engineering` router skill + `MENU.md` with honest per-task status (held-for-refire / weak-evidence / base-model-covered-pending). Only eval-passers ship.
 
 ## Copy it
 

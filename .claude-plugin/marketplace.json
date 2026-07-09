@@ -27,9 +27,14 @@
       "description": "A brigade for building skills: a multi-agent assembly line (spec -> tests -> author -> critic, with a convergence loop) that forces depth in from a competency source and gates slop with independent critics. Stations hand off through file artifacts; the expo routes each ticket (advance / refire-to-author / reroute-to-spec / reroute-to-steward / kill). Ships the steward (front-of-house context curation), the expo, reference workflows (single-ticket + rail queue-walk), and the variance-analysis worked example."
     },
     {
-      "name": "discipline-skills",
-      "source": "./plugins/discipline-skills",
-      "description": "Professional discipline skills produced by the skill-agent-brigade. First skill: variance-analysis (Finance / managerial-accounting). Skills accrue here as the backlog is built out."
+      "name": "ab-managerial-accounting",
+      "source": "./plugins/ab-managerial-accounting",
+      "description": "Managerial-accounting agent brigade (né discipline-skills): 5 eval-proven finance skills (variance-analysis, annual-budget-build, close-management, treasury-liquidity-analysis, debt-schedule), a menu/router skill that pairs a situation to the right skill, and a base-model-covered registry (5 tasks with eval-verified base-model coverage). Every skill ships with two-arm execution-eval evidence."
+    },
+    {
+      "name": "ab-data-engineering",
+      "source": "./plugins/ab-data-engineering",
+      "description": "Data-engineering agent brigade: eval-proven DE skills plus a menu/router skill. First skill: pipeline-failure-triage (+1.00 lift — classifies silent zero-row failures the base model misreads as transient infra). Menu carries honest status for the rest of the vertical (held-for-refire, weak-evidence, base-model-covered-pending)."
     }
   ]
 }
