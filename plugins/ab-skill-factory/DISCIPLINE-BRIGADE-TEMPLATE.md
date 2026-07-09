@@ -2,9 +2,12 @@
 
 What the factory stamps out when an `artifact: brigade` ticket asks for a **discipline
 brigade**. This is the reference shape + parameterized skeletons the assembling expo
-follows, so a discipline brigade's surface is **generated, not hand-built**. Worked
-exemplar on disk: [`../ab-managerial-accounting/`](../ab-managerial-accounting/) (built by
-hand 2026-07-09; this template generalizes it).
+follows, so a discipline brigade's surface can be **generated instead of hand-built**.
+Status: **designed, not yet exercised** — no discipline brigade has been produced by the
+assembling process yet. The one worked exemplar on disk,
+[`../ab-managerial-accounting/`](../ab-managerial-accounting/), was **built by hand**
+(2026-07-09); this template generalizes it, and the next `artifact: brigade` discipline
+build is the live test that it emits generated-not-hand-built.
 
 ## Two brigade kinds
 
@@ -19,7 +22,7 @@ them, and adds a finishing touch. What differs by kind is **what the stations ar
 | what a ticket is | an order to BUILD something (a skill, an assessment, a collateral piece) | a REQUEST to be answered by composing finished skills |
 | expo exit set | `advance · refire-to-author · reroute-to-spec · reroute-to-steward · kill` (build convergence) | `answered · needs-clarification · partial-with-gaps · out-of-scope` (composition completeness) |
 | primary path | `service` walks a rail of build tickets | `fire` — an ad-hoc request straight to the expo (no rail needed) |
-| examples | this factory, ab-assessment, ab-company-research, ab-sales-collateral, ab-website | ab-managerial-accounting, ab-data-engineering |
+| examples | this factory; ab-assessment / ab-company-research / ab-sales-collateral / ab-website *(house brigades, not in this public repo)* | ab-managerial-accounting, ab-data-engineering |
 
 Both kinds hold the **same surface: `mise + expo + service + menu`**. The factory must be
 able to emit either; before this template it could only emit the build kind.
@@ -68,8 +71,13 @@ Body procedure (fixed across discipline brigades — only the roster examples ch
 `menu-present` + `manifest-parses` (all FAIL severity) + any registry check (WARN). The
 **checks are derived from the roster** — the factory emits one station-present check per
 station it stamped, so a missing station FAILs the gate. `mise.py` is a stamped vendored
-copy of canon (`../mise/mise.py`, zero pip deps, relative targets resolve against
-`skills/mise/`). Credentials: none for a pure-computation brigade; a brigade with a
+copy of canon (zero pip deps, relative targets resolve against the brigade's own
+`skills/mise/`). **Known drift (2026-07-09): the two hand-built exemplars vendored their
+`mise.py` from the private house factory (sha `6a680f2…`), which differs from THIS public
+factory's own `skills/mise/mise.py` (sha `291612b…`) — the public↔house factory is not yet
+reconciled. When the reconciliation lands, "canon" is one file and the stamp is
+unambiguous; until then, treat the house version as newer.** Credentials: none for a
+pure-computation brigade; a brigade with a
 **connector** adds an `executor = "agent"` reachability check here — that is where mise
 stops being a pack-integrity check and becomes the load-bearing "does this work in YOUR
 environment" onboarding gate.
