@@ -6,7 +6,7 @@ description: 'Put the AB Data Engineering brigade in service — the on/off swit
 # service — the brigade's serving lifecycle (AB Data Engineering)
 
 Discipline-brigade implementation of the standard `service` command (canon
-[BRIGADE-INTERFACE](../../../ab-skill-factory/)). The contract (verbs, mise gate) is
+[BRIGADE-INTERFACE](../../../ab-skill-factory/BRIGADE-INTERFACE.md)). The contract (verbs, mise gate) is
 identical across every brigade; only what happens between start and end differs by kind.
 The factory walks a rail of build tickets; a discipline brigade's primary path is `fire`
 (an ad-hoc request straight to the [expo](../expo/)), so service here is thin: it gates

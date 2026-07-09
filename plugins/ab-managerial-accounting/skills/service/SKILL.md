@@ -6,7 +6,7 @@ description: 'Put the AB Managerial Accounting brigade in service — the on/off
 # service — the brigade's serving lifecycle (AB Managerial Accounting)
 
 This is the discipline-brigade implementation of the standard `service` command (canon
-[BRIGADE-INTERFACE](../../../ab-skill-factory/)). The contract (verbs, mise gate) is
+[BRIGADE-INTERFACE](../../../ab-skill-factory/BRIGADE-INTERFACE.md)). The contract (verbs, mise gate) is
 identical across every brigade; only what happens between start and end differs by
 brigade kind.
 

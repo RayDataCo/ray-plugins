@@ -7,7 +7,7 @@ description: 'Readiness check for the AB Data Engineering brigade — "is the br
 
 "Mise en place — everything in its place before service." Before this brigade serves, mise
 answers "are you ready?" deterministically. Discipline-brigade implementation of the
-standard `mise` command (canon [BRIGADE-INTERFACE](../../../ab-skill-factory/)).
+standard `mise` command (canon [BRIGADE-INTERFACE](../../../ab-skill-factory/BRIGADE-INTERFACE.md)).
 
 This is the onboarding gate. Today the checks are pack integrity (the live station, expo,
 menu, manifest). This brigade is next in line to gain a warehouse connector (Snowflake);

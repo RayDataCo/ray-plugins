@@ -32,7 +32,7 @@ at the registry bar — same evidence, different question asked of it.
   harness as the original eval) against the new model.
 - **Any fixture regression → promote the task to a built skill.** If the new base model drops
   below 3/3 on any fixture that was previously at ceiling, that task graduates out of this
-  registry. Route it through the ab-skill-factory factory (spec → tests → author ⇄ critic →
+  registry. Route it through the ab-skill-factory (spec → tests → author ⇄ critic →
   expo) the same way the four shipped finance skills were built, using the regressing fixture as
   the oracle case that proves the skill's worth.
 - Grading keys are never published alongside the exemplar prompts in this registry — they stay
@@ -56,5 +56,5 @@ separate verified-false anomaly (a `withSkill` regression, not a base miss — t
 demanded a magnitude where the source teaches a signed convention); see
 `reconciliation.md`.
 
-Source data: `/Users/ray/Projects/phdata-private/brigade-house/cellar/brigade-runs/EVAL-RESULTS-2026-07-08.json`.
+Source data: the finance-vertical eval run (2026-07-08); see `evals/` for the report.
 Method and verdicts: `../evals/2026-07-08-finance-vertical-eval.md`.

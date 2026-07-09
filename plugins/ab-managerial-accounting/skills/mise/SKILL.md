@@ -8,7 +8,7 @@ description: 'Readiness check for the AB Managerial Accounting brigade — "is t
 "Mise en place — everything in its place before service." Before this brigade serves a
 request, mise answers "are you ready?" with a deterministic report, not a vibe. This is
 the discipline-brigade implementation of the standard `mise` command (canon
-[BRIGADE-INTERFACE](../../../ab-skill-factory/)).
+[BRIGADE-INTERFACE](../../../ab-skill-factory/BRIGADE-INTERFACE.md)).
 
 This is the onboarding gate — the thing that separates a delivery-grade brigade from a
 skill pack thrown over the wall. For this brigade the checks are pack integrity (all

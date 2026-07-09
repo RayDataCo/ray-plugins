@@ -75,7 +75,7 @@ different roster and decision surface.
 ## Record (the fire contract)
 
 Every invocation is a `fire` — an ad-hoc direct call to the expo (per the house
-[BRIGADE-INTERFACE](../../../ab-skill-factory/)). Fire skips the queue, never the record:
+[BRIGADE-INTERFACE](../../../ab-skill-factory/BRIGADE-INTERFACE.md)). Fire skips the queue, never the record:
 note which stations you selected and why, so the decision trace is inspectable. In this
 public pack there is no persistent cellar rail, so the trace is an in-answer note ("fired:
 treasury-liquidity + debt-schedule; composed"); when this brigade is deployed against a
