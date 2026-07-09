@@ -35,7 +35,7 @@ Conventions that make the flat parts navigable:
 ## The two flows
 
 - **Gather** (steward-side, read): search and pull context when writing a ticket. The steward's "cellar-first, careful-external-second" sourcing rule ([skills/steward/](./skills/steward/)) runs against this port.
-- **Land** (brigade-side, write): every artifact a brigade produces — research briefs, scraped snapshots, built skills' eval reports, CAF phase contracts, sales collateral — lands here with provenance. Landing is what makes an output *house knowledge* instead of a file lost in a run directory.
+- **Land** (brigade-side, write): every artifact a brigade produces — research briefs, scraped snapshots, built skills' eval reports, assessment phase contracts, sales collateral — lands here with provenance. Landing is what makes an output *house knowledge* instead of a file lost in a run directory.
 
 ## The cellar interface
 
@@ -109,4 +109,4 @@ The steward and every brigade talk only to the cellar interface; moving the hous
 
 ## Worked example
 
-A Company Research brigade pulls a `acme-research` ticket, its job-scraping station lands `companies/acme/jobs/2026-07-02-snapshot.md` with full provenance meta, and the ticket's Artifacts section records the cellar ref. Next week the steward writes a CAF engagement ticket for the same company: `search("acme hiring signals")` surfaces the snapshot, and the ticket's context points at it with `type: cellar`. The research is now compounding house knowledge — which is the entire point of the cellar.
+A Company Research brigade pulls a `acme-research` ticket, its job-scraping station lands `companies/acme/jobs/2026-07-02-snapshot.md` with full provenance meta, and the ticket's Artifacts section records the cellar ref. Next week the steward writes an assessment engagement ticket for the same company: `search("acme hiring signals")` surfaces the snapshot, and the ticket's context points at it with `type: cellar`. The research is now compounding house knowledge — which is the entire point of the cellar.
