@@ -42,14 +42,36 @@ Public API
                 cellar_root=None) -> LintResult
     enqueue(rail_dir, ticket_text, ticket_id, *, allowed_artifacts=None,
             resolver_types=None, cellar_root=None, now=None) -> Path
-    pull(rail_dir, worker, ttl_min=DEFAULT_LEASE_TTL_MIN, *, now=None)
-        -> TicketHandle | None
+    pull(rail_dir, worker, ttl_min=DEFAULT_LEASE_TTL_MIN, *, now=None,
+         allowed_artifacts=None, brigade=None) -> TicketHandle | None
+    walker_scope_ok(text, allowed_artifacts, brigade) -> bool
     append(ticket_path, entry, *, now=None) -> None
     ack(ticket_path, exit, cellar_root, *, now=None) -> Path
     release(ticket_path, *, now=None) -> None
     find_unclosed(cellar_root, since_days=30) -> list[Path]
     stamp(path, *, version=None, stamped_at=None) -> Path
     ADAPTER_VERSION
+
+Claim-by-atomic-rename (v1.2.0, 2026-07-08)
+--------------------------------------------
+`pull()` no longer leases in place. It CLAIMS the chosen ticket by
+`os.rename()`-ing it into `<rail_dir>/.claimed/<worker>/<same filename>` —
+POSIX rename(2) is indivisible, so the rename itself is the check-and-claim
+in one step; the lease block is written to the file only AFTER this walker
+is its sole owner. Two walkers racing for the same ticket can both attempt
+the rename; at most one succeeds, the other's rename raises
+`FileNotFoundError` (the source vanished under it — the other walker
+already won), which `pull()` treats as ordinary contention and moves on to
+the next candidate rather than raising. `ack()`/`release()` know how to
+find a ticket in its claim dir and move it back (non-terminal exits, and
+`release()`) or file it onward to the cellar (terminal exits) exactly as
+before. `list_tickets()` now also surfaces claimed (in-flight) tickets —
+the holding worker is the claim path's own `.claimed/<worker>/` segment.
+See ADAPTER-SPEC.md's "Claim model" section for the full write-up,
+including the local-filesystem-only honesty caveat (rename atomicity does
+NOT hold across sync-drive-backed rails — Dropbox/iCloud/OneDrive-style
+clients reconcile asynchronously against a cloud copy, so two clients can
+each perform a locally-atomic rename against their own stale local view).
 
 Frontmatter helpers (public, used throughout): get_field / set_field /
 get_lease / parse_context_entries.
@@ -65,6 +87,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 import time
@@ -73,8 +96,14 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
-ADAPTER_VERSION = "1.0.1"
-CANON_NAME = "skill-agent-brigade/adapter/rail_adapter.py"
+ADAPTER_VERSION = "1.2.0"
+
+# Where `pull()` claims a ticket to: `<rail_dir>/.claimed/<worker>/<same filename>`.
+# The rename IS the check-and-claim (POSIX rename(2) is indivisible) — see `pull()`'s
+# own docstring and ADAPTER-SPEC.md's "Claim model" section for the full honesty
+# write-up, including why this guarantee is LOCAL-FILESYSTEM-ONLY.
+CLAIM_DIRNAME = ".claimed"
+CANON_NAME = "ab-skill-factory/adapter/rail_adapter.py"
 
 DEFAULT_LEASE_TTL_MIN = 60
 
@@ -496,14 +525,32 @@ def append(ticket_path: str | Path, entry: str, *, now: Optional[str] = None) ->
 # ---------------------------------------------------------------------------
 
 
+def _claimed_ticket_paths(rail_dir: Path) -> list[Path]:
+    """Every ticket currently claimed (in-flight under some walker's
+    `.claimed/<worker>/`), across ALL workers. The holding worker is
+    recoverable from the path itself — the directory segment immediately
+    under `.claimed/` — or from the ticket's own `lease.worker` field."""
+    claimed_root = rail_dir / CLAIM_DIRNAME
+    if not claimed_root.exists():
+        return []
+    return list(claimed_root.glob("*/*.ticket.md"))
+
+
 def list_tickets(rail_dir: str | Path, status: Optional[str] = None) -> list[Path]:
-    """Enumerate `*.ticket.md` on the rail, optionally filtered to one
-    frontmatter `status`. Filed (closed) tickets have moved off `rail_dir`
-    per RAIL-SPEC/CELLAR-SPEC and are never returned here."""
+    """Enumerate `*.ticket.md` on the rail — both unclaimed (rail-dir-root)
+    and claimed (in-flight, `.claimed/<worker>/…`) tickets — optionally
+    filtered to one frontmatter `status`. Filed (closed) tickets have moved
+    off `rail_dir` entirely per RAIL-SPEC/CELLAR-SPEC and are never
+    returned here.
+
+    A claimed ticket's holder is NOT a separate return field — it's the
+    `.claimed/<worker>/` segment of the path itself (or the ticket's own
+    `lease.worker`), preserving the `list[Path]` return shape every
+    existing caller already depends on."""
     rail_dir = Path(rail_dir)
     if not rail_dir.exists():
         return []
-    paths = sorted(rail_dir.glob("*.ticket.md"))
+    paths = sorted(rail_dir.glob("*.ticket.md")) + sorted(_claimed_ticket_paths(rail_dir))
     if status is None:
         return paths
     return [p for p in paths if get_field(p.read_text(encoding="utf-8"), "status") == status]
@@ -535,13 +582,18 @@ def enqueue(
     if fm_ticket_id is not None and fm_ticket_id != ticket_id:
         raise RailError(f"enqueue: ticket_id argument {ticket_id!r} != frontmatter `ticket:` {fm_ticket_id!r}")
 
+    # Duplicate-id detection covers claimed (in-flight) tickets too — a
+    # ticket mid-flight under `.claimed/<worker>/` is off rail-dir-root's
+    # own glob, but it's still "already has a file on the rail" for the
+    # purposes of Gate A rule 1 and the explicit collision guard below.
     existing_files = [p.name for p in rail_dir.glob("*.ticket.md")]
+    existing_files += [p.name for p in _claimed_ticket_paths(rail_dir)]
     result = ticket_lint(ticket_text, existing_files, allowed_artifacts=allowed_artifacts, resolver_types=resolver_types, cellar_root=cellar_root)
     if not result.passed:
         raise GateAError(result)
 
     path = rail_dir / f"{ticket_id}.ticket.md"
-    if path.exists():
+    if path.exists() or any(p.name == path.name for p in _claimed_ticket_paths(rail_dir)):
         raise RailError(f"enqueue: {ticket_id!r} already has a file on the rail at {path}")
 
     path.write_text(ticket_text if ticket_text.endswith("\n") else ticket_text + "\n", encoding="utf-8")
@@ -565,57 +617,172 @@ class TicketHandle:
         return get_field(self.text, "status")
 
 
+def walker_scope_ok(
+    text: str,
+    allowed_artifacts: Optional[Iterable[str]],
+    brigade: Optional[str],
+) -> bool:
+    """Walker-scope filter for `pull()` (shared-rail finding, 2026-07-06,
+    demonstrated live: the sales-collateral walker's oldest-mtime scan
+    leased a website-fix ticket and its own Gate A then parked ANOTHER
+    brigade's perfectly valid ticket as needs-context). A ticket outside
+    the calling walker's scope is SKIPPED — never touched, never judged.
+
+    Two independent, both-optional scopes:
+      - `allowed_artifacts`: the walker's own live artifact types (its
+        menu's live set, same source Gate A uses). A ticket whose
+        `artifact:` is not in the set belongs to some other brigade's
+        walker.
+      - `brigade`: this walker's brigade name. `artifact: menu` is
+        universally valid (every brigade answers discovery), so the
+        artifact set alone cannot scope a menu ticket — its `subject:`
+        (`brigades/<name>`, per MENU-SPEC) names the one brigade that
+        should answer it. With `brigade` given, a menu ticket for anyone
+        else is skipped too.
+
+    Both None (the default) preserves the historical scan-everything
+    behavior for single-brigade rails and existing callers/tests."""
+    if allowed_artifacts is None and brigade is None:
+        return True
+    artifact = (get_field(text, "artifact") or "").strip()
+    if allowed_artifacts is not None and artifact not in set(allowed_artifacts):
+        return False
+    if brigade is not None and artifact == "menu":
+        subject = (get_field(text, "subject") or "").strip().strip('"').strip("'")
+        if subject and subject != f"brigades/{brigade}":
+            return False
+    return True
+
+
 def pull(
     rail_dir: str | Path,
     worker: str,
     ttl_min: int = DEFAULT_LEASE_TTL_MIN,
     *,
     now: Optional[str] = None,
+    allowed_artifacts: Optional[Iterable[str]] = None,
+    brigade: Optional[str] = None,
 ) -> Optional[TicketHandle]:
-    """Lease the next workable ticket: the oldest-mtime `queued` ticket,
-    or — failing that — the oldest-mtime `leased`/`in-build` ticket whose
-    lease has expired (appends `lease-reclaimed` so the abandonment is
-    visible, per RAIL-SPEC's lease-semantics section). Returns None if the
-    rail is dry. `needs-context`/`escalated` are never returned.
+    """Lease the next workable ticket: the oldest-mtime `queued` ticket
+    (rail-dir root), or — failing that — the oldest-mtime `leased`/
+    `in-build` ticket whose lease has expired, wherever it currently sits
+    (rail-dir root, or a stale `.claimed/<worker>/` from an abandoned
+    walker) — appends `lease-reclaimed` so the abandonment is visible, per
+    RAIL-SPEC's lease-semantics section. Returns None if the rail is dry.
+    `needs-context`/`escalated` are never returned.
 
-    ADVISORY LEASE, documented honestly (RAIL-SPEC "v1 honesty"): markdown
-    files have no compare-and-swap. This scans, then writes — two
-    concurrent `pull()` calls can still race between scan and write. v1
-    runs one walker per rail by convention; the lease field DETECTS a
-    second walker's collision, it does not atomically PREVENT one. Real
-    atomicity arrives with a transactional backend."""
+    `allowed_artifacts`/`brigade` scope the scan to the calling walker's
+    own tickets on a SHARED rail — see `walker_scope_ok()`. Every brigade
+    walker on a multi-brigade rail should pass them; omitting both keeps
+    the historical scan-everything behavior.
+
+    CLAIM-BY-ATOMIC-RENAME (v1.2.0, 2026-07-08 — replaces the prior
+    check-then-write advisory lease): the chosen ticket is claimed by
+    `os.rename()`-ing it into `<rail_dir>/.claimed/<worker>/<same
+    filename>` BEFORE anything is written to it. POSIX rename(2) is
+    indivisible — the rename itself is the check-and-claim, atomically, in
+    one step. If another walker's rename already moved the same source
+    file out from under this one, `os.rename()` raises
+    `FileNotFoundError`; that is treated as ordinary contention (someone
+    else won this ticket), not an error — this walker moves on to the next
+    candidate rather than raising. Only after a successful rename — at
+    which point this walker is the file's sole owner — is the lease block
+    written. LOCAL FILESYSTEMS ONLY: this guarantee does not extend to
+    sync-drive-backed rails (Dropbox/iCloud/OneDrive/etc.), whose clients
+    reconcile asynchronously against a remote copy — a "local" rename can
+    be atomic on-disk and still race another client's equally "atomic"
+    rename against its own stale local view. See ADAPTER-SPEC.md's "Claim
+    model" section."""
     rail_dir = Path(rail_dir)
     if not rail_dir.exists():
         return None
     now_val = _now_iso(now)
 
-    candidates = sorted(rail_dir.glob("*.ticket.md"), key=lambda p: p.stat().st_mtime)
-    chosen: Optional[Path] = None
-    reclaim = False
+    root_candidates = list(rail_dir.glob("*.ticket.md"))
+    claimed_candidates = _claimed_ticket_paths(rail_dir)
+    candidates = sorted(root_candidates + claimed_candidates, key=lambda p: p.stat().st_mtime)
+
+    claim_dir = rail_dir / CLAIM_DIRNAME / worker
+    claim_dir.mkdir(parents=True, exist_ok=True)
+
     for p in candidates:
-        text = p.read_text(encoding="utf-8")
+        try:
+            text = p.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            continue  # vanished between the glob snapshot and the read — already lost
+        if not walker_scope_ok(text, allowed_artifacts, brigade):
+            continue
         status = get_field(text, "status")
         if status == "queued":
-            chosen, reclaim = p, False
-            break
-        if status in ("leased", "in-build") and _lease_expired(get_lease(text), now_val):
-            chosen, reclaim = p, True
-            break
+            reclaim = False
+        elif status in ("leased", "in-build") and _lease_expired(get_lease(text), now_val):
+            reclaim = True
+        else:
+            continue
 
-    if chosen is None:
-        return None
+        dest = claim_dir / p.name
+        try:
+            os.rename(p, dest)
+        except FileNotFoundError:
+            # Lost the race: another walker's rename already claimed this
+            # exact ticket between our read above and this rename call.
+            # Contention, not a defect — try the next candidate.
+            continue
 
-    text = chosen.read_text(encoding="utf-8")
-    text = set_field(text, "status", "leased")
-    text = set_field(text, "lease", json.dumps({"worker": worker, "at": now_val, "ttl_min": ttl_min}))
-    chosen.write_text(text, encoding="utf-8")
+        text = dest.read_text(encoding="utf-8")
+        text = set_field(text, "status", "leased")
+        text = set_field(text, "lease", json.dumps({"worker": worker, "at": now_val, "ttl_min": ttl_min}))
+        dest.write_text(text, encoding="utf-8")
 
-    if reclaim:
-        append(chosen, f"rail: lease-reclaimed — prior lease expired, worker={worker}", now=now_val)
-    append(chosen, f"rail: lease — worker={worker}, ttl_min={ttl_min}", now=now_val)
+        if reclaim:
+            append(dest, f"rail: lease-reclaimed — prior lease expired, worker={worker}", now=now_val)
+        append(dest, f"rail: lease — worker={worker}, ttl_min={ttl_min}", now=now_val)
 
-    final_text = chosen.read_text(encoding="utf-8")
-    return TicketHandle(id=get_field(final_text, "ticket") or chosen.stem.removesuffix(".ticket"), path=chosen, text=final_text)
+        final_text = dest.read_text(encoding="utf-8")
+        return TicketHandle(id=get_field(final_text, "ticket") or dest.stem.removesuffix(".ticket"), path=dest, text=final_text)
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# claim-path helpers — shared by release()/ack() to find the rail root from
+# a ticket that may currently be sitting under `.claimed/<worker>/`.
+# ---------------------------------------------------------------------------
+
+
+def _is_claimed_path(path: Path) -> bool:
+    """True when `path` is `<rail>/.claimed/<worker>/<file>` — i.e. its
+    grandparent directory is the claim root."""
+    return path.parent.parent.name == CLAIM_DIRNAME
+
+
+def _rail_root_from_ticket_path(path: Path) -> Path:
+    """The rail directory a ticket belongs at rest in, derived from its
+    CURRENT path. For a claimed ticket (`<rail>/.claimed/<worker>/<file>`)
+    that's three levels up. For a ticket already sitting at rail-dir root
+    (never claimed — e.g. every ab-assessment ticket, whose own hand-rolled
+    pull()/ack() never touch `.claimed/`), this is a no-op: `path.parent`
+    IS already the rail root, so callers that unconditionally route
+    through this helper stay byte-for-byte compatible with tickets that
+    never entered the claim mechanism at all."""
+    if _is_claimed_path(path):
+        return path.parent.parent.parent
+    return path.parent
+
+
+def _return_to_rail_root(path: Path) -> Path:
+    """Move a (possibly claimed) ticket back to its rail-dir root, if it
+    isn't already there. Same-filesystem move (both `.claimed/<worker>/`
+    and the rail root live under the same `rail_dir`), so `os.rename` is
+    safe and atomic here — unlike the cellar-filing move in `ack()`, which
+    deliberately stays copy+unlink because `cellar_root` can be a wholly
+    different top-level directory/mount."""
+    rail_root = _rail_root_from_ticket_path(path)
+    if path.parent == rail_root:
+        return path
+    dest = rail_root / path.name
+    os.rename(path, dest)
+    return dest
 
 
 # ---------------------------------------------------------------------------
@@ -625,8 +792,12 @@ def pull(
 
 def release(ticket_path: str | Path, *, now: Optional[str] = None) -> None:
     """Give a leased ticket back untouched: status -> queued, lease
-    cleared (worker died, budget hit, orderly shutdown)."""
+    cleared (worker died, budget hit, orderly shutdown). If the ticket is
+    currently claimed (`.claimed/<worker>/…`), it's moved back to the
+    rail-dir root as part of the same call — a released ticket is, by
+    definition, no longer anyone's in-flight work."""
     path = Path(ticket_path)
+    path = _return_to_rail_root(path)
     text = path.read_text(encoding="utf-8")
     text = set_field(text, "status", "queued")
     text = set_field(text, "lease", "null")
@@ -677,10 +848,17 @@ def ack(
     design: no pass-shelf pointer dropped here; `find_unclosed()` is the
     steward's discovery mechanism for delivering the outcome later).
     `needs-context`/`escalated` are pauses/rework, not terminal — the
-    ticket stays on the rail at `ticket_path`.
+    ticket stays ON THE RAIL, but a non-terminal ack always resolves it
+    back to the rail-dir ROOT (v1.2.0): if `ticket_path` currently sits
+    under `.claimed/<worker>/`, it's moved back out — a needs-context/
+    escalated ticket is no longer anyone's in-flight claim, so it belongs
+    wherever every other unclaimed rail ticket lives, workable again by
+    the steward/a human, not orphaned inside a specific walker's claim
+    dir. A ticket that was never claimed (already at rail-dir root) is
+    left in place — `_return_to_rail_root` is a no-op for it.
 
     Returns the ticket's path after this call: the filed destination on a
-    terminal exit, or the unchanged `ticket_path` otherwise."""
+    terminal exit, or its (possibly moved-back) rail-root path otherwise."""
     if exit not in STATUS_BY_EXIT:
         raise RailError(f"ack: unknown exit {exit!r}; expected one of {sorted(STATUS_BY_EXIT)}")
 
@@ -695,7 +873,7 @@ def ack(
     append(path, f"ack: {exit} → status {new_status}", now=now_val)
 
     if new_status not in FILES_TO_SUBJECT_STATUSES:
-        return path
+        return _return_to_rail_root(path)
 
     subject = _resolve_subject(path.read_text(encoding="utf-8"))
     if subject is None:
@@ -806,6 +984,16 @@ def _cli(argv: Optional[list[str]] = None) -> int:
     p_pull.add_argument("rail_dir")
     p_pull.add_argument("--worker", default="rail-adapter-cli")
     p_pull.add_argument("--ttl-min", type=int, default=DEFAULT_LEASE_TTL_MIN)
+    p_pull.add_argument(
+        "--allowed-artifact", action="append", default=None, dest="allowed_artifacts",
+        help="walker scope: repeatable; skip tickets whose artifact: is not among these "
+             "(a brigade walker on a shared rail passes its own live types + menu)",
+    )
+    p_pull.add_argument(
+        "--brigade", default=None,
+        help="walker scope: with artifact: menu being universal, only lease menu tickets "
+             "whose subject is brigades/<this name>",
+    )
 
     p_append = sub.add_parser("append", help="append one work-log entry")
     p_append.add_argument("ticket_path")
@@ -852,7 +1040,10 @@ def _cli(argv: Optional[list[str]] = None) -> int:
                 return 1
             print(f"enqueued {args.ticket_id} -> {path}")
         elif args.op == "pull":
-            handle = pull(args.rail_dir, args.worker, args.ttl_min)
+            handle = pull(
+                args.rail_dir, args.worker, args.ttl_min,
+                allowed_artifacts=args.allowed_artifacts, brigade=args.brigade,
+            )
             print("rail is dry" if handle is None else f"pulled {handle.id} ({handle.path})")
         elif args.op == "append":
             append(args.ticket_path, args.entry)

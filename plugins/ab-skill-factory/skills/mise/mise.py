@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""mise — the skill-agent-brigade readiness-check engine.
+"""mise — the ab-skill-factory readiness-check engine.
 
 "mise en place — everything in its place before service." Reads a brigade's
 mise.toml declaration (the single source of truth, Decision D1 —
@@ -544,7 +544,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mise.py",
         description=(
-            "mise en place — readiness check for a skill-agent-brigade. "
+            "mise en place — readiness check for a ab-skill-factory. "
             "Runs the static (script-executor) checks in a brigade's mise.toml "
             "declaration and reports PASS/WARN/FAIL/UNCHECKED(agent) per check."
         ),

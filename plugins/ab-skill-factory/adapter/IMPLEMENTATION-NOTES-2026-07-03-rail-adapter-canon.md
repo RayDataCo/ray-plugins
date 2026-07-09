@@ -20,7 +20,7 @@ RAIL-SPEC.md + TICKET-CONTRACT.md + BRIGADE-INTERFACE.md's "Adapter distribution
 brigade/rail_walk.py` + `brigade/batch.py` (Sales-Collateral), `assessment-workspace/
 brigade/pass_driver.py` (Assessment), `skills/service/rail-walk.run.js`'s inline `rail` object (this
 factory's JS walk) — the four prior implementations this canon supersedes. Two real filed tickets
-for shape truth: `cellar/brigades/skill-agent-brigade/tickets/factory-menu-restamp-2026-07-03.ticket.md`
+for shape truth: `cellar/brigades/ab-skill-factory/tickets/factory-menu-restamp-2026-07-03.ticket.md`
 (2-space-indent context entries) and `cellar/rail/acme-collateral-stress-2026-07-02.ticket.md`
 (0-indent context entries, `type: cellar`, folded/quoted `when:` values — the shape that exposed the
 parser drift).
