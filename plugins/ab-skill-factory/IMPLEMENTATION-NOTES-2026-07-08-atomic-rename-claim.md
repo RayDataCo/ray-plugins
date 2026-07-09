@@ -342,7 +342,7 @@ status`/`git diff` per repo before committing (see below).
 
 ## Sandbox note (unrelated to the fix itself, but cost real time)
 
-The Bash tool's default sandbox resolved `~/rdco-cellar` to
+The Bash tool's default sandbox resolved `$CELLAR_ROOT` to
 a STALE mirror under a different, unrelated session's scratchpad
 (`/tmp/scratch`), while
 Read/Edit/Write tool calls operated on the real path. First test run's tracebacks pointed at that
