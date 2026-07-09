@@ -189,6 +189,10 @@ README with honest status markers. Enforcement lands in two places:
 2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing any of the five →
    FAIL). *Status: documented here, code wiring in the critic queued — do not claim it fires yet.*
 
+**Kind-specific checks (2026-07-09, [DISCIPLINE-BRIGADE-TEMPLATE.md](./DISCIPLINE-BRIGADE-TEMPLATE.md)).** A brigade is not interface-complete until its expo matches its kind:
+- **discipline kind** — the expo is a **composing** coordinator (decompose → select → compose → finishing touch) whose exit surface is `answered · needs-clarification · partial-with-gaps · out-of-scope` (NOT the build exit-set); `mise.toml` carries one station-present check **derived per station in the roster** (a missing station must FAIL the gate) plus expo/menu/manifest checks; `mise.py` is a stamped vendored copy; `service start` is mise-gated (verified by a live run returning exit 1 when a station is hidden). A discipline brigade that ships a pair-to-one **router** (a skill that maps a request to exactly ONE finished station and stops — no decomposition, no composition, no compound-request handling; the degraded shape ab-managerial-accounting shipped the morning of 2026-07-09 before this correction) instead of a composing expo, or omits `mise`, is interface-**incomplete** — this is the 2026-07-09 correction that this obligation now catches.
+- **build kind** — the expo runs the build/phase stations and routes on the build exit-set; `service` walks a rail. (Unchanged; this was the only kind the obligation covered before 2026-07-09.)
+
 ## What this spec deliberately does not standardize
 
 - **Station rosters, gates, critic axes** — per-brigade, published via `menu`.
