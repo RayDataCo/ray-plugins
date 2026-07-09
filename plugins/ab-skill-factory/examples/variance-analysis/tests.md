@@ -25,7 +25,7 @@ every critic axis PASS@high.
 
 ## 0. CANONICAL ORACLE SET (ground truth, computed independently of the build)
 
-Per the Lloyd verify-then-build discipline, these reference answers were generated
+Per the verify-then-build discipline, these reference answers were generated
 separately from any code so the oracle is uncontaminated. The skill's worked examples
 AND the procedure-when-applied must reproduce these numbers. Sign rule under test:
 cost variance is **U if actual > standard, F if actual < standard** (operating-income effect).

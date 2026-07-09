@@ -128,7 +128,7 @@ Practical consequences of the switch:
 
 61 tests across four files (`test_check_types.py`, `test_declaration_loading.py`,
 `test_engine_evaluate.py`, `test_cli.py`). All fixtures use pytest's `tmp_path` — no test touches
-the real `~/Projects/phdata-private/cellar` tree. Run with:
+the real `~/rdco-cellar` tree. Run with:
 
 ```
 python3 -m pytest skills/mise/tests/ -q      # from the plugin dir (plugins/skill-agent-brigade/)

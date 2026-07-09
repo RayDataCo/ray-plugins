@@ -29,25 +29,25 @@ def _factory_menu_ticket_text(brigade_home: Path, menu_spec: Path) -> str:
     )
 
 
-def _lenovo_ticket_text() -> str:
-    return (FIXTURES_DIR / "lenovo-collateral-stress-2026-07-02.ticket.md.tmpl").read_text()
+def _acme_ticket_text() -> str:
+    return (FIXTURES_DIR / "acme-collateral-stress-2026-07-02.ticket.md.tmpl").read_text()
 
 
-def _seed_lenovo_cellar(cellar_root: Path) -> None:
-    """Create the files the lenovo fixture's eager `type: cellar` sources
+def _seed_acme_cellar(cellar_root: Path) -> None:
+    """Create the files the acme fixture's eager `type: cellar` sources
     point at, so rule 5 can genuinely resolve them (not skip via
     cellar_root=None)."""
-    manifest_dir = cellar_root / "assessments/lenovo/build-manifest"
+    manifest_dir = cellar_root / "assessments/acme/build-manifest"
     manifest_dir.mkdir(parents=True)
     (manifest_dir / "2026-07-02T161235-manifest.json").write_text("{}")
 
-    contract_dir = cellar_root / "assessments/lenovo/contract-4"
+    contract_dir = cellar_root / "assessments/acme/contract-4"
     contract_dir.mkdir(parents=True)
     (contract_dir / "2026-07-02-contract-4.json").write_text("{}")
 
     exemplar_dir = cellar_root / "competencies/sales-collateral"
     exemplar_dir.mkdir(parents=True)
-    (exemplar_dir / "quest-diagnostics-INDEX.md").write_text("# index\n")
+    (exemplar_dir / "acme-INDEX.md").write_text("# index\n")
 
 
 # ---------------------------------------------------------------------------
@@ -126,10 +126,10 @@ def test_factory_menu_shape_2space_indent_lints_8_of_8(tmp_path):
     assert [e["id"] for e in entries] == ["brigade-home", "menu-spec"]
 
 
-def test_lenovo_shape_0indent_context_lints_8_of_8(tmp_path):
+def test_acme_shape_0indent_context_lints_8_of_8(tmp_path):
     cellar_root = tmp_path / "cellar"
-    _seed_lenovo_cellar(cellar_root)
-    text = _lenovo_ticket_text()
+    _seed_acme_cellar(cellar_root)
+    text = _acme_ticket_text()
 
     result = ra.ticket_lint(
         text, rail_files=[], allowed_artifacts={"sales-collateral"}, cellar_root=cellar_root
@@ -151,12 +151,12 @@ def test_lenovo_shape_0indent_context_lints_8_of_8(tmp_path):
 
 def test_menu_driven_artifact_enum_accepts_and_rejects(tmp_path):
     """SF-1 drift fix: allowed_artifacts is a caller parameter, not a
-    hardcoded enum. The lenovo ticket's `artifact: sales-collateral` must
+    hardcoded enum. The acme ticket's `artifact: sales-collateral` must
     be ACCEPTED against its own brigade's menu and REJECTED against this
     factory's default menu."""
     cellar_root = tmp_path / "cellar"
-    _seed_lenovo_cellar(cellar_root)
-    text = _lenovo_ticket_text()
+    _seed_acme_cellar(cellar_root)
+    text = _acme_ticket_text()
 
     accepted = ra.ticket_lint(text, [], allowed_artifacts={"sales-collateral"}, cellar_root=cellar_root)
     assert accepted.passed

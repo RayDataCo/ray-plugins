@@ -130,9 +130,9 @@ file-to-subject) of:
 
 | implementation | brigade | what it hand-rolled |
 |---|---|---|
-| `brigade/rail_walk.py` | Company Research (`phdata-jobscraping-c50369bea4b9`) | `RailClient` — enqueue/pull/ack/release/append/list + a mechanical Gate-B floor, on top of PyYAML (`yaml.safe_dump`) |
-| `brigade/rail_walk.py` (+ `brigade/batch.py`) | Sales-Collateral (`asset-creator-framework`) | An explicit fork-with-two-departures of the Company Research copy (per-artifact `refire_rounds`, an `ack(artifact_refs=...)` enhancement) — its own docstring calls out the shared-lib debt directly |
-| `brigade/pass_driver.py` (+ rail helpers) | Assessment (`phdata-ai-wf-plugins-dd673d8e215f`) | Multi-phase pass choreography riding the same `RailClient`/`Ticket` shape, plus its own `_pull_or_continue`/`_gate_a_recheck`/`_dispatch_and_close` primitives |
+| `brigade/rail_walk.py` | Company Research (`company-research-workspace`) | `RailClient` — enqueue/pull/ack/release/append/list + a mechanical Gate-B floor, on top of PyYAML (`yaml.safe_dump`) |
+| `brigade/rail_walk.py` (+ `brigade/batch.py`) | Sales-Collateral (`sales-collateral-workspace`) | An explicit fork-with-two-departures of the Company Research copy (per-artifact `refire_rounds`, an `ack(artifact_refs=...)` enhancement) — its own docstring calls out the shared-lib debt directly |
+| `brigade/pass_driver.py` (+ rail helpers) | Assessment (`assessment-workspace`) | Multi-phase pass choreography riding the same `RailClient`/`Ticket` shape, plus its own `_pull_or_continue`/`_gate_a_recheck`/`_dispatch_and_close` primitives |
 | `skills/service/rail-walk.run.js`'s inline `rail` object + `ticketLint()` | this factory (`skill-agent-brigade`) | The JS reference walk's own frontmatter-regex rail ops and Gate-A lint — the two documented drift bugs (2-space-only context-entry parsing, hardcoded artifact enum) live here |
 
 None of the four are deleted by this doc — the retrofit pass (swap each brigade's hand-rolled rail

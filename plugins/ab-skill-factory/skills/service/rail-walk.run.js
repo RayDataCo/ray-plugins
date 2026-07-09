@@ -62,13 +62,13 @@ let A = {}
 if (typeof args === 'string') { try { A = JSON.parse(args) } catch (e) { A = {} } }
 else if (args && typeof args === 'object') { A = args }
 
-const RAIL_DIR = A.rail_dir || '/Users/ray/Projects/phdata-private/cellar/rail'
-const CELLAR_ROOT = A.cellar_root || '/Users/ray/Projects/phdata-private/cellar'
-const PLUGIN_DIR = A.plugin_dir || '/Users/ray/Projects/ray-plugins/plugins/ab-skill-factory'
+const RAIL_DIR = A.rail_dir || '~/rdco-cellar/rail'
+const CELLAR_ROOT = A.cellar_root || '~/rdco-cellar'
+const PLUGIN_DIR = A.plugin_dir || '${HOME}/Projects/ray-plugins/plugins/ab-skill-factory'
 const WORKER = A.worker || 'rail-walk-reference'
 const NOW = A.now || 'unstamped' // ISO string, log-only — see NOTE above
 const MAX_TICKETS = A.max_tickets || 10
-const STATION_SKILLS = A.station_skills_dir || '/Users/ray/.claude/skills'
+const STATION_SKILLS = A.station_skills_dir || '${HOME}/.claude/skills'
 
 const LEASE_TTL_MIN = 120
 const MAX_ROUNDS = 2

@@ -197,7 +197,7 @@ README with honest status markers. Enforcement lands in two places:
 
 - **Station rosters, gates, critic axes** — per-brigade, published via `menu`.
 - **Polling cadence / concurrency** — deployment-profile concerns (see the deployment matrix,
-  vault: `01-projects/phdata/2026-07-03-hex-deployment-matrix.md`).
+  the brigade deployment matrix).
 - **Requester notification channels** — driven adapters behind `runner`, chosen per deployment.
 
 ## Cross-references

@@ -32,7 +32,7 @@ export const meta = {
   ],
 }
 
-const SCRATCH = '/private/tmp/claude-501/-Users-ray/9dc2c717-3170-4bb7-9002-c8c126306f3f/scratchpad/variance-analysis-pilot'
+const SCRATCH = '/tmp/variance-analysis-pilot'
 
 const CERT_SEED = `CERT-COMPETENCY SEED -- Variance Analysis (CMA Part 1 / managerial accounting; this is the depth source the skill must ENCODE AS A PROCEDURE, not restate as theory):
 - Standard costing: standard cost = standard price (SP) x standard quantity (SQ) per cost element (direct materials DM, direct labor DL, variable overhead VOH, fixed overhead FOH).
