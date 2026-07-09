@@ -47,7 +47,7 @@ def _seed_acme_cellar(cellar_root: Path) -> None:
 
     exemplar_dir = cellar_root / "competencies/sales-collateral"
     exemplar_dir.mkdir(parents=True)
-    (exemplar_dir / "quest-diagnostics-INDEX.md").write_text("# index\n")
+    (exemplar_dir / "acme-INDEX.md").write_text("# index\n")
 
 
 # ---------------------------------------------------------------------------

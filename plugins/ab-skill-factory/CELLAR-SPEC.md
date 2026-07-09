@@ -56,10 +56,10 @@ Every landed artifact carries frontmatter recording where it came from:
 ---
 landed: 2026-07-02T05:40:00-04:00
 kind: company-jobs-snapshot        # what this artifact is, per the landing brigade's menu
-subject: companies/comcast          # canonical subject key (see identity, below)
+subject: companies/acme          # canonical subject key (see identity, below)
 produced_by:
   brigade: company-research
-  ticket: comcast-research-2026-07-02   # the build record that produced it
+  ticket: acme-research-2026-07-02   # the build record that produced it
   station: job-scraping
 supersedes: null                    # or the ref this replaces (append-only chain)
 provenance: <original source — scraped from careers page X on date Y / derived from Z>
@@ -70,13 +70,13 @@ A deterministic `cellarLint()` (same move as `ticketLint()` / `skillLint()`) che
 
 ## Cellar refs and the resolver
 
-A **cellar ref** is a backend-relative path (`companies/comcast/jobs/2026-07-02-snapshot.md`) — stable across backend moves. Tickets point into the cellar via a registered `cellar` source type ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)); the resolver dispatches it through the configured cellar adapter.
+A **cellar ref** is a backend-relative path (`companies/acme/jobs/2026-07-02-snapshot.md`) — stable across backend moves. Tickets point into the cellar via a registered `cellar` source type ([BUNDLE-SPEC.md](./BUNDLE-SPEC.md)); the resolver dispatches it through the configured cellar adapter.
 
 **v1 equivalence, documented honestly:** on the filesystem backend a `cellar` ref and a `file` ref reach the same bytes, and existing `file`-sourced tickets keep working. Prefer `type: cellar` for anything that lives in the cellar — those tickets survive the move to Drive/S3/Snowflake; `file` refs are for genuinely local, non-cellar files (a repo checkout, a scratch artifact).
 
 ## Subject identity (the canonical-key rule)
 
-`subject` is a **canonical key**, minted once per real-world entity — one entity, one key, however many spellings arrive. For company research: `companies/<canonical-id>` where the id is a lowercase slug resolved at intake (the steward owns identity resolution — pairing "Comcast", "comcast", "Comcast Corp" to the one existing key *before* any ticket is written). The cellar keeps the resolution auditable:
+`subject` is a **canonical key**, minted once per real-world entity — one entity, one key, however many spellings arrive. For company research: `companies/<canonical-id>` where the id is a lowercase slug resolved at intake (the steward owns identity resolution — pairing "Acme", "acme", "Acme Corp" to the one existing key *before* any ticket is written). The cellar keeps the resolution auditable:
 
 ```
 companies/<canonical-id>/identity.md   — canonical name, known aliases, resolution provenance
@@ -109,4 +109,4 @@ The steward and every brigade talk only to the cellar interface; moving the hous
 
 ## Worked example
 
-A Company Research brigade pulls a `comcast-research` ticket, its job-scraping station lands `companies/comcast/jobs/2026-07-02-snapshot.md` with full provenance meta, and the ticket's Artifacts section records the cellar ref. Next week the steward writes a CAF engagement ticket for the same company: `search("comcast hiring signals")` surfaces the snapshot, and the ticket's context points at it with `type: cellar`. The research is now compounding house knowledge — which is the entire point of the cellar.
+A Company Research brigade pulls a `acme-research` ticket, its job-scraping station lands `companies/acme/jobs/2026-07-02-snapshot.md` with full provenance meta, and the ticket's Artifacts section records the cellar ref. Next week the steward writes a CAF engagement ticket for the same company: `search("acme hiring signals")` surfaces the snapshot, and the ticket's context points at it with `type: cellar`. The research is now compounding house knowledge — which is the entire point of the cellar.

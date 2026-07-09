@@ -16,8 +16,8 @@ brigades (the 7/2 Acme shakedown's "inherited fix" was the receipt that made the
 ## Reading order for this build
 
 RAIL-SPEC.md + TICKET-CONTRACT.md + BRIGADE-INTERFACE.md's "Adapter distribution" section (specs);
-`phdata-jobscraping-c50369bea4b9/brigade/rail_walk.py` (Company Research), `asset-creator-framework/
-brigade/rail_walk.py` + `brigade/batch.py` (Sales-Collateral), `phdata-ai-wf-plugins-dd673d8e215f/
+`company-research-workspace/brigade/rail_walk.py` (Company Research), `sales-collateral-workspace/
+brigade/rail_walk.py` + `brigade/batch.py` (Sales-Collateral), `assessment-workspace/
 brigade/pass_driver.py` (Assessment), `skills/service/rail-walk.run.js`'s inline `rail` object (this
 factory's JS walk) — the four prior implementations this canon supersedes. Two real filed tickets
 for shape truth: `cellar/brigades/skill-agent-brigade/tickets/factory-menu-restamp-2026-07-03.ticket.md`
