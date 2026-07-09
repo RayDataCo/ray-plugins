@@ -1,5 +1,5 @@
 """Tests for the canonical rail_adapter — tmp_path-only, never touches the
-real cellar/rail. Run via `python3 -m pytest plugins/skill-agent-brigade/adapter/tests/ -q`
+real cellar/rail. Run via `python3 -m pytest plugins/ab-skill-factory/adapter/tests/ -q`
 from the repo root.
 """
 
@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -410,7 +412,12 @@ def test_pull_happy_path(tmp_path, valid_ticket_text):
     assert handle.id == "sample-skill-2026-01-01"
     assert handle.status == "leased"
     assert "rail: lease — worker=worker-1, ttl_min=30" in handle.text
-    lease = ra.get_lease(path.read_text())
+    # claim-by-atomic-rename (v1.2.0): the ticket physically MOVED off its
+    # original enqueue path into this worker's claim dir — that's the whole
+    # point of the fix, so assert both halves of it.
+    assert not path.exists()
+    assert handle.path == rail_dir / ".claimed" / "worker-1" / "sample-skill-2026-01-01.ticket.md"
+    lease = ra.get_lease(handle.path.read_text())
     assert lease == {"worker": "worker-1", "at": "2026-01-01T09:00:00-05:00", "ttl_min": 30}
 
 
@@ -425,7 +432,7 @@ def test_pull_never_returns_needs_context_or_escalated(tmp_path):
 
 def test_pull_reclaims_expired_lease(tmp_path, valid_ticket_text):
     rail_dir = tmp_path / "rail"
-    path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
     first = ra.pull(rail_dir, "worker-1", ttl_min=10, now="2026-01-01T09:00:00-05:00")
     assert first.status == "leased"
 
@@ -435,7 +442,10 @@ def test_pull_reclaims_expired_lease(tmp_path, valid_ticket_text):
     assert second.id == "sample-skill-2026-01-01"
     assert "rail: lease-reclaimed — prior lease expired, worker=worker-2" in second.text
     assert "rail: lease — worker=worker-2, ttl_min=10" in second.text
-    lease = ra.get_lease(path.read_text())
+    # reclaimed via the same atomic rename, out of worker-1's stale claim dir
+    # into worker-2's — worker-1's copy is gone, not just re-leased in place.
+    assert not first.path.exists()
+    lease = ra.get_lease(second.path.read_text())
     assert lease["worker"] == "worker-2"
 
 
@@ -463,6 +473,338 @@ def test_pull_picks_oldest_mtime_queued_first(tmp_path):
 
     handle = ra.pull(rail_dir, "worker-1")
     assert handle.id == "older-ticket-2026-01-01"
+
+
+# ---------------------------------------------------------------------------
+# 5b. pull — walker scope on a SHARED rail (finding 2026-07-06: a brigade
+# walker's oldest-mtime scan leased ANOTHER brigade's queued ticket, and its
+# own Gate A then parked that perfectly valid ticket as needs-context).
+# ---------------------------------------------------------------------------
+
+
+def _two_brigade_rail(tmp_path):
+    """Older FOREIGN ticket (another brigade's artifact type) + newer OWN
+    ticket — the exact mtime ordering that triggered the live mis-pull."""
+    rail_dir = tmp_path / "rail"
+    rail_dir.mkdir()
+    foreign = rail_dir / "foreign-fix-2026-01-01.ticket.md"
+    own = rail_dir / "own-skill-2026-01-02.ticket.md"
+    foreign.write_text(make_ticket(ticket_id="foreign-fix-2026-01-01", artifact="website-fix"))
+    own.write_text(make_ticket(ticket_id="own-skill-2026-01-02", artifact="skill"))
+    now = time.time()
+    os.utime(foreign, (now - 100, now - 100))
+    os.utime(own, (now, now))
+    return rail_dir, foreign, own
+
+
+def test_pull_walker_scope_skips_foreign_artifact(tmp_path):
+    rail_dir, foreign, _own = _two_brigade_rail(tmp_path)
+    handle = ra.pull(rail_dir, "worker-1", allowed_artifacts={"skill", "menu"})
+    assert handle is not None
+    assert handle.id == "own-skill-2026-01-02"
+    # the foreign ticket is NEVER touched — no lease, no work-log residue
+    foreign_text = foreign.read_text()
+    assert ra.get_field(foreign_text, "status") == "queued"
+    assert "rail: lease" not in foreign_text
+
+
+def test_pull_walker_scope_returns_none_when_only_foreign_tickets(tmp_path):
+    rail_dir, foreign, own = _two_brigade_rail(tmp_path)
+    own.unlink()
+    assert ra.pull(rail_dir, "worker-1", allowed_artifacts={"skill", "menu"}) is None
+    assert ra.get_field(foreign.read_text(), "status") == "queued"
+
+
+def test_pull_walker_scope_menu_tickets_target_one_brigade(tmp_path):
+    rail_dir = tmp_path / "rail"
+    rail_dir.mkdir()
+    theirs = rail_dir / "their-menu-2026-01-01.ticket.md"
+    ours = rail_dir / "our-menu-2026-01-02.ticket.md"
+    theirs.write_text(make_ticket(ticket_id="their-menu-2026-01-01", artifact="menu", subject="brigades/ab-website"))
+    ours.write_text(make_ticket(ticket_id="our-menu-2026-01-02", artifact="menu", subject="brigades/ab-skill-factory"))
+    now = time.time()
+    os.utime(theirs, (now - 100, now - 100))
+    os.utime(ours, (now, now))
+
+    handle = ra.pull(rail_dir, "worker-1", allowed_artifacts={"skill", "menu"}, brigade="ab-skill-factory")
+    assert handle is not None
+    assert handle.id == "our-menu-2026-01-02"
+    assert ra.get_field(theirs.read_text(), "status") == "queued"
+
+
+def test_pull_without_scope_keeps_historical_scan_everything(tmp_path):
+    rail_dir, _foreign, _own = _two_brigade_rail(tmp_path)
+    handle = ra.pull(rail_dir, "worker-1")
+    assert handle.id == "foreign-fix-2026-01-01"  # oldest-mtime wins, as before
+
+
+# ===========================================================================
+# 5c. pull — claim-by-atomic-rename mechanics (2026-07-08, replaces the
+# prior check-then-write advisory lease — RAIL-SPEC's "v1 honesty" section
+# no longer applies to the mis-pull race itself, only to sync-drive rails).
+# ===========================================================================
+
+
+def test_pull_claim_moves_file_into_worker_claim_dir(tmp_path, valid_ticket_text):
+    """The atomic-rename claim, isolated: the ticket physically relocates
+    from the rail root to `<rail>/.claimed/<worker>/<same filename>` BEFORE
+    the lease is ever written — that's the whole mechanism."""
+    rail_dir = tmp_path / "rail"
+    path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+
+    handle = ra.pull(rail_dir, "worker-1", ttl_min=30, now="2026-01-01T09:00:00-05:00")
+
+    assert handle is not None
+    expected = rail_dir / ".claimed" / "worker-1" / "sample-skill-2026-01-01.ticket.md"
+    assert handle.path == expected
+    assert expected.exists()
+    assert expected.read_text() == handle.text
+    assert not path.exists()
+
+
+def test_pull_lost_race_skips_to_next_candidate_cleanly(tmp_path, monkeypatch):
+    """Simulates the race `pull()` is designed to survive: another walker's
+    rename wins the contended ticket a moment before this one's rename call
+    (`os.rename` raising `FileNotFoundError`, exactly what a real lost race
+    against a concurrent process produces — see the real subprocess race
+    test below for the non-simulated version). `pull()` must fall through
+    to the next oldest-mtime candidate rather than raising, and the
+    contended ticket must be left completely untouched — no lease, no
+    work-log residue, still sitting exactly where it started."""
+    rail_dir = tmp_path / "rail"
+    rail_dir.mkdir()
+    contended = rail_dir / "contended-2026-01-01.ticket.md"
+    fallback = rail_dir / "fallback-2026-01-02.ticket.md"
+    contended.write_text(make_ticket(ticket_id="contended-2026-01-01"))
+    fallback.write_text(make_ticket(ticket_id="fallback-2026-01-02"))
+    now = time.time()
+    os.utime(contended, (now - 100, now - 100))  # older mtime — tried first
+    os.utime(fallback, (now, now))
+
+    real_rename = ra.os.rename
+
+    def fake_rename(src, dst):
+        if "contended-2026-01-01" in str(src):
+            raise FileNotFoundError(f"simulated lost race for {src}")
+        return real_rename(src, dst)
+
+    monkeypatch.setattr(ra.os, "rename", fake_rename)
+
+    handle = ra.pull(rail_dir, "worker-1")
+
+    assert handle is not None
+    assert handle.id == "fallback-2026-01-02"
+    # the contended ticket was NEVER actually touched by the lost attempt
+    assert contended.exists()
+    text = contended.read_text()
+    assert ra.get_field(text, "status") == "queued"
+    assert ra.get_lease(text) is None
+    assert "rail:" not in text  # no work-log residue from a failed claim
+
+
+def test_pull_lease_written_only_in_claimed_location(tmp_path, valid_ticket_text):
+    """The lease block never touches the rail-root file at all — it's
+    written exclusively to the post-rename destination. Guards against a
+    regression that writes the lease before (or in addition to) the move."""
+    rail_dir = tmp_path / "rail"
+    path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+
+    handle = ra.pull(rail_dir, "worker-1", ttl_min=15, now="2026-01-01T09:00:00-05:00")
+
+    assert not path.exists()  # nothing was ever left behind at the root
+    lease = ra.get_lease(handle.path.read_text())
+    assert lease == {"worker": "worker-1", "at": "2026-01-01T09:00:00-05:00", "ttl_min": 15}
+
+
+def test_pull_reclaims_from_stale_claim_dir(tmp_path, valid_ticket_text):
+    """Expired-lease reclaim (item 3): a ticket sitting in a STALE
+    `.claimed/<worker>/` dir (its lease expired, its walker presumably
+    dead) is eligible for a new walker's pull — claimed via the same
+    atomic rename, straight out of the old worker's claim dir into the
+    new one's."""
+    rail_dir = tmp_path / "rail"
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    first = ra.pull(rail_dir, "worker-1", ttl_min=10, now="2026-01-01T09:00:00-05:00")
+    stale_path = first.path
+    assert stale_path.parent.name == "worker-1"
+    assert stale_path.parent.parent.name == ".claimed"
+
+    second = ra.pull(rail_dir, "worker-2", ttl_min=10, now="2026-01-01T09:20:00-05:00")
+
+    assert second is not None
+    assert second.path == rail_dir / ".claimed" / "worker-2" / "sample-skill-2026-01-01.ticket.md"
+    assert not stale_path.exists()  # gone from worker-1's stale claim dir
+    assert "rail: lease-reclaimed — prior lease expired, worker=worker-2" in second.text
+
+
+def test_ack_terminal_files_from_claimed_path(tmp_path, valid_ticket_text):
+    rail_dir = tmp_path / "rail"
+    cellar_root = tmp_path / "cellar"
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    handle = ra.pull(rail_dir, "worker-1")
+    assert handle.path.parent.name == "worker-1"  # confirmed claimed, not at rail root
+
+    dest = ra.ack(handle.path, "advance", cellar_root)
+
+    assert dest == cellar_root / "companies/acme/tickets/sample-skill-2026-01-01.ticket.md"
+    assert not handle.path.exists()  # the claim dir entry disappears via the move
+    assert ra.get_field(dest.read_text(), "status") == "done"
+
+
+def test_ack_non_terminal_returns_claimed_ticket_to_rail_root(tmp_path, valid_ticket_text):
+    rail_dir = tmp_path / "rail"
+    cellar_root = tmp_path / "cellar"
+
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    handle = ra.pull(rail_dir, "worker-1")
+    dest = ra.ack(handle.path, "reroute-to-steward", cellar_root)
+
+    assert dest == rail_dir / "sample-skill-2026-01-01.ticket.md"
+    assert dest.exists()
+    assert not handle.path.exists()  # claim dir entry gone — moved back
+    assert ra.get_field(dest.read_text(), "status") == "needs-context"
+    # needs-context tickets are on the rail but never workable by pull() —
+    # only the steward acts on them (RAIL-SPEC) — confirming it's back at
+    # rail root, not orphaned in a claim dir, is the point of this test,
+    # not re-leasability.
+    assert ra.pull(rail_dir, "worker-2") is None
+
+
+def test_release_returns_claimed_ticket_to_rail_root(tmp_path, valid_ticket_text):
+    rail_dir = tmp_path / "rail"
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    handle = ra.pull(rail_dir, "worker-1")
+
+    ra.release(handle.path, now="2026-01-01T09:05:00-05:00")
+
+    restored = rail_dir / "sample-skill-2026-01-01.ticket.md"
+    assert restored.exists()
+    assert not handle.path.exists()
+    text = restored.read_text()
+    assert ra.get_field(text, "status") == "queued"
+    assert ra.get_lease(text) is None
+
+    # and it's workable again, straight off the rail root
+    second = ra.pull(rail_dir, "worker-2")
+    assert second is not None
+    assert second.id == "sample-skill-2026-01-01"
+
+
+def test_list_tickets_includes_claimed_with_holder_annotation(tmp_path, valid_ticket_text):
+    rail_dir = tmp_path / "rail"
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    handle = ra.pull(rail_dir, "worker-1")
+
+    all_tickets = ra.list_tickets(rail_dir)
+    assert handle.path in all_tickets
+
+    # the holding worker is recoverable straight from the path structure —
+    # `<rail>/.claimed/<worker>/<file>` — the "annotation" this canon
+    # exposes rather than inventing a new return shape every caller (three
+    # brigades' `list()` wrappers) would need to be updated for.
+    claimed = [p for p in all_tickets if p.parent.parent.name == ".claimed"]
+    assert len(claimed) == 1
+    assert claimed[0].parent.name == "worker-1"
+
+    leased_only = ra.list_tickets(rail_dir, status="leased")
+    assert leased_only == [handle.path]
+
+
+def test_enqueue_detects_duplicate_id_against_claimed_ticket(tmp_path, valid_ticket_text):
+    """A ticket id currently in-flight (claimed, not yet filed) is off the
+    rail-root glob but must still collide — otherwise a second enqueue
+    with the same id would silently succeed while the first copy is mid-
+    flight under `.claimed/<worker>/`."""
+    rail_dir = tmp_path / "rail"
+    ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+    ra.pull(rail_dir, "worker-1")  # now claimed, not at rail root
+
+    with pytest.raises(ra.RailError):
+        ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
+
+
+# ===========================================================================
+# 5d. pull — the REAL race: two concurrent OS processes, one ticket. Not a
+# simulation — actually exercises POSIX rename(2)'s atomicity guarantee via
+# two independent Python interpreters hitting the same rail directory at
+# (as close as this harness can get to) the same instant, repeated across
+# many iterations to give a genuine race a chance to manifest.
+# ===========================================================================
+
+RAIL_ADAPTER_PATH = Path(__file__).resolve().parent.parent / "rail_adapter.py"
+RACE_ITERATIONS = 20
+
+
+def _cli_pull_process(rail_dir: Path, worker: str) -> subprocess.Popen:
+    """Launch `rail_adapter.py pull` as an independent OS process — the
+    exact same CLI entry point `rail-walk.run.js` shells out to in
+    production (see ADAPTER-SPEC.md / the module docstring's CLI note)."""
+    return subprocess.Popen(
+        [sys.executable, str(RAIL_ADAPTER_PATH), "pull", str(rail_dir), "--worker", worker],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+
+def test_real_concurrent_pull_race_exactly_one_winner(tmp_path):
+    """Two real OS processes race `pull()` against a rail holding exactly
+    ONE ticket, `RACE_ITERATIONS` times. Both processes are started
+    back-to-back (Popen doesn't block) so they run genuinely concurrently;
+    `.communicate()` is only called after both are launched. Every
+    iteration must produce exactly one winner (prints `pulled ...`) and
+    exactly one loser reporting the rail dry (single-ticket rail — once
+    the winner's rename succeeds, there is nothing left for the loser to
+    claim). The decisive invariant is filesystem state, not stdout
+    parsing: exactly one ticket file must exist anywhere under the rail
+    dir when it's over — never zero (lost), never two (double-claimed)."""
+    wins = {"worker-a": 0, "worker-b": 0}
+
+    for i in range(RACE_ITERATIONS):
+        rail_dir = tmp_path / f"rail-{i:02d}"
+        ticket_id = f"race-ticket-{i:02d}"
+        text = make_ticket(
+            ticket_id=ticket_id,
+            subject="companies/race-test",
+            context_lines=context_entry("https://example.org/race", type_="url"),
+        )
+        ra.enqueue(rail_dir, text, ticket_id)
+
+        proc_a = _cli_pull_process(rail_dir, "worker-a")
+        proc_b = _cli_pull_process(rail_dir, "worker-b")
+        out_a, err_a = proc_a.communicate(timeout=15)
+        out_b, err_b = proc_b.communicate(timeout=15)
+
+        assert proc_a.returncode == 0, f"iter {i}: worker-a CLI failed: {err_a}"
+        assert proc_b.returncode == 0, f"iter {i}: worker-b CLI failed: {err_b}"
+
+        out_a, out_b = out_a.strip(), out_b.strip()
+        pulled_a = out_a.startswith("pulled ")
+        pulled_b = out_b.startswith("pulled ")
+
+        assert pulled_a != pulled_b, (
+            f"iter {i}: expected exactly one winner, got a={out_a!r} b={out_b!r}"
+        )
+        loser_out = out_b if pulled_a else out_a
+        assert loser_out == "rail is dry", f"iter {i}: loser did not see a dry rail: {loser_out!r}"
+
+        # the decisive check: exactly one physical ticket file survives,
+        # wherever it ended up (claimed by whichever worker won) — never
+        # duplicated, never lost.
+        all_ticket_files = list(rail_dir.rglob("*.ticket.md"))
+        assert len(all_ticket_files) == 1, f"iter {i}: expected exactly one ticket file, found {all_ticket_files}"
+
+        if pulled_a:
+            assert all_ticket_files[0].parent.name == "worker-a"
+            wins["worker-a"] += 1
+        else:
+            assert all_ticket_files[0].parent.name == "worker-b"
+            wins["worker-b"] += 1
+
+    assert wins["worker-a"] + wins["worker-b"] == RACE_ITERATIONS
+    # Not asserting a particular split — OS scheduling may be biased toward
+    # whichever process the kernel happens to run first — only that every
+    # single iteration resolved to exactly one winner (checked above).
 
 
 # ===========================================================================
@@ -509,19 +851,24 @@ def test_append_when_heading_missing_falls_back_defensively(tmp_path):
 def test_release_round_trips(tmp_path, valid_ticket_text):
     rail_dir = tmp_path / "rail"
     path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
-    ra.pull(rail_dir, "worker-1", now="2026-01-01T09:00:00-05:00")
-    assert ra.get_field(path.read_text(), "status") == "leased"
+    handle = ra.pull(rail_dir, "worker-1", now="2026-01-01T09:00:00-05:00")
+    assert ra.get_field(handle.path.read_text(), "status") == "leased"
+    assert not path.exists()  # claimed — moved off the original enqueue path
 
-    ra.release(path, now="2026-01-01T09:05:00-05:00")
+    ra.release(handle.path, now="2026-01-01T09:05:00-05:00")
+    # release() returns a claimed ticket to the rail root — back at the
+    # exact path it was originally enqueued at.
+    assert path.exists()
+    assert not handle.path.exists()
     text = path.read_text()
     assert ra.get_field(text, "status") == "queued"
     assert ra.get_lease(text) is None
     assert "rail: release — lease cleared, back to queued" in text
 
     # and it's workable again
-    handle = ra.pull(rail_dir, "worker-2", now="2026-01-01T09:06:00-05:00")
-    assert handle is not None
-    assert handle.id == "sample-skill-2026-01-01"
+    second = ra.pull(rail_dir, "worker-2", now="2026-01-01T09:06:00-05:00")
+    assert second is not None
+    assert second.id == "sample-skill-2026-01-01"
 
 
 # ===========================================================================
@@ -533,11 +880,13 @@ def test_ack_advance_files_done_to_subject(tmp_path, valid_ticket_text):
     rail_dir = tmp_path / "rail"
     cellar_root = tmp_path / "cellar"
     path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
-    ra.pull(rail_dir, "worker-1")
+    handle = ra.pull(rail_dir, "worker-1")
+    assert not path.exists()  # claimed — moved off the original enqueue path
 
-    dest = ra.ack(path, "advance", cellar_root, now="2026-01-01T10:00:00-05:00")
+    dest = ra.ack(handle.path, "advance", cellar_root, now="2026-01-01T10:00:00-05:00")
 
     assert not path.exists()
+    assert not handle.path.exists()  # the claim dir entry disappears via the move
     assert dest == cellar_root / "companies/acme/tickets/sample-skill-2026-01-01.ticket.md"
     text = dest.read_text()
     assert ra.get_field(text, "status") == "done"
@@ -549,10 +898,11 @@ def test_ack_kill_files_killed_to_subject(tmp_path, valid_ticket_text):
     rail_dir = tmp_path / "rail"
     cellar_root = tmp_path / "cellar"
     path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
-    ra.pull(rail_dir, "worker-1")
+    handle = ra.pull(rail_dir, "worker-1")
 
-    dest = ra.ack(path, "kill", cellar_root)
+    dest = ra.ack(handle.path, "kill", cellar_root)
     assert not path.exists()
+    assert not handle.path.exists()
     assert ra.get_field(dest.read_text(), "status") == "killed"
 
 
@@ -561,12 +911,16 @@ def test_ack_non_terminal_exits_stay_on_rail(tmp_path, valid_ticket_text, exit_,
     rail_dir = tmp_path / "rail"
     cellar_root = tmp_path / "cellar"
     path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
-    ra.pull(rail_dir, "worker-1")
+    handle = ra.pull(rail_dir, "worker-1")
+    assert not path.exists()  # claimed — moved off the original enqueue path
 
-    dest = ra.ack(path, exit_, cellar_root)
+    dest = ra.ack(handle.path, exit_, cellar_root)
 
+    # a non-terminal ack resolves a claimed ticket back to the rail ROOT —
+    # which is exactly the path it was originally enqueued at.
     assert dest == path
-    assert path.exists()  # never moved off the rail
+    assert path.exists()  # never filed off the rail
+    assert not handle.path.exists()  # claim dir entry gone — moved back
     assert not cellar_root.exists()  # ack() never touches cellar_root for a non-terminal exit
     text = path.read_text()
     assert ra.get_field(text, "status") == expected_status
@@ -665,7 +1019,7 @@ def test_stamp_round_trip(tmp_path):
     assert stamp_path == target.with_name(target.name + ".stamp.json")
     data = json.loads(stamp_path.read_text())
     assert data["file"] == "rail_adapter_copy.py"
-    assert data["canon"] == "skill-agent-brigade/adapter/rail_adapter.py"
+    assert data["canon"] == "ab-skill-factory/adapter/rail_adapter.py"
     assert data["version"] == "1.2.3"
     assert data["stamped_at"] == "2026-01-01T00:00:00-05:00"
 
