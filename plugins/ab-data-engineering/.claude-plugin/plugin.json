@@ -1,0 +1,9 @@
+{
+  "name": "ab-data-engineering",
+  "description": "Data-engineering agent brigade: eval-proven DE skills produced by the skill-agent-brigade, shipped only with execution-eval evidence (two-arm lift vs base model), plus a menu/router skill that pairs a situation to the right skill. First skill: pipeline-failure-triage (+1.00 lift on silent zero-row failure classification). Menu carries honest status for the rest of the vertical: held-for-refire, weak-evidence, and base-model-covered-pending-registry entries. Eval reports in evals/.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}

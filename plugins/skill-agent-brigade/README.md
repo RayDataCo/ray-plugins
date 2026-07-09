@@ -4,7 +4,7 @@ A **brigade for building skills** — a multi-agent assembly line that turns a o
 
 It produces **two assets** every run:
 1. **The brigade itself** (this plugin) — reusable across any skill you want to build.
-2. **The worked-example output** — the authored skill + its full build trail (spec, tests, critic verdicts). The first stress test is `variance-analysis` (a Finance / managerial-accounting skill); see [`examples/variance-analysis/`](./examples/variance-analysis/) and the installed skill at [`../discipline-skills/skills/variance-analysis/`](../discipline-skills/skills/variance-analysis/).
+2. **The worked-example output** — the authored skill + its full build trail (spec, tests, critic verdicts). The first stress test is `variance-analysis` (a Finance / managerial-accounting skill); see [`examples/variance-analysis/`](./examples/variance-analysis/) and the installed skill at [`../ab-managerial-accounting/skills/variance-analysis/`](../ab-managerial-accounting/skills/variance-analysis/).
 
 ## Why this shape
 
@@ -133,7 +133,7 @@ The critic's one improvement note (ITERATE-grade, not a fail): a generic-FP&A ne
 
 ## Building out more skills
 
-Add a skill by appending its input record to the backlog and running the brigade. On a regular set (e.g. one skill per discipline), the **rail** fans the pass over the backlog — each ticket flows spec → tests → author → critic independently, so wall-clock is the slowest single ticket, not the sum. Installed skills accrue under [`../discipline-skills/`](../discipline-skills/).
+Add a skill by appending its input record to the backlog and running the brigade. On a regular set (e.g. one skill per discipline), the **rail** fans the pass over the backlog — each ticket flows spec → tests → author → critic independently, so wall-clock is the slowest single ticket, not the sum. Installed skills accrue under per-discipline brigade plugins (e.g. [`../ab-managerial-accounting/`](../ab-managerial-accounting/), [`../ab-data-engineering/`](../ab-data-engineering/)) — each ships only eval-passers, plus a menu/router skill.
 
 ## Follow-ups
 

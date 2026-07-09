@@ -1,0 +1,9 @@
+{
+  "name": "ab-managerial-accounting",
+  "description": "Managerial-accounting agent brigade (né discipline-skills): eval-proven finance skills produced by the skill-agent-brigade, shipped only with execution-eval evidence (two-arm lift vs base model), plus a menu/router skill that pairs a situation to the right skill and a base-model-covered registry (5 tasks with eval-verified base-model coverage — exemplar prompts, no skill needed). Skills: variance-analysis, annual-budget-build, close-management, treasury-liquidity-analysis, debt-schedule. Eval reports in evals/.",
+  "version": "0.3.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
