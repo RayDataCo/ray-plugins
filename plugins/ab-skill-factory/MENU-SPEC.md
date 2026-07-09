@@ -17,7 +17,7 @@ A menu is one markdown file with a small frontmatter header and one section per 
 
 ```yaml
 ---
-menu_of: skill-agent-brigade      # the brigade this menu describes
+menu_of: ab-skill-factory      # the brigade this menu describes
 version: 1                        # bumped every time the brigade re-answers a discovery ticket
 generated_by: expo                # discovery answers are expo-authored (introspection), or hand-maintained
 source_hash: <sha256>             # publication copies only — sha256 of the packaged MENU.md at publish time (freshness stamp)
@@ -62,7 +62,7 @@ The steward learns a brigade's menu by hanging a ticket, the same way it orders 
 ## Where menus live
 
 - **Runtime (authoritative for stewards):** `<cellar>/brigades/<brigade>/menu.md` — published by discovery into the house store's brigades section, read by stewards. Menus are house knowledge, NOT repo code.
-- **In-repo (this plugin only):** [MENU.md](./MENU.md) ships with the skill-agent-brigade as its current self-description and the worked example of the format — the expo's discovery answer derives from it plus live introspection.
+- **In-repo (this plugin only):** [MENU.md](./MENU.md) ships with the ab-skill-factory as its current self-description and the worked example of the format — the expo's discovery answer derives from it plus live introspection.
 
 ## v1 pragmatism (adopt the pattern, not a protocol)
 

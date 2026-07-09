@@ -1,6 +1,6 @@
 ---
 name: service
-description: Put the skill-agent-brigade in service — attach to the rail and walk it (start, default), stand down cleanly (end), or report the walker's state (status). Start is mise-gated and takes the rail service lock; end finishes-or-releases the current ticket, notates resumable state to its work-log, and drops the lock. Use when the founder says "put the brigade in service", "start the rail walk", "stop the brigade", or "is the brigade in service?".
+description: Put the ab-skill-factory in service — attach to the rail and walk it (start, default), stand down cleanly (end), or report the walker's state (status). Start is mise-gated and takes the rail service lock; end finishes-or-releases the current ticket, notates resumable state to its work-log, and drops the lock. Use when the founder says "put the brigade in service", "start the rail walk", "stop the brigade", or "is the brigade in service?".
 ---
 
 # service — the brigade's rail-attachment lifecycle
@@ -30,7 +30,7 @@ already held, in which case report "already in service" (lock holder, since when
 
 ### `service start` (default)
 
-1. **Lock check:** if `<rail>/.service/skill-agent-brigade.lock` exists and its holder is live →
+1. **Lock check:** if `<rail>/.service/ab-skill-factory.lock` exists and its holder is live →
    report "already in service", stop. This lock is what upgrades the filesystem rail from
    *one-walker-by-convention* to **one-walker-enforced** (see RAIL-SPEC's advisory-lease honesty note).
 2. **Mise gate:** run `python3 ../mise/mise.py` (the engine reads [../mise/mise.toml](../mise/mise.toml),
@@ -41,7 +41,7 @@ already held, in which case report "already in service" (lock holder, since when
 3. **Take the lock:** write `{brigade, started_at, session, walker}` JSON to the lock path.
 4. **Walk:** invoke the Workflow tool on [rail-walk.run.js](./rail-walk.run.js) in bounded cycles
    (one backlog sweep per invocation). Between cycles, check for the stop flag
-   (`<rail>/.service/skill-agent-brigade.stop`); absent → sweep again after the polling interval.
+   (`<rail>/.service/ab-skill-factory.stop`); absent → sweep again after the polling interval.
 5. **On any exit** (stop flag, error, session end): release per step "end" below — never leave the
    lock behind.
 

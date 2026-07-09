@@ -56,7 +56,7 @@ the five-exit set → ack) but moves the *mechanism* entirely:
 - **Menu/run paths now resolve from `CELLAR_ROOT` directly**, not via `RAIL_DIR/../..` relative
   hops. The old script only had `RAIL_DIR` and derived everything else with `join(RAIL_DIR, '..',
   ...)`; the new script takes `cellar_root` as its own first-class arg (matching the adapter's own
-  `--cellar-root` flag), so the menu path is `${CELLAR_ROOT}/brigades/skill-agent-brigade/menu.md`
+  `--cellar-root` flag), so the menu path is `${CELLAR_ROOT}/brigades/ab-skill-factory/menu.md`
   and the per-ticket scratch dir is `${CELLAR_ROOT}/brigade-runs/${ticketId}` — no relative-path
   guessing through the rail directory.
 - **Station work-log appends now go through the adapter's `append` CLI**, not a vague "append a

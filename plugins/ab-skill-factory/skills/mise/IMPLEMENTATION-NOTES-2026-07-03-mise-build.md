@@ -60,7 +60,7 @@ Practical consequences of the switch:
 - **No `vendor_stamp` entry in this brigade's own `mise.toml`.** The vendor-stamp check type exists
   in the engine (implemented + tested) because the plan calls for it as a v1 check type, and
   because domain brigades vendoring `rail_adapter.py` (and eventually `mise.py` itself) from canon
-  will need it. But *this* brigade (`skill-agent-brigade`) is canon — it doesn't vendor anything
+  will need it. But *this* brigade (`ab-skill-factory`) is canon — it doesn't vendor anything
   from itself. Adding a self-referential vendor-stamp check for `mise.py` is explicitly future
   work (build sequence step 4 in the plan; see "Open questions" below).
 - **No "model access" check.** BRIGADE-INTERFACE.md's mise spec lists "one minimal model call per
@@ -131,8 +131,8 @@ Practical consequences of the switch:
 the real `~/rdco-cellar` tree. Run with:
 
 ```
-python3 -m pytest skills/mise/tests/ -q      # from the plugin dir (plugins/skill-agent-brigade/)
-python3 -m pytest plugins/skill-agent-brigade/skills/mise/tests/ -q   # from the repo root
+python3 -m pytest skills/mise/tests/ -q      # from the plugin dir (plugins/ab-skill-factory/)
+python3 -m pytest plugins/ab-skill-factory/skills/mise/tests/ -q   # from the repo root
 ```
 
 Both invocations verified green (61 passed) before commit. `node_syntax` PASS/FAIL tests are

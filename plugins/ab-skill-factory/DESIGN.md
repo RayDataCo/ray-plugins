@@ -1,4 +1,4 @@
-# skill-agent-brigade — Working Design (v2)
+# ab-skill-factory — Working Design (v2)
 
 > **Status: living doc, co-developed.** PR #6 shipped v1 (the working pass + the variance-analysis worked example). This captures the v2 architecture as it's being designed. Open questions are at the bottom — edit freely.
 
@@ -6,7 +6,7 @@
 
 The settled brigade vocabulary — one place, one definition each. Use these exact terms in code and prose; this block is the single source of truth.
 
-- **brigade** — the whole system: the multi-agent assembly line that builds skills (this plugin, `skill-agent-brigade`).
+- **brigade** — the whole system: the multi-agent assembly line that builds skills (this plugin, `ab-skill-factory`).
 - **station** — one atomic skill / one phase (spec, test, author, critic). Does its single job in isolation; hands off via a file artifact.
 - **the pass** — the layer that runs one ticket through the stations: sequencing, phase state, the convergence (rework) loop.
 - **expo** — the deciding agent *at* the pass. Routes each ticket using the exit set, holding the phase/ticket state and cross-station context a single-shot critic lacks. (The pass is the layer; the expo is the role inside it.)

@@ -187,7 +187,7 @@ while (worked < MAX_TICKETS) {
     const menu = await agent(
       `You are the EXPO answering a menu/discovery ticket ("what can your brigade do?"). Read the ticket at ${ticketPath} and ` +
       `the brigade home its context points at (this brigade: ${PLUGIN_DIR} — read MENU-SPEC.md, MENU.md, the skills/ roster, ` +
-      `and the critic/eval config). Write or refresh the menu at ${CELLAR_ROOT}/brigades/skill-agent-brigade/menu.md ` +
+      `and the critic/eval config). Write or refresh the menu at ${CELLAR_ROOT}/brigades/ab-skill-factory/menu.md ` +
       `(the cellar brigades section per MENU-SPEC — menus moved there from <rail>/menus/ in the 2026-07-02 one-store centralization; ` +
       `frontmatter menu_of/version/generated_by: expo — bump version if it exists — plus source_hash: the sha256 of the ` +
       `packaged MENU.md you derived from, computed via Bash \`shasum -a 256\` at publish time; it is the freshness stamp ` +

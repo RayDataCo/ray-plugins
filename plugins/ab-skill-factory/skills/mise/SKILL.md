@@ -1,6 +1,6 @@
 ---
 name: mise
-description: Readiness check for the skill-agent-brigade — "is the brigade ready?" (mise en place, before service). Runs the static engine (mise.py against mise.toml) plus the agent-executor checks it can't do itself (Workflow tool, station skills), and merges both into one PASS/WARN/FAIL/UNCHECKED report. Use when the founder says "run mise", "is the brigade ready", "readiness check", or as the precondition gate before `service start`. A FAIL anywhere means this brigade must refuse service.
+description: Readiness check for the ab-skill-factory — "is the brigade ready?" (mise en place, before service). Runs the static engine (mise.py against mise.toml) plus the agent-executor checks it can't do itself (Workflow tool, station skills), and merges both into one PASS/WARN/FAIL/UNCHECKED report. Use when the founder says "run mise", "is the brigade ready", "readiness check", or as the precondition gate before `service start`. A FAIL anywhere means this brigade must refuse service.
 ---
 
 # mise — readiness check
