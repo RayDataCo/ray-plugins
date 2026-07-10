@@ -1,6 +1,6 @@
 ---
 name: advertising-claims-endorsement-review
-description: Reviews marketing copy, influencer briefs, testimonials, case studies, and expert/organizational endorsement content against FTC 16 CFR Part 255 (Endorsement Guides) for PRESENT/ABSENT/DEFICIENT element coverage — material-connection disclosure, consumer/expert/organizational endorsement duties, and efficacy-claim substantiation. Use before publishing anything with a testimonial, influencer partnership, "#ad"-style disclosure, expert or practitioner endorsement, or efficacy language like "clinically tested," "proven," "guaranteed," or "backed by research." Emits ONE compact coverage table (element, status, citation, defect detail) in full every time, never a prose summary and never referenced as already produced. Reports coverage, not a compliance verdict, and is not legal advice — route ABSENT/DEFICIENT findings to counsel.
+description: Reviews marketing copy, influencer briefs, testimonials, case studies, and expert/organizational endorsement content against FTC 16 CFR Part 255 (Endorsement Guides) and 16 CFR Part 465 (Consumer Reviews Rule) for PRESENT/ABSENT/DEFICIENT element coverage — material-connection disclosure, consumer/expert/organizational endorsement duties, child-directed-endorsement scrutiny, review-authenticity/intermediary duties, and efficacy-claim substantiation. Use before publishing anything with a testimonial, influencer partnership, "#ad"-style disclosure, expert or practitioner endorsement, consumer review content, or efficacy language like "clinically tested," "proven," "guaranteed," or "backed by research." Emits ONE compact coverage table (element, status, citation, defect detail) in full every time, never a prose summary and never referenced as already produced. Reports coverage, not a compliance verdict, and is not legal advice — route ABSENT/DEFICIENT findings to counsel.
 ---
 
 # Advertising Claims & Endorsement Review
@@ -8,7 +8,8 @@ description: Reviews marketing copy, influencer briefs, testimonials, case studi
 Coverage-checking skill, not a legal-advice skill. It reads submitted marketing
 content (ad copy, influencer brief, testimonial page, case study, social post
 draft, etc.), determines which sections of 16 CFR Part 255 (the FTC's
-Endorsement Guides) apply, and reports element-by-element whether the content
+Endorsement Guides) and, where relevant, 16 CFR Part 465 (the FTC's Consumer
+Reviews Rule) apply, and reports element-by-element whether the content
 addresses each applicable requirement. It never issues a compliance verdict —
 it reports coverage and routes gaps to counsel.
 
@@ -17,9 +18,10 @@ public-domain US federal material (17 U.S.C. § 105 — no copyright, fully
 excerptable with citation):
 
 - `references/16-cfr-255-elements.md` — the enumerated 255.0–255.6
-  requirements, each with a plain-language summary, a directly quotable
-  line, and the per-element status decision rules that resolve the
-  cases most likely to be scored wrong.
+  requirements plus the related 16 CFR Part 465 consumer-reviews element,
+  each with a plain-language summary, a paraphrase verified against eCFR
+  (not verbatim regulatory text), and the per-element status decision
+  rules that resolve the cases most likely to be scored wrong.
 - `references/substantiation-defect-patterns.md` — four named
   efficacy-claim defect patterns (drawn from a real FTC enforcement
   complaint) plus the mechanical detection tests and carve-outs for each,
@@ -46,7 +48,7 @@ Before starting, establish:
 2. **content_type** — a short label (e.g. "Instagram influencer brief,"
    "product landing page," "case-study one-pager"). If not stated, infer it
    and say so. Note explicitly when content_type is a brief or instruction
-   set for a not-yet-published post — Step 4 rule 5 governs how those are
+   set for a not-yet-published post — Step 4 rule 6 governs how those are
    scored differently from a finished, published piece.
 3. **jurisdiction_confirmation** — whether the content is confirmed
    US-targeted. If not stated, default to unconfirmed and add a
@@ -83,12 +85,14 @@ Decide, for each conditional element, whether it applies:
 | 255.3 (expert endorsement) | Invokes a professional credential, title, or claimed expertise as the source of an endorsement |
 | 255.4 (organizational endorsement) | Depicts an organization, association, or institution (not an individual) as endorsing, approving, or recommending the product |
 | 255.5 (material connection) | Is sponsored, gifted, paid, an influencer/creator brief, an affiliate arrangement, or otherwise involves a relationship a consumer would not assume |
+| 255.6 (child-directed endorsement) | Is addressed to or plainly targets a child audience — a children's-product ad, a child endorser, or a brief instructing posting to a clearly child-skewing channel/audience |
+| 465 (consumer reviews / intermediary) | Involves consumer reviews, a review platform, or a named/implied intermediary role (agency, PR firm, review broker, reputation-management company) creating, buying, selling, filtering, or managing reviews |
 
-255.0, 255.1-honest-opinion, 255.1-substantiation, and 255.6 are always
-evaluated, never conditional. This determination becomes one compact line in
-the report header — do not give it a separate section. **The reason named in
-this line and the status later written in that element's table row must
-never contradict each other** (see Step 4 rule 1).
+255.0, 255.1-honest-opinion, and 255.1-substantiation are always evaluated,
+never conditional. This determination becomes one compact line in the report
+header — do not give it a separate section. **The reason named in this line
+and the status later written in that element's table row must never
+contradict each other** (see Step 4 rule 1).
 
 ### Step 3 — Element findings: status definitions
 
@@ -183,17 +187,38 @@ wrong. Apply all that are relevant before writing a status, in this order:
    actively defeats the definitional concepts (e.g. content that relabels an
    obviously sponsored placement as organic in a way that undermines what
    "endorsement" even means here) — this should be uncommon.
-4. **255.6 is a liability-allocation section, not a content checklist.** It
-   asks whether the endorser or an intermediary (ad agency, PR firm, review
-   broker, reputation-management company) is shown creating or spreading a
-   deceptive or undisclosed-connection endorsement. Absent that specific
-   signal in the content, mark 255.6 PRESENT by default — do not read it as
-   a generic "does the advertiser train/monitor endorsers" duty and do not
-   mark it DEFICIENT without a concrete intermediary-conduct quote. An
-   unresolved or even undisclosed material connection scored under 255.5 is
-   not, by itself, evidence for a 255.6 finding — 255.6 needs its own
-   intermediary-conduct signal.
-5. **Brief/instruction content is scored on the instructions actually given,
+4. **255.6 only applies when the content is addressed to or plainly targets
+   children — treat it as a conditional trigger like 255.2-255.5, never as an
+   always-on default.** It asks whether the content shows awareness of, or
+   accommodation for, the heightened scrutiny the FTC applies to endorsements
+   directed at children (a children's-product ad, a child endorser, a brief
+   instructing posting to a clearly child-skewing channel/audience). Content
+   with no child-audience signal — the ordinary case — is NOT TRIGGERED; omit
+   the row per Step 6, the same as any not-triggered 255.2-255.5 element.
+   Never default this element to PRESENT for adult-directed content. Once
+   triggered, mark DEFICIENT (not ABSENT) when the content contains an
+   endorsement but never engages the child-audience concern in any form, and
+   reserve ABSENT for content that shows zero engagement whatsoever with the
+   endorsement's suitability for a child audience.
+5. **16 CFR Part 465 (Consumer Reviews Rule) is a separate rule from Part
+   255 and a separate liability-allocation trigger, not a content
+   checklist.** It is Part 465 — not Part 255 — that reaches an intermediary
+   (ad agency, PR firm, review broker, reputation-management company) shown
+   creating, procuring, buying, selling, filtering, or otherwise managing
+   reviews, and that prohibits fake, purchased, or undisclosed-incentivized
+   reviews and review suppression. Trigger only when the content involves
+   consumer reviews, a review platform, or a named/implied intermediary
+   review-management role; plain single-endorser testimonial or influencer
+   content with no review-platform or intermediary angle does not trigger
+   this element — mark NOT TRIGGERED and omit the row per Step 6. Once
+   triggered, absent a concrete signal in the content, mark 465 PRESENT by
+   default — do not read it as a generic "does the advertiser train/monitor
+   endorsers" duty and do not mark it DEFICIENT without a concrete
+   intermediary-conduct or fake/incentivized-review quote. An unresolved or
+   even undisclosed material connection scored under 255.5 is not, by
+   itself, evidence for a 465 finding — 465 needs its own intermediary- or
+   review-conduct signal.
+6. **Brief/instruction content is scored on the instructions actually given,
    not on a hypothetical finished post.** When content_type is a brief,
    script, or instruction set for a not-yet-published piece, evaluate what
    the brief's language actually says and omits — not what a compliant or
@@ -204,28 +229,29 @@ wrong. Apply all that are relevant before writing a status, in this order:
    how the organizational view was actually formed, or about disclosure),
    that is an attempt with a gap — DEFICIENT, not ABSENT. Reserve ABSENT for
    elements the brief's language never touches in any form.
-6. **Unresolved endorser_context gets one DEFICIENT element, not two.** When
+7. **Unresolved endorser_context gets one DEFICIENT element, not two.** When
    compensation/relationship/personal-use status was not provided and the
    content doesn't resolve it, mark the single most relevant element (usually
    255.5, or 255.1-substantiation if 255.5 isn't triggered) DEFICIENT and say
    plainly in its defect detail that the fact wasn't provided and needs
    confirmation before publishing. Never duplicate that same open question
    under a second, invented element.
-7. **Severity ranking draws only from ABSENT/DEFICIENT rows, using a fixed
+8. **Severity ranking draws only from ABSENT/DEFICIENT rows, using a fixed
    tier order.** PRESENT elements are never ranked or tagged with a severity
    marker. When more than one row is ABSENT/DEFICIENT, assign each to a tier
    below, then rank most-severe-tier-first; break ties within a tier by table
-   row order (255.0 → 255.6):
+   row order (255.0 → 465):
    - Tier 1 — undisclosed or unresolved material connection (255.5)
    - Tier 2 — an unsubstantiated claim in a health/financial/legal/safety
      category (255.1-substantiation with any of patterns a/b/c/d flagged in
-     one of those categories), or a 255.6 finding backed by concrete
-     intermediary-conduct evidence
+     one of those categories), or a 465 finding backed by concrete
+     intermediary-conduct or fake/incentivized-review evidence
    - Tier 3 — a fabricated/scripted/coerced opinion (255.1-honest-opinion
      DEFICIENT/ABSENT) or an unsubstantiated typicality representation
      (255.2 DEFICIENT/ABSENT)
-   - Tier 4 — an expert-credential defect (255.3) or an
-     organizational-collective-judgment defect (255.4)
+   - Tier 4 — an expert-credential defect (255.3), an
+     organizational-collective-judgment defect (255.4), or a
+     child-directed-endorsement defect (255.6)
    - Tier 5 — softer definitional or wording/precision gaps (255.0, or a
      255.1-substantiation gap outside a health/financial/legal/safety
      category)
@@ -295,15 +321,18 @@ single claim can trip more than one pattern — flag all that apply.
 Emit exactly one table, in this fixed row order (skip rows for elements that
 were NOT TRIGGERED in Step 2 — they're already covered in the header line):
 255.0, 255.1-honest-opinion, 255.1-substantiation, 255.2, 255.3, 255.4, 255.5,
-255.6.
+255.6, 465.
 
 Columns: `Element | Status | Citation | Defect / Substantiation Detail`.
 
-- **Citation** — the 16 CFR 255.x subsection plus, where useful, a direct
-  quote pulled from `references/16-cfr-255-elements.md`'s quotable line for
-  that element, tagged "(FTC Endorsement Guides, 16 CFR Part 255, public
-  domain, 17 U.S.C. § 105)". Never cite a subsection this file doesn't cover
-  — fall back to the bare section number rather than fabricating a quote.
+- **Citation** — the 16 CFR 255.x subsection (or, for the 465 row, 16 CFR
+  Part 465) plus, where useful, the paraphrase pulled from
+  `references/16-cfr-255-elements.md`'s paraphrase field for that element —
+  labeled there as verified against eCFR, not verbatim regulatory text — and
+  presented as a paraphrase, never as a quoted excerpt, tagged "(FTC
+  Endorsement Guides, 16 CFR Part 255 or 16 CFR Part 465, public domain, 17
+  U.S.C. § 105)". Never cite a subsection this file doesn't cover — fall back
+  to the bare section number rather than fabricating language.
 - **Defect / Substantiation Detail** —
   - PRESENT: one short clause on why (e.g. "genuine first-hand account, no
     typicality claim made").
@@ -311,7 +340,7 @@ Columns: `Element | Status | Citation | Defect / Substantiation Detail`.
     the spot in the submitted content that shows the gap. If nothing in the
     content addresses the element at all, write "no text in the submitted
     content addresses this element." Prefix with a severity tag per Step 4
-    rule 7.
+    rule 8.
   - For 255.1-substantiation rows with an efficacy claim present, append the
     four-pattern breakdown inline: `(a) {FLAGGED/NOT FLAGGED}{: "quote" if
     flagged}; (b) ...; (c) ...; (d) ...`.
@@ -335,11 +364,13 @@ prose, never truncate the table, and never say the report is "above" or
   before it lands in the report; never pass it through verbatim.
 - **No private paths, no build filenames, no build narrative.** Cite only
   public source titles — "Guides Concerning the Use of Endorsements and
-  Testimonials in Advertising, 16 CFR Part 255" (Federal Trade Commission)
-  and "In the Matter of Marc Ching, individually and d/b/a Whole Leaf
-  Organics — FTC Docket No. 9394, Administrative Part III Complaint"
-  (Federal Trade Commission). Never surface an internal filename, file path,
-  or note about how this skill pack was assembled.
+  Testimonials in Advertising, 16 CFR Part 255" (Federal Trade Commission),
+  "Trade Regulation Rule on the Use of Consumer Reviews and Testimonials, 16
+  CFR Part 465" (Federal Trade Commission), and "In the Matter of Marc
+  Ching, individually and d/b/a Whole Leaf Organics — FTC Docket No. 9394,
+  Administrative Part III Complaint" (Federal Trade Commission). Never
+  surface an internal filename, file path, or note about how this skill
+  pack was assembled.
 - **No verdict language.** Never write "compliant," "non-compliant," "this
   passes," "this violates the law," or any sentence that reads as a legal
   conclusion. Status values are PRESENT / ABSENT / DEFICIENT only.
@@ -353,28 +384,29 @@ prose, never truncate the table, and never say the report is "above" or
 
 - content_type: {content_type}
 - jurisdiction_note: {jurisdiction_note — omit this line entirely if jurisdiction_confirmation was true and no non-US signal was found}
-- grounding: FTC Endorsement Guides (16 CFR Part 255, current version) and FTC Matter No. 9394 Administrative Complaint (In the Matter of Marc Ching / Whole Leaf Organics) — both public-domain US federal sources, retrieved {retrieval_date}.
-- trigger determination: 255.2 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.3 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.4 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.5 {TRIGGERED/NOT TRIGGERED} ({reason}). 255.0, 255.1-honest-opinion, 255.1-substantiation, 255.6 always evaluated.
+- grounding: FTC Endorsement Guides (16 CFR Part 255, current version), FTC Trade Regulation Rule on the Use of Consumer Reviews and Testimonials (16 CFR Part 465), and FTC Matter No. 9394 Administrative Complaint (In the Matter of Marc Ching / Whole Leaf Organics) — all public-domain US federal sources, retrieved {retrieval_date}.
+- trigger determination: 255.2 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.3 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.4 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.5 {TRIGGERED/NOT TRIGGERED} ({reason}); 255.6 {TRIGGERED/NOT TRIGGERED} ({reason}); 465 {TRIGGERED/NOT TRIGGERED} ({reason}). 255.0, 255.1-honest-opinion, 255.1-substantiation always evaluated.
 
 | Element | Status | Citation | Defect / Substantiation Detail |
 |---|---|---|---|
-| 255.0 | {status} | 16 CFR 255.0{ — "quote" if used} | {detail} |
-| 255.1-honest-opinion | {status} | 16 CFR 255.1{ — "quote" if used} | {detail} |
-| 255.1-substantiation | {status} | 16 CFR 255.1{ — "quote" if used} | {detail}{; (a) ...; (b) ...; (c) ...; (d) ... if an efficacy claim is present} |
-| 255.2 | {status, only if triggered} | 16 CFR 255.2{ — "quote" if used} | {detail} |
-| 255.3 | {status, only if triggered} | 16 CFR 255.3{ — "quote" if used} | {detail} |
-| 255.4 | {status, only if triggered} | 16 CFR 255.4{ — "quote" if used} | {detail} |
-| 255.5 | {status, only if triggered} | 16 CFR 255.5{ — "quote" if used} | {detail} |
-| 255.6 | {status} | 16 CFR 255.6{ — "quote" if used} | {detail} |
+| 255.0 | {status} | 16 CFR 255.0{ — "paraphrase" if used} | {detail} |
+| 255.1-honest-opinion | {status} | 16 CFR 255.1{ — "paraphrase" if used} | {detail} |
+| 255.1-substantiation | {status} | 16 CFR 255.1{ — "paraphrase" if used} | {detail}{; (a) ...; (b) ...; (c) ...; (d) ... if an efficacy claim is present} |
+| 255.2 | {status, only if triggered} | 16 CFR 255.2{ — "paraphrase" if used} | {detail} |
+| 255.3 | {status, only if triggered} | 16 CFR 255.3{ — "paraphrase" if used} | {detail} |
+| 255.4 | {status, only if triggered} | 16 CFR 255.4{ — "paraphrase" if used} | {detail} |
+| 255.5 | {status, only if triggered} | 16 CFR 255.5{ — "paraphrase" if used} | {detail} |
+| 255.6 | {status, only if triggered} | 16 CFR 255.6{ — "paraphrase" if used} | {detail} |
+| 465 | {status, only if triggered} | 16 CFR 465{ — "paraphrase" if used} | {detail} |
 
 {n} PRESENT, {n} ABSENT, {n} DEFICIENT of {n} applicable elements.
 
-This report checks the submitted content against the enumerated requirements in 16 CFR Part 255 and the FTC Act Section 5 substantiation duty the Guides interpret. It reports element-by-element PRESENT / ABSENT / DEFICIENT coverage. It does not constitute legal advice and is not a compliance or non-compliance determination — route any ABSENT or DEFICIENT finding through counsel before publishing or relying on this report.
+This report checks the submitted content against the enumerated requirements in 16 CFR Part 255, 16 CFR Part 465, and the FTC Act Section 5 substantiation duty the Guides interpret. It reports element-by-element PRESENT / ABSENT / DEFICIENT coverage. It does not constitute legal advice and is not a compliance or non-compliance determination — route any ABSENT or DEFICIENT finding through counsel before publishing or relying on this report.
 ```
 
-(Omit table rows for any 255.2/255.3/255.4/255.5 element that was NOT
-TRIGGERED — the trigger-determination line already accounts for it. Never
-leave a `{status}` placeholder unfilled or add an extra row for a
+(Omit table rows for any 255.2/255.3/255.4/255.5/255.6/465 element that was
+NOT TRIGGERED — the trigger-determination line already accounts for it.
+Never leave a `{status}` placeholder unfilled or add an extra row for a
 not-triggered element.)
 
 ## Notes on scope

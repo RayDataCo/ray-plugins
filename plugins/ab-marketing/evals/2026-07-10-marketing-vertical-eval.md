@@ -117,3 +117,25 @@ content quality on emitted reports is ~90%; the residual defect is increasingly 
 eval delivery channel (long structured-output answers) rather than the discipline.
 Revisit alongside eval-harness work (e.g. chunked emission or a delivery-mode check),
 not with another same-oracle round.
+
+## Post-review correction (2026-07-10, pre-merge): the 255.6 citation defect
+
+The zero-context merge reviewer verified every encoded CFR section against the actual
+regulation and found the skill's "255.6" element FABRICATED: the real 16 CFR 255.6 covers
+**endorsements directed to children**; the intermediary/fake-review liability content the
+skill had filed under 255.6 belongs to **16 CFR Part 465** (Consumer Reviews and
+Testimonials Rule, 2024). Traced upstream: the cellar grounding file carried the error
+WITH a false "verified against primary text: yes" stamp — the fill station hallucinated
+the element, and the skill author plus two independent critics propagated it because each
+verified against the same tainted intermediate. Fixed pre-merge in both the shipped skill
+(255.6 → child-directed, conditional; Part 465 → its own correctly-cited element;
+fabricated quotable line deleted; all "quote" framings relabeled as verified paraphrases)
+and the cellar source (with a dated correction note).
+
+Eval-evidence impact, stated honestly: the round-3 oracles and BOTH arms shared the same
+mislabeled citation, so the relative lift (33% → 93%) stands as evidence of the skill's
+element-coverage discipline — but one element of the fixture set was graded under a wrong
+citation convention. Fixture keys flagged for the hardener pass. Process lesson adopted:
+fill stations' "verified against primary text" self-stamps require INDEPENDENT primary-
+source spot-checks; regulatory-fact verification against the actual CFR is now a mandatory
+fresh-eyes dimension for any standards-derived skill.
