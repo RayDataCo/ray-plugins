@@ -411,7 +411,7 @@ not-triggered element.)
 
 ## Notes on scope
 
-- This skill checks coverage of the Endorsement Guides only. It does not
+- This skill checks coverage of the Endorsement Guides and the Consumer Reviews Rule (16 CFR Parts 255 and 465) only. It does not
   check general FTC Act Section 5 deceptive-advertising issues unrelated to
   endorsements (pricing claims, "free" offer rules, native-advertising
   labeling outside an endorsement context, COPPA, CAN-SPAM, etc.) — those are
