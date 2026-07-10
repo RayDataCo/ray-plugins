@@ -57,3 +57,31 @@ the base model.
   excluded from grounding so no shipped skill carries an NC/SA obligation. The one
   violation that slipped through (the positioning exemplar sentence) was caught by the
   critic and is why that station is held.
+
+## Round 2 — refire (same day, 90 agents, 0 errors)
+
+All five held skills were refired against their named defects (revise → independent
+re-critic → full re-eval on the SAME oracles; skills fixed to oracles, never the reverse).
+
+**Promoted to live (ship in 0.2.0):**
+
+| station | r1 → r2 | round-2 critic |
+|---|---|---|
+| positioning-narrative-draft | +1.00 → **+0.80** (9/10 pooled) | **advance** — all four round-1 defects verified fixed: the near-verbatim exemplar sentence replaced with original pattern description, provenance note now honestly names the two editorially-invented gates, build-narrative section removed, false self-certification gone. The r2 miss: the hardest thin-input fixture scored 8/12 rubric criteria (refusal-to-fabricate held; coverage dipped) |
+| marketing-brief-draft | +0.80 → **+0.80** (8/10 pooled) | **advance** — private paths removed, public citations only. The r2 miss was a delivery artifact (the arm described its brief as "delivered in full above" without including it — the emit-in-full residual, documented) |
+
+**Still held (structural trio — near-miss profile):**
+
+- email-telemarketing-compliance-review +0.20 → **+0.40**; critic caught a NEW defect: the
+  verdict-ordering guidance contradicts itself between prose and numbered list (in the
+  skill and both references).
+- digital-disclosure-review +0.20 → +0.20; 7 of 8 named defects verified fixed (the
+  invented health/safety scope is gone); one item survived; recurring DEFICIENT-vs-ABSENT
+  severity calls.
+- advertising-claims-endorsement-review 0.00 → 0.00; all round-1 defects verified fixed
+  (critic advance) — round-2 answers show correct schemas, exact triggers, and 5/6-element
+  accuracy on several fixtures, but strict all-element set-match fails every fixture on
+  1-2 statuses. Held purely on eval evidence. Round 3 should also decide whether
+  per-element accuracy joins the reported evidence beside the strict fixture bar.
+
+Method unchanged: sonnet arms, in-answer-only, strict grading, oracle keys private.
