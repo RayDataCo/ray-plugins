@@ -64,6 +64,15 @@ target      = "../award-case-study-exemplars/SKILL.md"
 severity    = "FAIL"
 remedy      = "reinstall the plugin — award-case-study-exemplars station is missing"
 
+[[checks]]
+id          = "station-freshness-watch"
+description = "Station present: freshness-watch"
+executor    = "script"
+type        = "path_exists"
+target      = "../freshness-watch/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — freshness-watch station is missing"
+
 # --- Deciding agent + roster present ---
 
 [[checks]]

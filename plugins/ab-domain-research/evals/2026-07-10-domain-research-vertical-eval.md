@@ -91,3 +91,14 @@ notes below.
   facts.
 - Competency sources, round-by-round fixture sets, and both raw result sets are preserved
   privately (oracle keys stay out of the public repo so future evals stay uncontaminated).
+
+## Station 6 addendum — freshness-watch (same day, founder build go)
+
+Built through the factory line (19 + 18 agents across two rounds) from its own competency
+doc, implementing EVAL-SPEC's third regression trigger. Graded per-element under the
+standing founder-ruled bar (≥90% accuracy, ≥+20pts lift).
+
+| station | evidence | headline |
+|---|---|---|
+| freshness-watch | **round 1: 87% (+36)** → **round 2: 99% per-element (+48), strict 4/5** | Round-1 critic caught a build-narrative leak (an internal incident anecdote imported from the competency doc) — scrubbed in the refire, which also fixed 3 of 4 named boundary classes; the round-2 critic's one survivor (the unverifiable action-routing boundary: transient → re-check vs stale-recorded-URL → provenance repair) was applied as a named text fix at packaging and is verified by the merge gate. Base sonnet: 0/10 strict across both rounds |
+

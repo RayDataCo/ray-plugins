@@ -1,6 +1,6 @@
 # ab-domain-research — Menu
 
-**Status:** live · 5 stations shipped (eval-proven, residual weaknesses named below) ·
+**Status:** live · 6 stations shipped (eval-proven, residual weaknesses named below) ·
 **fills a cellar with domain competency + gold exemplars — curation, never bulk
 scraping**
 
@@ -32,17 +32,16 @@ to one; a full domain fill fires every station whose source class the domain off
 | Source GOLD EXEMPLARS — real professional work product from public filings and public records (EDGAR exhibits/MD&A, SAM.gov RFP/SOWs, court briefs, patents, GAO/CRS reports) with `why_gold` on every exemplar | `public-filings-exemplars` | **win +0.40–0.60 across two rounds**: base 0/10 → skill 5/10 total; every round-2 miss was a single source on a 6-source strict fixture (per-source ≥5/6), same named boundary-judgment family. Weakest evidence on the roster — flagged honestly; evidence detail in evals/ |
 | Source GOLD EXEMPLARS for CREATIVE/subjective domains (marketing, advertising, design, PR, digital/UX) from juried award libraries (Effie, Cannes Lions, D&AD, IPA) and published case studies — award metadata as `why_gold`, entrant-reported results tagged | `award-case-study-exemplars` | **win +0.60**: base 1/5 → skill 4/5. The one miss was the hardest license-boundary-precision fixture (public abstract vs gated databank; INCLUDE vs INCLUDE-WITH-RESTRICTION labeling) — both arms failed the same sources; residual named in evals/ |
 
-## Planned duty: the freshness watch (docs-pinned 2026-07-10, not yet built)
+## The freshness watch (live, eval-proven)
 
-This brigade owns grounding provenance, so it also owns **keeping it fresh**: on a cadence,
-re-verify each landed grounding source against its PRIMARY source (never a cellar
-intermediate — self-verification stamps have been caught false); when a source has moved
-past the `version_or_date` the cellar carries (a regulation amended, a standard re-issued,
-an exemplar superseded), flag every downstream skill and oracle authored against it and
-enqueue factory refire tickets carrying the updated grounding. Contract detail in the
-factory's [EVAL-SPEC](../ab-skill-factory/EVAL-SPEC.md). Until built, the expo answers
-freshness questions honestly: provenance dates are recorded per artifact, and re-runs of
-the relevant sourcing station are the manual path.
+| When the situation is… | Route to | Eval headline (per-element bar) |
+|---|---|---|
+| Re-verify landed grounding against PRIMARY sources — weekly cron, before a client-facing tasting/deployment, or "is our cellar grounding stale?" / "what needs a refire?" | `freshness-watch` | **win +48pts**: base 51% → skill **99% per-element** (strict 4/5) on fixtures covering moved/superseded/unverifiable/provenance-gap boundaries, redirect-vs-moved, injection handling, and action-routing. Detect-and-route only — it never lands new content |
+
+This station owns EVAL-SPEC's third regression trigger (world change): a moved or
+superseded source flags every downstream skill and oracle and routes factory refire
+tickets. Verification is PRIMARY-source-only — a cellar "verified" stamp is a claim,
+not a fact.
 
 ## Per-domain growth note
 
