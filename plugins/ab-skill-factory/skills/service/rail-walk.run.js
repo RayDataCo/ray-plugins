@@ -152,7 +152,7 @@ while (worked < MAX_TICKETS) {
   // rules ticketLint always ran, now from the single canon copy.
   const lint = await agent(
     `Run this exact Bash command: \`python3 ${ADAPTER} lint ${ticketPath} --rail-dir ${RAIL_DIR} --cellar-root ${CELLAR_ROOT}\`. ` +
-    `It prints one "rule N: PASS|FAIL — <description> (<detail>)" line per Gate-A rule (8 rules total), ` +
+    `It prints one "rule N: PASS|FAIL — <description> (<detail>)" line per Gate-A rule, ` +
     `then a summary line "Gate A: X/Y pass" (with "(failed rules: [...])" appended if any failed), and ` +
     `exits 0 on an overall pass or 1 on an overall fail. Transcribe what it reported — do not re-judge the ` +
     `rules yourself, only report what the command said.`,
