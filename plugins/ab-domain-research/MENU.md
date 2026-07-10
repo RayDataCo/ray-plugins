@@ -38,7 +38,7 @@ to one; a full domain fill fires every station whose source class the domain off
 |---|---|---|
 | Re-verify landed grounding against PRIMARY sources — weekly cron, before a client-facing tasting/deployment, or "is our cellar grounding stale?" / "what needs a refire?" | `freshness-watch` | **win +48pts**: base 51% → skill **99% per-element** (strict 4/5) on fixtures covering moved/superseded/unverifiable/provenance-gap boundaries, redirect-vs-moved, injection handling, and action-routing. Detect-and-route only — it never lands new content |
 
-This station owns EVAL-SPEC's third regression trigger (world change): a moved or
+This station owns [EVAL-SPEC](../ab-skill-factory/EVAL-SPEC.md)'s third regression trigger (world change): a moved or
 superseded source flags every downstream skill and oracle and routes factory refire
 tickets. Verification is PRIMARY-source-only — a cellar "verified" stamp is a claim,
 not a fact.
