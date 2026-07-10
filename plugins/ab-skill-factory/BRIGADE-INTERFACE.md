@@ -153,7 +153,7 @@ The contract:
    demo-grade evidence produced by delivery-grade machinery.
 
 Build note: like fire, this needs no new engine — expo + stations + the packaged tasting
-set. The build ticket is: retire a per-brigade showcase subset (hardener replenishes),
+set. The build ticket is: retire a per-brigade showcase subset (replenished per EVAL-SPEC's fixture-supply contract),
 package it, and add the expo's tasting procedure. Not built until that ticket runs.
 
 ### Close-out — the FOH contract *(runner DROPPED as a role, founder 2026-07-03; absorbed into the steward)*
