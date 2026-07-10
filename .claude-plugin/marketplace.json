@@ -37,6 +37,12 @@
       "description": "The registrar — the house's first 'house role' (a coordinator/record-keeper install unit, not a kitchen brigade that cooks tickets). Ships mise + three role skills: steward (front-of-house intake, context curation, the needs-context rework loop, and the close-out sweep — moved here from the factory), registry (the menu catalog, scan-on-demand over published menus), and orders (open-orders report). No service/fire/stations — a house role never works a ticket."
     },
     {
+      "name": "ab-legal",
+      "displayName": "AB Legal",
+      "source": "./plugins/ab-legal",
+      "description": "Legal-review agent brigade (structural, not advisory): the standard mise + expo + service surface over eval-proven structural legal-review stations. Two live — regulatory-notice-coverage (GDPR Art.13/14 + CCPA/CPRA disclosure-element coverage, +0.60 lift) and contract-clause-coverage (standard expected clause set by contract type, +1.00 lift, base missed all 5) — plus one held-for-refire (redline-against-playbook). Every station checks a document against an explicit enumerated standard and reports coverage/gaps; it never gives legal advice or makes a lawfulness/compliance determination."
+    },
+    {
       "name": "ab-managerial-accounting",
       "displayName": "AB Managerial Accounting",
       "source": "./plugins/ab-managerial-accounting",

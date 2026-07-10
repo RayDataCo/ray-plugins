@@ -1,0 +1,59 @@
+# mise.toml — AB Legal brigade readiness declaration.
+#
+# Single source of truth for "is this brigade ready to serve". Engine: mise.py
+# vendored from ab-skill-factory canon, zero pip deps. Relative targets resolve
+# against this file's own directory (skills/mise/), so the pack is portable.
+#
+# Credentials: NONE. These are structural document-review skills — no external
+# API calls, no MCP servers, no connectors. (A legal brigade that later gained a
+# contract-repository or e-signature connector would add an executor="agent"
+# reachability check here.)
+
+# --- Stations present: every live station the expo can compose ---
+
+[[checks]]
+id          = "station-regulatory-notice-coverage"
+description = "Station present: regulatory-notice-coverage"
+executor    = "script"
+type        = "path_exists"
+target      = "../regulatory-notice-coverage/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — regulatory-notice-coverage station is missing"
+
+[[checks]]
+id          = "station-contract-clause-coverage"
+description = "Station present: contract-clause-coverage"
+executor    = "script"
+type        = "path_exists"
+target      = "../contract-clause-coverage/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — contract-clause-coverage station is missing"
+
+# --- Deciding agent + roster present ---
+
+[[checks]]
+id          = "expo-present"
+description = "Expo present: the composing coordinator"
+executor    = "script"
+type        = "path_exists"
+target      = "../expo/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — expo is missing; the brigade cannot compose stations"
+
+[[checks]]
+id          = "menu-present"
+description = "Menu present: the station roster the expo reads"
+executor    = "script"
+type        = "path_exists"
+target      = "../../MENU.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — MENU.md is missing"
+
+[[checks]]
+id          = "manifest-parses"
+description = "Plugin manifest is valid JSON"
+executor    = "script"
+type        = "file_parses_json"
+target      = "../../.claude-plugin/plugin.json"
+severity    = "FAIL"
+remedy      = "plugin.json is malformed — reinstall the plugin"
