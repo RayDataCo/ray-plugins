@@ -34,8 +34,8 @@ compliance verdict; gaps route to counsel). Hold both lines.
 3. **Decompose + select:**
    - Single-station → route to it per the menu triggers.
    - Compound → select every station the Order touches (e.g. "draft the brief and the
-     measurement plan" → `marketing-brief-draft`* + `effectiveness-narrative-draft`,
-     then a combined read). *A station marked **held-for-refire** on the menu: say so
+     measurement plan" → `marketing-brief-draft` + `effectiveness-narrative-draft`,
+     then a combined read). A station marked **held-for-refire** on the menu: say so
      honestly, do the best available base-model work for that slice, and warn about the
      documented gap. Do NOT pretend a held station is live.
    - Out-of-scope → name where it belongs (counsel for legal advice; the domain-research

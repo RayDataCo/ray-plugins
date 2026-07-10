@@ -4,7 +4,7 @@
 # vendored from ab-skill-factory canon, zero pip deps. Relative targets resolve
 # against this file's own directory (skills/mise/), so the pack is portable.
 #
-# One live station ships in 0.1.0 (only eval-passers ship; five held-for-refire
+# Three live stations as of 0.2.0 (only eval-passers ship; three held-for-refire
 # stations are menu rows, not installed skills — mise gains a station-present
 # check per station as each refire lands). Credentials: NONE.
 
@@ -18,6 +18,24 @@ type        = "path_exists"
 target      = "../effectiveness-narrative-draft/SKILL.md"
 severity    = "FAIL"
 remedy      = "reinstall the plugin — effectiveness-narrative-draft station is missing"
+
+[[checks]]
+id          = "station-positioning-narrative-draft"
+description = "Station present: positioning-narrative-draft"
+executor    = "script"
+type        = "path_exists"
+target      = "../positioning-narrative-draft/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — positioning-narrative-draft station is missing"
+
+[[checks]]
+id          = "station-marketing-brief-draft"
+description = "Station present: marketing-brief-draft"
+executor    = "script"
+type        = "path_exists"
+target      = "../marketing-brief-draft/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — marketing-brief-draft station is missing"
 
 # --- Deciding agent + roster present ---
 
