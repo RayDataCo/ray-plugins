@@ -1,7 +1,7 @@
 # ab-domain-research — Menu
 
-**Status:** live · 4 stations shipped (eval-proven, residual weaknesses named below) · 1
-planned · **fills a cellar with domain competency + gold exemplars — curation, never bulk
+**Status:** live · 5 stations shipped (eval-proven, residual weaknesses named below) ·
+**fills a cellar with domain competency + gold exemplars — curation, never bulk
 scraping**
 
 This is the packaged menu (source of truth, versioned with the plugin). It is the
@@ -30,14 +30,14 @@ to one; a full domain fill fires every station whose source class the domain off
 | Source the CHECKABLE-STANDARD layer — statutes, regulations, official standards, with enumerated cited requirements and version/effective dates | `standards-regulatory-sourcing` | **win +1.00** (round 2): base 0/5 → skill 5/5, all five trap fixtures (injection, license, staleness, off-domain, reason-class precision). Round-1 gaps fixed by the §4b disposition-boundary rules |
 | Source methodology from open courseware / OER under the CC-licensed-only hard gate (TASL attribution, NC/SA restrictions recorded) | `academic-ocw-sourcing` | **win +0.60** (round 2, up from +0.20): base 0/5 → skill 3/5. One miss sits on a self-contradictory fixture key (logged in evals/ — under the oracle's own summary line it is a pass). Residual: SA-only stated licenses can get labeled plain INCLUDE instead of INCLUDE-WITH-RESTRICTION |
 | Source GOLD EXEMPLARS — real professional work product from public filings and public records (EDGAR exhibits/MD&A, SAM.gov RFP/SOWs, court briefs, patents, GAO/CRS reports) with `why_gold` on every exemplar | `public-filings-exemplars` | **win +0.40–0.60 across two rounds**: base 0/10 → skill 5/10 total; every round-2 miss was a single source on a 6-source strict fixture (per-source ≥5/6), same named boundary-judgment family. Weakest evidence on the roster — flagged honestly; evidence detail in evals/ |
+| Source GOLD EXEMPLARS for CREATIVE/subjective domains (marketing, advertising, design, PR, digital/UX) from juried award libraries (Effie, Cannes Lions, D&AD, IPA) and published case studies — award metadata as `why_gold`, entrant-reported results tagged | `award-case-study-exemplars` | **win +0.60**: base 1/5 → skill 4/5. The one miss was the hardest license-boundary-precision fixture (public abstract vs gated databank; INCLUDE vs INCLUDE-WITH-RESTRICTION labeling) — both arms failed the same sources; residual named in evals/ |
 
-## Planned (not live — do not improvise a substitute)
+## Per-domain growth note
 
-- **award-case-study-exemplars** — published gold exemplars for creative domains
-  (advertising/marketing award libraries, agency case studies). Deferred per the build
-  spec: added per-domain, later. Until it ships, creative-domain exemplar requests get
-  `partial-with-gaps` from the expo, with `public-filings-exemplars` covering what public
-  records can (real marketing-adjacent artifacts: S-1 business sections, proxy CD&A).
+`award-case-study-exemplars` ships with the marketing/advertising source set (Effie,
+Cannes Lions, D&AD, One Show, Clio, IPA) plus PR (SABRE) and digital/UX (Webby, Awwwards)
+extensions; its source directory grows per domain as fills demand — the discipline
+transfers unchanged.
 
 ## Where fills land
 

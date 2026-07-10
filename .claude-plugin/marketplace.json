@@ -58,7 +58,7 @@
       "name": "ab-domain-research",
       "displayName": "AB Domain Research",
       "source": "./plugins/ab-domain-research",
-      "description": "Domain-research agent brigade \u2014 the FILL brigade that stocks a knowledge cellar with domain competency and gold exemplars for generative-skill builds. Standard brigade surface (mise incl. CELLAR_ROOT check + expo + service) over 4 eval-proven sourcing stations: cert-body-sourcing (+0.60), standards-regulatory-sourcing (+1.00), academic-ocw-sourcing (+0.60, CC-licensed-only gate), public-filings-exemplars (+0.40-0.60 \u2014 EDGAR/SAM.gov/courts/patents/GAO gold exemplars with why_gold). License gate before content, authority tiering, per-source dispositions, provenance on everything, injection-suspect discipline. Curation, never bulk scraping."
+      "description": "Domain-research agent brigade \u2014 the FILL brigade that stocks a knowledge cellar with domain competency and gold exemplars for generative-skill builds. Standard brigade surface (mise incl. CELLAR_ROOT check + expo + service) over 5 eval-proven sourcing stations: cert-body-sourcing (+0.60), standards-regulatory-sourcing (+1.00), academic-ocw-sourcing (+0.60, CC-licensed-only gate), public-filings-exemplars (+0.40-0.60 \u2014 EDGAR/SAM.gov/courts/patents/GAO gold exemplars with why_gold), award-case-study-exemplars (+0.60 \u2014 creative-domain gold exemplars from juried award libraries, Effie/Cannes/D&AD/IPA). License gate before content, authority tiering, per-source dispositions, provenance on everything, injection-suspect discipline. Curation, never bulk scraping."
     }
   ]
 }

@@ -55,6 +55,15 @@ target      = "../public-filings-exemplars/SKILL.md"
 severity    = "FAIL"
 remedy      = "reinstall the plugin — public-filings-exemplars station is missing"
 
+[[checks]]
+id          = "station-award-case-study-exemplars"
+description = "Station present: award-case-study-exemplars"
+executor    = "script"
+type        = "path_exists"
+target      = "../award-case-study-exemplars/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — award-case-study-exemplars station is missing"
+
 # --- Deciding agent + roster present ---
 
 [[checks]]
