@@ -4,6 +4,10 @@
 **fills a cellar with domain competency + gold exemplars — curation, never bulk
 scraping**
 
+**Leaseable artifact types (rail orders):** `domain-fill` — one fill order per domain
+(the whole composed fill rides a single ticket; the expo decomposes it across
+stations). A rail walker for this brigade scopes its pull to `domain-fill` + `menu`.
+
 This is the packaged menu (source of truth, versioned with the plugin). It is the
 **station roster** the [expo](skills/expo/) reads to decompose a domain-fill order, select
 which sourcing stations to fire, and compose their outputs into one fill. Every live

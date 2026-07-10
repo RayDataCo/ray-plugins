@@ -109,11 +109,11 @@ def valid_ticket_text(eager_ref: Path) -> str:
 
 
 # ===========================================================================
-# 1. Both REAL ticket shapes lint 8/8 — the drift-fix regression test.
+# 1. Both REAL ticket shapes lint 9/9 — the drift-fix regression test.
 # ===========================================================================
 
 
-def test_factory_menu_shape_2space_indent_lints_8_of_8(tmp_path):
+def test_factory_menu_shape_2space_indent_lints_9_of_9(tmp_path):
     brigade_home = tmp_path / "brigade-home"
     brigade_home.mkdir()
     menu_spec = brigade_home / "MENU-SPEC.md"
@@ -122,13 +122,13 @@ def test_factory_menu_shape_2space_indent_lints_8_of_8(tmp_path):
     text = _factory_menu_ticket_text(brigade_home, menu_spec)
     result = ra.ticket_lint(text, rail_files=[])
 
-    assert len(result.rules) == 8
+    assert len(result.rules) == 9
     assert result.passed, result.summary()
     entries = ra.parse_context_entries(text)
     assert [e["id"] for e in entries] == ["brigade-home", "menu-spec"]
 
 
-def test_acme_shape_0indent_context_lints_8_of_8(tmp_path):
+def test_acme_shape_0indent_context_lints_9_of_9(tmp_path):
     cellar_root = tmp_path / "cellar"
     _seed_acme_cellar(cellar_root)
     text = _acme_ticket_text()
@@ -137,7 +137,7 @@ def test_acme_shape_0indent_context_lints_8_of_8(tmp_path):
         text, rail_files=[], allowed_artifacts={"sales-collateral"}, cellar_root=cellar_root
     )
 
-    assert len(result.rules) == 8
+    assert len(result.rules) == 9
     assert result.passed, result.summary()
     entries = ra.parse_context_entries(text)
     assert [e["id"] for e in entries] == [
@@ -324,17 +324,17 @@ def test_rule8_fails_on_inline_content(eager_ref):
     assert 8 in result.failed_ids
 
 
-def test_valid_ticket_passes_all_8(valid_ticket_text):
+def test_valid_ticket_passes_all_9(valid_ticket_text):
     result = ra.ticket_lint(valid_ticket_text, [])
     assert result.passed, result.summary()
     assert result.failed_ids == []
 
 
-def test_lint_on_unparseable_frontmatter_fails_all_8():
+def test_lint_on_unparseable_frontmatter_fails_all_9():
     result = ra.ticket_lint("no frontmatter here at all", [])
-    assert len(result.rules) == 8
+    assert len(result.rules) == 9
     assert not result.passed
-    assert result.failed_ids == [1, 2, 3, 4, 5, 6, 7, 8]
+    assert result.failed_ids == [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
 # ===========================================================================
@@ -370,7 +370,7 @@ def test_enqueue_happy_path(tmp_path, valid_ticket_text):
     path = ra.enqueue(rail_dir, valid_ticket_text, "sample-skill-2026-01-01")
     assert path.exists()
     text = path.read_text()
-    assert "steward: enqueued — Gate A: 8/8 pass" in text
+    assert "steward: enqueued — Gate A: 9/9 pass" in text
 
 
 def test_enqueue_refuses_gate_a_failure(tmp_path):
@@ -1089,7 +1089,7 @@ def test_cli_list_and_lint(tmp_path, valid_ticket_text, capsys):
     exit_code = ra._cli(["lint", str(ticket_path)])
     assert exit_code == 0
     out = capsys.readouterr().out
-    assert "Gate A: 8/8 pass" in out
+    assert "Gate A: 9/9 pass" in out
 
 
 def test_cli_enqueue_failure_exits_nonzero(tmp_path, capsys):
