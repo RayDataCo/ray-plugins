@@ -203,10 +203,10 @@ def load_declaration(path: Path) -> dict[str, Any]:
 def resolve_roots(raw_roots: dict[str, str], toml_dir: Path) -> dict[str, str]:
     resolved: dict[str, str] = {}
     for key, value in raw_roots.items():
-        # Expand environment variables first (${BRIGADE_CELLAR}, $HOME), then ~.
+        # Expand environment variables first (${CELLAR_ROOT}, $HOME), then ~.
         # This is how a root like the cellar is made portable — the declaration
         # names an env var, not a machine-specific path. An unset var stays
-        # literal (`${BRIGADE_CELLAR}`) so the downstream path check FAILs with
+        # literal (`${CELLAR_ROOT}`) so the downstream path check FAILs with
         # the declared remedy rather than silently resolving somewhere wrong.
         expanded = os.path.expanduser(os.path.expandvars(str(value)))
         p = Path(expanded)
