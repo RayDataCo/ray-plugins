@@ -35,12 +35,13 @@ individually.
 ## 2. The activity-vs-outcome gap (the core failure mode this skill guards
 against)
 
-GAO-25-106719's central finding was not about creative quality — it was that
-social media engagement "did not consistently correlate with successful
-recruiter contact," and that some strategic goals (e.g., "building a connection
-to the STEM field") had no attached target or performance measure at all. GAO's
-own language: "Without identifying how such progress will be measured ... it
-will be difficult for these services to assess their progress." An un-targeted
+GAO-25-106719's central finding was not about creative quality — it was a
+measurement gap: the services could not demonstrate how digital-marketing
+activity converts to recruiting outcomes, and some strategic goals (e.g.,
+"building a connection to the STEM field") had no attached target or
+performance measure at all. GAO's own language: "Without identifying how such
+progress will be measured ... it will be difficult for these services to
+assess their progress." An un-targeted
 goal is not merely under-specified — it is unassessable, and GAO treats that as
 a findable defect in its own right rather than something to rewrite on the
 evaluee's behalf. This skill applies the identical rule in Section 2 of its
