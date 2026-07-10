@@ -38,7 +38,7 @@ vague; PRESENT = all required sub-parts stated.
   DEFICIENT: disclosure/sharing mentioned but no third-party categories given. ABSENT: the
   third-party disclosure question is not addressed.
 
-### C5 — §1798.115 / §1798.120 — Whether the business sells or shares PI (and the categories if so)
+### C5 — §1798.130(a)(5)(C) / §1798.135 — Whether the business sells or shares PI (and the categories if so)
 - Type: Unconditional.
 - Required sub-parts: (i) whether the business sells or shares PI; (ii) the categories sold
   or shared, if it does.
