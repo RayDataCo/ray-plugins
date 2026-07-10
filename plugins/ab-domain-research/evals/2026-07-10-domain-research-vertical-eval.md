@@ -36,6 +36,25 @@ reason to exist.
 | academic-ocw-sourcing | **win +0.60** (r2, from +0.20 r1): base 0/5 → skill 3/5 | The CC-licensed-only gate now grades clean on the platform-restriction and stated-license-overrides-platform traps. One r2 miss (f2) sits on a self-contradictory fixture key — see Fixture defects below; under the oracle's own summary line the arm passes (would be +0.80). Named residual: an SA-only stated license was labeled plain INCLUDE with the SA obligation noted parenthetically — the label must be INCLUDE-WITH-RESTRICTION (f4) |
 | public-filings-exemplars | **win +0.40 (r2) / +0.60 (r1)** — base 0/10 → skill 5/10 pooled | The weakest evidence on the roster, flagged honestly. Every r2 miss was a single source on a 6-source strict fixture (arm matched ≥5/6 sources on each): an NC restriction on a quasi-official portal treated as disqualifier instead of recorded obligation (pfe-01), a grants.gov NOFO judged off-domain where the competency places FOAs in the proposal-structure exemplar domain (pfe-02), a reputable-T3 vs untiered call (pfe-03). Round-1 critic nits (a 3-7 vs 5-15 count contradiction; GAO/CRS mis-tiered T1) fixed and re-verified clean in r2. Ship rationale: real lift in both rounds over a 0/10 base, r2 critic clean on all six axes, every miss named and in one boundary-judgment family the expo carries as a documented weakness |
 
+## Station 5 addendum — award-case-study-exemplars (built same day, separate run)
+
+Built through the same factory line (19 agents, 0 agent errors) after the first four
+shipped, from its own competency doc (award libraries as the external quality oracle for
+creative domains; award METADATA is fact, case CONTENT is copyrighted expression;
+entrant-reported results tagging). Same two-arm method, same §4b inheritance,
+in-answer-only arms.
+
+| station | deployment-tier evidence | headline |
+|---|---|---|
+| award-case-study-exemplars | **win +0.60**: base 1/5 → skill 4/5 | Critic advance on all six axes (license/access facts verified against the competency doc, incl. the paywalled-T1 rule-5 carve-out and the government-authored public-domain corner). The one miss (f5, hardest license-boundary fixture) failed BOTH arms on the same 3 sources — named residuals: a T1 body's public ABSTRACT is itself the copyrighted-accessible candidate (the arm over-applied the gated-databank POINTER-ONLY carve-out to it), and the recurring plain-INCLUDE vs INCLUDE-WITH-RESTRICTION labeling precision |
+
+Run note: this build surfaced a third eval-integrity failure mode — structured-output
+calls carrying angle-bracket placeholders (`<task>-<n>`) can corrupt the tool-call parse
+(only the first field survives, validation fails). Fixed with an explicit
+curly-brace-placeholder instruction to all authoring agents; the run then completed
+clean. Logged alongside the pointer-return and shared-scratchpad modes in the method
+notes below.
+
 ## Fixture defects (logged, keys NOT silently edited)
 
 - **f2 (academic-ocw, r2):** the oracle's reasoned per-row text requires row 1 = EXCLUDE
