@@ -59,4 +59,4 @@ The **steward** ([ab-registrar/skills/steward/](../ab-registrar/skills/steward/)
 - Not a built knowledge graph (e.g. [graphify](https://github.com/safishamsi/graphify)) — that *compresses* a large corpus for cheap navigation; a bundle *curates and points* at the right depth for one build. graphify is a candidate `type: graph` resolver backend, not the bundle format.
 - Not a flat folder — sources are typed and live on different planes (vault file, web, MCP, retrieval) by design.
 
-Worked example: the `variance-analysis` ticket lives on the vault rail (`~/rdco-vault/08-tooling/brigade-rail/variance-analysis.ticket.md`), pointing at competency notes under `~/rdco-vault/10-source-material/competencies/variance-analysis/`. It is intentionally NOT in this repo — see [RAIL-SPEC.md](./RAIL-SPEC.md).
+Worked example: the `variance-analysis` ticket lives on a private house rail (a knowledge-vault folder outside this repo), pointing at competency notes stored beside it. It is intentionally NOT in this repo — see [RAIL-SPEC.md](./RAIL-SPEC.md).

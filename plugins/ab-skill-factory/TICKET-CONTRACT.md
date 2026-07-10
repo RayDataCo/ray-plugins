@@ -117,4 +117,4 @@ The canonical closed exit set is now:
 
 ## Worked example
 
-The live `variance-analysis` ticket on the vault rail (`~/rdco-vault/08-tooling/brigade-rail/variance-analysis.ticket.md`) conforms to this contract and carries a complete build record (queued → phase-0 `clear` → spec → tests → author ×2 rounds → critic 5/5 → advance) — the ticket-is-the-build-record model, demonstrated.
+The live `variance-analysis` ticket on a private house rail (outside this repo) conforms to this contract and carries a complete build record (queued → phase-0 `clear` → spec → tests → author ×2 rounds → critic 5/5 → advance) — the ticket-is-the-build-record model, demonstrated.
