@@ -17,6 +17,7 @@
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
+| **`tasting`** | "show me, before I buy" | the soft opening — the kitchen cooks for guests before full service | **CONTRACT PINNED 2026-07-10 (founder-directed, docs-first) — an INVOCATION MODE like fire, no build yet**: mise-gated run of the brigade's stations against its RETIRED showcase fixtures in the prospect's environment — real input → real output → the graded criteria that make it good. Never touches live oracles ([EVAL-SPEC](./EVAL-SPEC.md)) |
 | **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | front of house checks the pass for finished plates and delivers | **CONTRACT PINNED, absorbed into the steward — scan-only (founder simplification)**: expo files at terminal ack (rail clear, zero residue); steward sweep scans filed tickets for terminal-without-`close-out:`-signature via the canon adapter's `find_unclosed()`, delivers, signs. Sweep = [skills/steward/SKILL.md](../ab-registrar/skills/steward/SKILL.md) "The close-out sweep" |
 
 ## Two brigade kinds — kitchen brigades and house roles *(amendment 2026-07-06, with the ab-registrar extraction)*
@@ -119,6 +120,38 @@ non-negotiables:
   lands on the rail as a normal closed ticket, marked `origin: fire`.
 - **Gates still apply.** Phase-0 can still return Thin/Ambiguous and bounce the request back to the
   caller. Fire means "now", not "ungated".
+
+### `tasting` — the soft opening *(contract pinned 2026-07-10: an INVOCATION MODE, no build yet)*
+
+The gap it closes: the surface DESCRIBES (menu), VALIDATES (mise), and DOES
+(service/fire) — but never SHOWS. A prospect reads what the brigade can prepare, then the
+next step is setting up shop in their environment. The tasting is the step between: the
+kitchen cooks a known meal for the guest before full service.
+
+The contract:
+
+1. **Mise-gated** — a tasting only runs where mise clears (or explicitly reports its
+   WARNs). This makes the tasting double as onboarding proof: not just "the output is
+   good" but "the brigade works HERE."
+2. **Retired fixtures only.** The tasting set is fixtures deliberately spent for
+   demonstration (`retired-for-tasting` in [EVAL-SPEC](./EVAL-SPEC.md)) and packaged with
+   the plugin: each item = the input, the expected-output sketch, and the graded criteria.
+   Live oracles never appear in a tasting — retiring is a one-way, recorded decision.
+3. **The show is input → output → why it's good.** The brigade runs its real stations on
+   the tasting inputs in the prospect's environment, then presents each output beside the
+   criteria it is graded on (the eval evidence made visible), with the honest evidence
+   summary from `evals/` alongside. Held stations present as held — the tasting shows
+   the menu's honest statuses, it does not paper over them.
+4. **Fire's invariants apply**: a tasting is recorded (in-answer trace for a public pack;
+   an `origin: tasting` ticket when run against a cellar), and gates still apply — the
+   tasting is a mode of invoking the expo, not a bypass.
+5. **Sales frame** (founder, 2026-07-09): evals prove it works at all; mise proves it
+   works here. The tasting is what makes both visible to a client in one sitting —
+   demo-grade evidence produced by delivery-grade machinery.
+
+Build note: like fire, this needs no new engine — expo + stations + the packaged tasting
+set. The build ticket is: retire a per-brigade showcase subset (hardener replenishes),
+package it, and add the expo's tasting procedure. Not built until that ticket runs.
 
 ### Close-out — the FOH contract *(runner DROPPED as a role, founder 2026-07-03; absorbed into the steward)*
 
