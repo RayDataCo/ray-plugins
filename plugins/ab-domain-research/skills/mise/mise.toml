@@ -16,6 +16,7 @@
 
 [roots]
 cellar = "${CELLAR_ROOT}"
+rail   = "${CELLAR_ROOT}/rail"
 
 # --- Stations present: every live station the expo can compose ---
 
@@ -112,3 +113,56 @@ type        = "path_writable"
 target      = "{cellar}"
 severity    = "WARN"
 remedy      = "set CELLAR_ROOT to your cellar directory to land fills on disk; without it the brigade serves in-answer only"
+
+# --- The rail half (symmetry guarantee): vendored walk driver + adapter ---
+#
+# Both files are byte-identical vendored copies of ab-skill-factory canon,
+# stamped at vendor time — build artifacts, never hand-edited. Rail port is
+# WARN, not FAIL: an unwired rail means fire-only mode (honest), not broken.
+
+[[checks]]
+id          = "walk-driver-present"
+description = "Walk driver present: the rail half's discipline-rail-walk Workflow script"
+executor    = "script"
+type        = "path_exists"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — discipline-rail-walk.run.js is missing; the brigade cannot walk a rail without it"
+
+[[checks]]
+id          = "walk-driver-syntax"
+description = "../service/discipline-rail-walk.run.js parses as valid JS (node --check)"
+executor    = "script"
+type        = "node_syntax"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "WARN"
+remedy      = "fix the syntax error `node --check` reports in skills/service/discipline-rail-walk.run.js; if node is absent this check cannot run — lint-time only, the walk itself runs via the harness Workflow tool"
+
+[[checks]]
+id           = "rail-adapter-vendor-stamp"
+description  = "skills/service/vendor/rail_adapter.py matches its .stamp.json (no drift from canon, no hand-edit)"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../service/vendor/rail_adapter.py"
+stamp_target = "../service/vendor/rail_adapter.py.stamp.json"
+severity     = "FAIL"
+remedy       = "re-vendor from ab-skill-factory/adapter/rail_adapter.py and re-stamp — never hand-edit the vendored copy"
+
+[[checks]]
+id           = "walk-driver-vendor-stamp"
+description  = "skills/service/discipline-rail-walk.run.js matches its .stamp.json (no drift from canon, no hand-edit)"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../service/discipline-rail-walk.run.js"
+stamp_target = "../service/discipline-rail-walk.run.js.stamp.json"
+severity     = "FAIL"
+remedy       = "re-vendor from ab-skill-factory/skills/service/discipline-rail-walk.run.js and re-stamp — never hand-edit the vendored copy"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail reachable: rail dir exists and is writable (pull/lease/append/ack — house deployments)"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "unwired rail = fire-only mode (honest). To go on a rail: set CELLAR_ROOT, mkdir -p {rail}, then `service start` walks it via the vendored driver"

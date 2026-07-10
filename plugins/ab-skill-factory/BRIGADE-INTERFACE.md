@@ -42,6 +42,22 @@ role for uniformity would be checkbox theater — the split is the honest contra
 is a further split — **build** vs **discipline** brigades — see the Factory obligation section
 and [DISCIPLINE-BRIGADE-TEMPLATE.md](./DISCIPLINE-BRIGADE-TEMPLATE.md).)*
 
+## The symmetry guarantee *(founder-ratified 2026-07-10 — see [AGENT-BRIGADE-STANDARD.md](./AGENT-BRIGADE-STANDARD.md))*
+
+Every kitchen brigade ships **both halves** of the surface, regardless of kind:
+
+- **the expo half (fireable):** an addressable expo skill matching the brigade's kind —
+  `fire` and `tasting` are invocation modes of this expo, so a brigade without one cannot
+  be fired or tasted;
+- **the rail half (queueable):** a `service` walk — the stamped vendored canon rail adapter
+  plus a walk driver that pulls-with-lease, hands the ticket to the expo/stations, and acks
+  on the brigade's exit set — so the steward can route it work autonomously and the
+  close-out sweep has something to sweep.
+
+A kitchen brigade with only one half is interface-**incomplete**. In a deployment without a
+rail/cellar (a public-pack install), the rail half sits idle and fire-only is the honest
+mode — that is a *deployment* posture reported by `mise`, not a packaging exemption.
+
 ## Command contracts
 
 ### `menu` — capability discovery *(live)*
@@ -76,11 +92,18 @@ MCP connections, station resolution) are verified by the harness agent and merge
    remedy "re-hang a discovery ticket".
 5. **Model access** — one minimal model call per configured tier returns.
 
-**Output:** a mise report — one line per check, `PASS` / `FAIL` / `WARN`, and for every non-PASS a
-**specific remedy** ("run `uv sync`", "connect MCP server X", "re-hang the discovery ticket"). The
-report is written to the ticket work-log when run as part of `service` startup, or returned directly
-when run ad hoc. A brigade whose mise has a FAIL must refuse `service` (a kitchen that isn't set up
-doesn't open).
+**Output:** a mise report — one line per check, `PASS` / `FAIL` / `WARN` / `N/A`, and for every
+non-PASS a **specific remedy** ("run `uv sync`", "connect MCP server X", "re-hang the discovery
+ticket"). The report is written to the ticket work-log when run as part of `service` startup, or
+returned directly when run ad hoc. A brigade whose mise has a FAIL must refuse `service` (a kitchen
+that isn't set up doesn't open).
+
+**Mise is the hexagon's instrument** ([AGENT-BRIGADE-STANDARD.md](./AGENT-BRIGADE-STANDARD.md)):
+unconfigured ≠ broken. A port not wired in this deployment (no `CELLAR_ROOT`, no rail dir) reports
+with the remedy naming the adapter to configure, so the report reads as a *configuration report* —
+what's available, what needs configuring still. FAIL is reserved for "cannot honestly serve in the
+current mode"; a public-pack install with unwired rail/cellar ports is healthy in fire-only mode
+and mise says exactly that.
 
 ### `service` — attach to the rail and poll *(contract settled 2026-07-03; built for the factory)*
 
@@ -233,12 +256,14 @@ is a queued build ticket, sequenced after the founder's P1 port validates and be
 
 **The meta rule (founder, 2026-07-03): the factory must structurally be unable to emit an
 interface-incomplete brigade.** An `artifact: brigade` (or `add-station` re-wire) build is not done
-until the new brigade ships the required surface: its menu published, a `service` skill wrapping
-*its* walk with the standard verbs + declared-deps manifest, and mise spec'd/vendored — with fire,
-tasting, and close-out at minimum spec'd in its README with honest status markers (fire and tasting
-are invocation modes of the expo and need no separate build; tasting's packaged showcase set ships
-only once its build ticket runs — a brigade without one simply has no tasting set yet, which its
-README states honestly). Enforcement lands in two places:
+until the new brigade ships the required surface: its menu published, **both symmetric halves**
+(an addressable expo skill matching its kind, and a `service` skill wrapping *its* walk with the
+standard verbs + declared-deps manifest + stamped vendored rail adapter — see "The symmetry
+guarantee"), and mise spec'd/vendored — with fire, tasting, and close-out at minimum spec'd in its
+README with honest status markers (fire and tasting are invocation modes of the expo and need no
+separate build; tasting's packaged showcase set ships only once its build ticket runs — a brigade
+without one simply has no tasting set yet, which its README states honestly). Enforcement lands in
+two places:
 
 1. **Acceptance contract** — the brigade acceptance checklist gains interface-completeness checks
    (required commands present, service manifest declares the walk runtime, rail adapter is a stamped

@@ -1,8 +1,8 @@
 {
   "name": "ab-data-engineering",
   "displayName": "AB Data Engineering",
-  "description": "Data-engineering agent brigade: the standard brigade surface — mise (readiness gate), expo (the composing coordinator that decomposes a DE request and fires the stations it needs), service (the on/off switch) — over eval-proven DE stations, each shipped only with two-arm execution-eval evidence. One station live: pipeline-failure-triage (+1.00 lift on silent zero-row failure classification). The menu carries honest per-task status for the rest of the vertical (held-for-refire, weak-evidence, base-model-covered-pending). Slated to gain a warehouse connector next, at which point mise becomes the load-bearing onboarding gate. Eval reports in evals/.",
-  "version": "0.2.0",
+  "description": "Data-engineering agent brigade: the standard brigade surface — mise (readiness gate), expo (the composing coordinator that decomposes a DE request and fires the stations it needs), service (both symmetric halves: the fire path straight to the expo, plus the rail half — vendored canon rail adapter + discipline walk driver for house deployments) — over eval-proven DE stations, each shipped only with two-arm execution-eval evidence. One station live: pipeline-failure-triage (+1.00 lift on silent zero-row failure classification). The menu carries honest per-task status for the rest of the vertical (held-for-refire, weak-evidence, base-model-covered-pending). Slated to gain a warehouse connector next, at which point mise becomes the load-bearing onboarding gate. Eval reports in evals/.",
+  "version": "0.3.0",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"

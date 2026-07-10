@@ -9,6 +9,13 @@
 # contract-repository or e-signature connector would add an executor="agent"
 # reachability check here.)
 
+[roots]
+# Rail + cellar resolve from the CELLAR_ROOT env var — the same var the runtime
+# resolves. Unset, the placeholder stays literal and the port checks report
+# unconfigured (WARN) with the remedy naming what to set: fire-only mode.
+rail   = "${CELLAR_ROOT}/rail"
+cellar = "${CELLAR_ROOT}"
+
 # --- Stations present: every live station the expo can compose ---
 
 [[checks]]
@@ -57,3 +64,81 @@ type        = "file_parses_json"
 target      = "../../.claude-plugin/plugin.json"
 severity    = "FAIL"
 remedy      = "plugin.json is malformed — reinstall the plugin"
+
+# --- Rail half: vendored walk driver + adapter (symmetry guarantee) ---
+
+[[checks]]
+id          = "walk-driver-present"
+description = "Walk driver present: skills/service/discipline-rail-walk.run.js — the rail half's vendored canon driver"
+executor    = "script"
+type        = "path_exists"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/skills/service/discipline-rail-walk.run.js and re-stamp — a discipline brigade without its walk is interface-incomplete"
+
+[[checks]]
+id          = "walk-driver-parses"
+description = "Walk driver parses: node --check on discipline-rail-walk.run.js (lint-time only — the driver runs via the harness Workflow tool, not node; node absent reports WARN, not broken-brigade)"
+executor    = "script"
+type        = "node_syntax"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "WARN"
+remedy      = "install node for the lint-time syntax check, or on a real syntax error re-vendor from canon — never hand-edit the vendored copy"
+
+[[checks]]
+id          = "rail-adapter-vendor-stamp"
+description = "skills/service/vendor/rail_adapter.py matches its .stamp.json (no drift from canon, no hand-edit)"
+executor    = "script"
+type        = "vendor_stamp"
+target      = "../service/vendor/rail_adapter.py"
+stamp_target = "../service/vendor/rail_adapter.py.stamp.json"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/adapter/rail_adapter.py and re-stamp — never hand-edit the vendored copy"
+
+[[checks]]
+id          = "walk-driver-vendor-stamp"
+description = "skills/service/discipline-rail-walk.run.js matches its .stamp.json (no drift from canon, no hand-edit)"
+executor    = "script"
+type        = "vendor_stamp"
+target      = "../service/discipline-rail-walk.run.js"
+stamp_target = "../service/discipline-rail-walk.run.js.stamp.json"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/skills/service/discipline-rail-walk.run.js and re-stamp — never hand-edit the vendored copy"
+
+# --- Ports: rail + cellar (WARN — unwired means fire-only mode, not broken) ---
+
+[[checks]]
+id          = "rail-root-exists"
+description = "Rail root exists — tickets live and travel here (rail path only)"
+executor    = "script"
+type        = "path_exists"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar path, then mkdir -p {rail} — until then the brigade serves fire-only (requests straight to the expo)"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail root is writable — pull/lease/append/ack all write here (rail path only)"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "fix permissions on {rail} (chmod/chown) — the walk cannot lease or ack tickets on a read-only rail"
+
+[[checks]]
+id          = "cellar-root-exists"
+description = "Cellar root exists — composed answers land here (rail path only)"
+executor    = "script"
+type        = "path_exists"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar path, then mkdir -p {cellar} — until then the brigade serves fire-only (answers stay in-session)"
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar root is writable — the walk files answers and closed tickets here (rail path only)"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "fix permissions on {cellar} (chmod/chown) — composed answers cannot land on a read-only cellar"

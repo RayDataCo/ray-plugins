@@ -7,6 +7,15 @@
 # Four live stations as of 0.3.0 (only eval-passers ship; two held-for-refire
 # stations are menu rows, not installed skills — mise gains a station-present
 # check per station as each refire lands). Credentials: NONE.
+#
+# 0.4.0 adds the rail half (symmetry guarantee): vendored walk driver +
+# rail adapter checks, and rail/cellar port checks at WARN — an unset
+# CELLAR_ROOT leaves the placeholder literal so the check reports its remedy;
+# unwired ports read as fire-only mode, not broken.
+
+[roots]
+cellar = "${CELLAR_ROOT}"
+rail   = "${CELLAR_ROOT}/rail"
 
 # --- Stations present: every live station the expo can compose ---
 
@@ -74,3 +83,83 @@ type        = "file_parses_json"
 target      = "../../.claude-plugin/plugin.json"
 severity    = "FAIL"
 remedy      = "plugin.json is malformed — reinstall the plugin"
+
+# --- The rail half: walk driver + vendored adapter (symmetry guarantee) ---
+
+[[checks]]
+id          = "walk-driver-present"
+description = "Walk driver present: discipline-rail-walk.run.js (the rail half)"
+executor    = "script"
+type        = "path_exists"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — the walk driver is missing; the brigade cannot walk a rail without it"
+
+[[checks]]
+id          = "walk-driver-parses"
+description = "Walk driver parses: node --check on discipline-rail-walk.run.js (lint-time only — the driver runs via the harness Workflow tool, not node)"
+executor    = "script"
+type        = "node_syntax"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "WARN"
+remedy      = "install node for local syntax verification, or re-vendor the driver from canon if it reports a syntax error"
+
+[[checks]]
+id          = "adapter-vendor-stamp"
+description = "skills/service/vendor/rail_adapter.py matches its .stamp.json (no drift from canon, no hand-edit)"
+executor    = "script"
+type        = "vendor_stamp"
+target      = "../service/vendor/rail_adapter.py"
+stamp_target = "../service/vendor/rail_adapter.py.stamp.json"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/adapter/rail_adapter.py and re-stamp — never hand-edit the vendored copy"
+
+[[checks]]
+id          = "walk-driver-vendor-stamp"
+description = "skills/service/discipline-rail-walk.run.js matches its .stamp.json (no drift from canon, no hand-edit)"
+executor    = "script"
+type        = "vendor_stamp"
+target      = "../service/discipline-rail-walk.run.js"
+stamp_target = "../service/discipline-rail-walk.run.js.stamp.json"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/skills/service/discipline-rail-walk.run.js and re-stamp — never hand-edit the vendored copy"
+
+# --- Rail-path runtime (declared-deps manifest in skills/service/SKILL.md) ---
+
+[[checks]]
+id          = "python3-on-path"
+description = "python3 is on PATH — the vendored rail adapter is invoked via python3 (rail path only; the fire path needs nothing here)"
+executor    = "script"
+type        = "command_on_path"
+target      = "python3"
+severity    = "WARN"
+remedy      = "install python3 (>=3.11) — without it the rail path cannot lease, append, or ack; fire path unaffected"
+
+[[checks]]
+id          = "workflow-tool-callable"
+description = "The session has the harness Workflow tool — discipline-rail-walk.run.js is a Workflow script, not a node script (rail path only)"
+executor    = "agent"
+type        = "workflow_tool_callable"
+target      = "Workflow tool (harness-provided)"
+severity    = "WARN"
+remedy      = "run the rail path from a session whose tool config includes the Workflow tool; fire path unaffected"
+
+# --- Ports: rail + cellar (WARN — unwired reads as fire-only, not broken) ---
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar reachable: CELLAR_ROOT set and writable (composed answers land at {cellar} on the rail path)"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar directory — without it the brigade serves fire-only, answers returned in-answer"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail reachable: {rail} exists and is writable (pull/lease/append/ack all write here)"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT and create the rail dir (mkdir -p {rail}) — without it the walk cannot lease tickets; fire path unaffected"
