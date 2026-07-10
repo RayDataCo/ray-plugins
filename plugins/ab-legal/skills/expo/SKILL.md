@@ -63,6 +63,24 @@ Every invocation is a `fire` — an ad-hoc direct call to the expo. Fire skips t
 never the record: note which stations fired and why. In-answer trace for a public pack;
 a closed `origin: fire` ticket when deployed against a cellar.
 
+## Tasting (the soft opening)
+
+When asked to "run the tasting", "show me what this brigade can do", or to demo before
+deployment: this is the `tasting` invocation mode (contract in the factory's
+BRIGADE-INTERFACE) — the kitchen cooks a known meal in THIS environment.
+
+1. Run `mise` first; report any WARN/FAIL honestly before proceeding.
+2. For each plate in [tasting/](../../tasting/): run the NAMED station on the plate's
+   input, exactly as a real request.
+3. Present each result beside the plate's packaged criteria (the expected coverage or
+   graded rubric) and note where the fresh output meets or misses them — the point is an
+   honest showing of the same bar the eval evidence in `evals/` reports, not a sales
+   gloss.
+4. Stations without a plate (held, or awaiting a re-keyed suite — see tasting/README.md)
+   are presented as exactly that. The tasting shows the menu's honest statuses.
+5. Fire's record invariant applies: note in-answer which plates ran and their outcomes
+   (an `origin: tasting` ticket when deployed against a cellar).
+
 ## Notes
 
 - The whole brigade is structural-not-advisory. If a request wants merits/strategy/risk,

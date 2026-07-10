@@ -154,7 +154,7 @@ The contract:
 
 Build note: like fire, this needs no new engine — expo + stations + the packaged tasting
 set. The build ticket is: retire a per-brigade showcase subset (replenished per EVAL-SPEC's fixture-supply contract),
-package it, and add the expo's tasting procedure. Not built until that ticket runs.
+package it, and add the expo's tasting procedure. **First three tasting sets shipped 2026-07-10** (ab-domain-research ×5 plates, ab-marketing ×3, ab-legal ×2); remaining brigades get theirs as their suites migrate.
 
 ### Close-out — the FOH contract *(runner DROPPED as a role, founder 2026-07-03; absorbed into the steward)*
 

@@ -29,7 +29,7 @@ stations below).
 | Draft a campaign-effectiveness narrative or measurement plan — objectives tied to measurable outcomes, methodology stated, evidence marshaled honestly (incl. null results), limitations named, recommendations traceable to findings | `effectiveness-narrative-draft` | **win +1.00**: base 0/5 → skill 5/5 on rubric criteria derived from real GAO campaign-evaluation gold structure. Base failed every fixture incl. the null-result and activity-metrics-only traps; the skill's findings-evidence-recommendation discipline passed all five |
 | Draft a brand-positioning narrative of investor/board grade — category definition, target customer, differentiated value, quantified proof points vs named baselines, moat/durability | `positioning-narrative-draft` | **win +0.80 (r2) / +1.00 (r1)**: base 0/10 → skill 9/10 across two rounds on rubrics derived from real S-1 positioning gold. Round-2 critic verified all four round-1 defects fixed (incl. the caught license violation). Residual: the hardest thin-input fixture graded 8/12 criteria in r2 — refusal-to-fabricate discipline held but coverage dipped |
 | Draft a complete marketing brief from a business scenario — objective, STP, single-minded proposition, channel strategy, success metrics, mandatories | `marketing-brief-draft` | **win +0.80 both rounds**: base 0/10 → skill 8/10. The two misses across rounds were one content miss (regulated-industry scenario, r1) and one delivery artifact (the arm described its brief instead of emitting it, r2) — the emit-in-full residual is documented |
-| Review marketing content (ad copy, influencer briefs, testimonials, social posts) against FTC 16 CFR Part 255 endorsement + substantiation duties — per-element PRESENT/ABSENT/DEFICIENT coverage, never legal advice | `advertising-claims-endorsement-review` | **win +60pts per-element** (round 3, the founder-ruled measure-skill-quality bar): base 33% → skill 93% element accuracy (strict 4/5), critic advance with every prior defect verified fixed — the round-3 turnaround came from an emit-in-full output contract + precise element-status boundary rules |
+| Review marketing content (ad copy, influencer briefs, testimonials, social posts) against FTC 16 CFR Part 255 endorsement + substantiation duties — per-element PRESENT/ABSENT/DEFICIENT coverage, never legal advice | `advertising-claims-endorsement-review` | **win +60pts per-element** (round 3, the founder-ruled measure-skill-quality bar): base 33% → skill 93% element accuracy (strict 4/5), critic advance with every prior defect verified fixed — the round-3 turnaround came from an emit-in-full output contract + precise element-status boundary rules . Suite note: the original fixture set was retired wholesale after the 255.6 citation-convention correction (see evals/) — the headline stands as recorded historical evidence; a re-keyed suite arrives via the hardener |
 
 ## Held (2 structural stations — 4-round evidence trail, honest residuals)
 
@@ -43,6 +43,13 @@ delivery channel, not the discipline.
 |---|---|---|
 | `email-telemarketing-compliance-review` | strict +0.20 → 53% (2 emission stubs) → **67%** (+6 lift) | On emitted fixtures it grades ~91% per-element; the longest fixture (17 elements, dual email+script tables) still produced a summarize-instead-of-emit answer under eval conditions despite hardened contract language. Named residual: long-output emission reliability |
 | `digital-disclosure-review` | strict +0.20 → 86% (+25) → **81%** (+25) | Lift meets the bar (+25pts) but accuracy hovers 81-86% across rounds — recurring single-element ABSENT-vs-DEFICIENT/N-A severity calls on hyperlink-adequacy and repetition elements. Named residual: severity-boundary variance |
+
+## The tasting
+
+A packaged soft opening lives in [tasting/](tasting/): retired eval fixtures (input +
+expected coverage/rubric + grading), run by the expo in YOUR environment after mise —
+the same machinery and the same bar the eval evidence reports. See tasting/README.md
+for which stations have plates.
 
 ## Out of scope
 
