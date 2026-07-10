@@ -1,0 +1,10 @@
+{
+  "name": "ab-marketing",
+  "displayName": "AB Marketing",
+  "description": "Marketing agent brigade: the standard brigade surface — mise (readiness gate), expo (the composing coordinator that decomposes a marketing request and fires the stations it needs, incl. compound asks like drafting a brief AND its measurement plan), service (the on/off switch) — over eval-proven marketing stations. First live station: effectiveness-narrative-draft (+1.00 lift, base 0/5 -> skill 5/5) — drafts campaign-effectiveness narratives and measurement plans in the findings-evidence-recommendation discipline, graded in eval against rubrics derived from real GAO campaign-evaluation gold structure (the marketplace's first exemplar-graded generative station). MENU.md carries honest held-for-refire status with real measured evidence for the rest of the vertical (positioning-narrative +1.00 and marketing-brief +0.80 held on named critic defects; three structural FTC coverage-review stations held on eval precision). Structural stations report coverage, never legal advice. Only eval-passers ship; eval reports in evals/.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
