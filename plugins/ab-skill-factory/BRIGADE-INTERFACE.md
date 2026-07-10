@@ -1,15 +1,18 @@
 # The Brigade Interface — Spec
 
-> Every Agent Brigade exposes the **same five standard commands**, regardless of domain. This is the
-> brigade's public surface — what a steward, an operator, or another agent can rely on being there.
-> A brigade that implements these five (plus its stations à la carte) is interface-complete; anything
-> else it exposes is house-specific extension.
+> Every Agent Brigade exposes the **same standard command surface**, regardless of domain. This is
+> the brigade's public surface — what a steward, an operator, or another agent can rely on being
+> there. A brigade that implements the required commands (plus its stations à la carte) is
+> interface-complete; anything else it exposes is house-specific extension.
 >
-> **Naming status (2026-07-03):** all five **founder-approved** (`mise`/`service`/`fire` "I like
-> those names"; `runner` "Runner too - I like that", iMessage 2026-07-03). All five are also now
-> SETTLED in implementation terms: three built, two ruled no-build (see the table).
+> **Naming status:** `menu`/`mise`/`service`/`fire` founder-approved 2026-07-03 (`runner` was
+> approved then too, later dropped as a role — its duty became the close-out contract). `tasting`
+> contract-pinned 2026-07-10 (founder-directed docs-first pass). Implementation terms: three built
+> (menu/mise/service), fire + tasting are invocation modes of the expo (no separate build; tasting's
+> packaged showcase set is a queued build ticket), close-out is a pinned contract absorbed into the
+> steward.
 
-## The five commands
+## The commands
 
 | command | answers | kitchen reading | status today |
 |---|---|---|---|
@@ -17,11 +20,12 @@
 | **`mise`** | "are you ready?" | mise en place — everything in its place before service | **BUILT for this brigade** ([skills/mise/](./skills/mise/SKILL.md): `mise.py` stdlib engine + `mise.toml` declaration — D1 source of truth — merges static + agent-executor checks). Domain brigades: contract defined, wrappers queued |
 | **`service`** | "start taking orders" | the brigade goes *in service*: attaches to the rail and polls | **BUILT for this brigade** ([skills/service/](./skills/service/SKILL.md): start/end/status verbs, service lock, mise-gated; walk script packaged inside the skill). Domain brigades: contract defined, wrappers queued |
 | **`fire`** | "do this one now" | "fire table 12" — cook immediately, skip the queue | **SETTLED — invocation mode, no build** (founder 7/3): calling the expo directly IS fire; ticket still created, gates still apply |
+| **`tasting`** | "show me, before I buy" | the soft opening — the kitchen cooks for guests before full service | **CONTRACT PINNED 2026-07-10 (founder-directed, docs-first) — an INVOCATION MODE like fire, no build yet**: mise-gated run of the brigade's stations against its RETIRED showcase fixtures in the prospect's environment — real input → real output → the graded criteria that make it good. Never touches live oracles ([EVAL-SPEC](./EVAL-SPEC.md)) |
 | **close-out** *(né `runner` — dropped as a role, 7/3)* | "order up — who tells the table?" | front of house checks the pass for finished plates and delivers | **CONTRACT PINNED, absorbed into the steward — scan-only (founder simplification)**: expo files at terminal ack (rail clear, zero residue); steward sweep scans filed tickets for terminal-without-`close-out:`-signature via the canon adapter's `find_unclosed()`, delivers, signs. Sweep = [skills/steward/SKILL.md](../ab-registrar/skills/steward/SKILL.md) "The close-out sweep" |
 
 ## Two brigade kinds — kitchen brigades and house roles *(amendment 2026-07-06, with the ab-registrar extraction)*
 
-The five commands above describe a **kitchen brigade** — a thing that cooks: stations behind an
+The commands above describe a **kitchen brigade** — a thing that cooks: stations behind an
 expo, a walk that leases tickets, a menu it answers discovery with. The house also has
 **house roles**: install units that coordinate or keep records but never work a ticket. A house
 role ships `mise` + its role verbs and NOTHING kitchen-shaped — no `service` (it takes no rail
@@ -120,6 +124,38 @@ non-negotiables:
 - **Gates still apply.** Phase-0 can still return Thin/Ambiguous and bounce the request back to the
   caller. Fire means "now", not "ungated".
 
+### `tasting` — the soft opening *(contract pinned 2026-07-10: an INVOCATION MODE, no build yet)*
+
+The gap it closes: the surface DESCRIBES (menu), VALIDATES (mise), and DOES
+(service/fire) — but never SHOWS. A prospect reads what the brigade can prepare, then the
+next step is setting up shop in their environment. The tasting is the step between: the
+kitchen cooks a known meal for the guest before full service.
+
+The contract:
+
+1. **Mise-gated** — a tasting only runs where mise clears (or explicitly reports its
+   WARNs). This makes the tasting double as onboarding proof: not just "the output is
+   good" but "the brigade works HERE."
+2. **Retired fixtures only.** The tasting set is fixtures deliberately spent for
+   demonstration (`retired-for-tasting` in [EVAL-SPEC](./EVAL-SPEC.md)) and packaged with
+   the plugin: each item = the input, the expected-output sketch, and the graded criteria.
+   Live oracles never appear in a tasting — retiring is a one-way, recorded decision.
+3. **The show is input → output → why it's good.** The brigade runs its real stations on
+   the tasting inputs in the prospect's environment, then presents each output beside the
+   criteria it is graded on (the eval evidence made visible), with the honest evidence
+   summary from `evals/` alongside. Held stations present as held — the tasting shows
+   the menu's honest statuses, it does not paper over them.
+4. **Fire's invariants apply**: a tasting is recorded (in-answer trace for a public pack;
+   an `origin: tasting` ticket when run against a cellar), and gates still apply — the
+   tasting is a mode of invoking the expo, not a bypass.
+5. **Sales frame** (founder, 2026-07-09): evals prove it works at all; mise proves it
+   works here. The tasting is what makes both visible to a client in one sitting —
+   demo-grade evidence produced by delivery-grade machinery.
+
+Build note: like fire, this needs no new engine — expo + stations + the packaged tasting
+set. The build ticket is: retire a per-brigade showcase subset (replenished per EVAL-SPEC's fixture-supply contract),
+package it, and add the expo's tasting procedure. Not built until that ticket runs.
+
 ### Close-out — the FOH contract *(runner DROPPED as a role, founder 2026-07-03; absorbed into the steward)*
 
 **The full ruling chain:** runner is not a station (stations transform the artifact; this moves
@@ -197,15 +233,18 @@ is a queued build ticket, sequenced after the founder's P1 port validates and be
 
 **The meta rule (founder, 2026-07-03): the factory must structurally be unable to emit an
 interface-incomplete brigade.** An `artifact: brigade` (or `add-station` re-wire) build is not done
-until the new brigade ships the five commands: its menu published, a `service` skill wrapping *its*
-walk with the standard verbs + declared-deps manifest, and mise/fire/runner at minimum spec'd in its
-README with honest status markers. Enforcement lands in two places:
+until the new brigade ships the required surface: its menu published, a `service` skill wrapping
+*its* walk with the standard verbs + declared-deps manifest, and mise spec'd/vendored — with fire,
+tasting, and close-out at minimum spec'd in its README with honest status markers (fire and tasting
+are invocation modes of the expo and need no separate build; tasting's packaged showcase set ships
+only once its build ticket runs — a brigade without one simply has no tasting set yet, which its
+README states honestly). Enforcement lands in two places:
 
 1. **Acceptance contract** — the brigade acceptance checklist gains interface-completeness checks
-   (five commands present, service manifest declares the walk runtime, rail adapter is a stamped
+   (required commands present, service manifest declares the walk runtime, rail adapter is a stamped
    vendor copy of canon — see "Adapter distribution" above). *(Wired into MENU.md's
    `artifact: brigade` entry as of this commit.)*
-2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing any of the five →
+2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing a required command →
    FAIL). *Status: documented here, code wiring in the critic queued — do not claim it fires yet.*
 
 **Kind-specific checks (2026-07-09, [DISCIPLINE-BRIGADE-TEMPLATE.md](./DISCIPLINE-BRIGADE-TEMPLATE.md)).** A brigade is not interface-complete until its expo matches its kind:
@@ -217,7 +256,7 @@ README with honest status markers. Enforcement lands in two places:
 - **Station rosters, gates, critic axes** — per-brigade, published via `menu`.
 - **Polling cadence / concurrency** — deployment-profile concerns (see the deployment matrix,
   the brigade deployment matrix).
-- **Requester notification channels** — driven adapters behind `runner`, chosen per deployment.
+- **Requester notification channels** — driven adapters behind the close-out contract (né `runner`), chosen per deployment.
 
 ## Cross-references
 

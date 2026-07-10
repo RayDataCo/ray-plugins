@@ -24,6 +24,8 @@ Top level answers "what kind of thing is this"; the folder inside is the thing's
   brigades/<brigade>/              # capability knowledge: menu.md, roster notes
   rail/                            # in-flight tickets ONLY — the queue adapter scans just this
   competencies/<domain>/           # source material skills are built from
+  evals/<brigade>/<station>/       # eval suites as lifecycle assets — fixtures + keys +
+                                   # append-only runs/ (added 2026-07-10; contract in EVAL-SPEC.md)
 ```
 
 Conventions that make the flat parts navigable:

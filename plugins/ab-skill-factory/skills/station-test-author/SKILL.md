@@ -11,7 +11,7 @@ Utility station 2 of 4 in the ab-skill-factory. Reads ONLY the spec (never sees 
 
 Translate the spec into testable success criteria. The test-author's job is to prevent the rubber-stamp anti-pattern: when the same station writes spec + tests + code, tests get written to pass the code instead of measuring against ground truth. By isolating this station to see ONLY the spec (never the code), tests are forced to express "what would success look like" from the spec's perspective rather than "what does my code happen to do."
 
-Per Lloyd's mermaid-to-svg case study ([[../../rdco-vault/06-reference/2026-05-12-zach-lloyd-warp-verify-then-build-test-harness-agentic-coding]]), the canonical reference set must be generated separately from the code under test for the oracle to be uncontaminated. This station is the RDCO analog of Lloyd's canonical-set generator.
+Per Zach Lloyd's (Warp) verify-then-build mermaid-to-svg case study, the canonical reference set must be generated separately from the code under test for the oracle to be uncontaminated. This station is the analog of that canonical-set generator.
 
 ## When invoked
 
