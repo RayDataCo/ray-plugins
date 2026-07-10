@@ -4,7 +4,7 @@ Date: 2026-06-30
 Branch: `add-skill-dev-pipeline-and-variance-analysis` (PR #6)
 Scope: `plugins/skill-dev-pipeline/` → `plugins/skill-agent-brigade/` + repo-root `marketplace.json`.
 
-Canonical vocab source: `~/rdco-vault/08-tooling/2026-06-28-agent-brigade-rough-edges-editor-pass.md`
+Canonical vocab source: the 2026-06-28 agent-brigade editor's-pass note (private house doc, outside this repo)
 (items #2 exit set, #3 docs-vs-code split, #4 86→kill, pass-vs-expo note in #5).
 
 ## Canonical mapping (final, do not re-debate)

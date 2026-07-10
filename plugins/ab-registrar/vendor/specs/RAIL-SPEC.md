@@ -68,4 +68,4 @@ The **steward** ([ab-registrar/skills/steward/](../ab-registrar/skills/steward/)
 
 ## Worked example
 
-The `variance-analysis` ticket lives on the vault rail at `~/rdco-vault/08-tooling/brigade-rail/variance-analysis.ticket.md`. Its context payload points at three competency notes under `~/rdco-vault/10-source-material/competencies/variance-analysis/` (core competency · worked-example fixtures · interpretation & pitfalls). The brigade pulls it, the expo runs phase-0 over it, the resolver reads the pointed-at notes, and the build marks the ticket up as it goes.
+The `variance-analysis` ticket lives on a private house rail (a knowledge-vault folder outside this repo); its context payload points at three competency notes stored beside it (core competency · worked-example fixtures · interpretation & pitfalls). The brigade pulls it, the expo runs phase-0 over it, the resolver reads the pointed-at notes, and the build marks the ticket up as it goes.
