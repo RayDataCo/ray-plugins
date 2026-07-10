@@ -82,6 +82,7 @@ Conflating these was a v1 bug (RAIL-SPEC's old lifecycle mixed them); they are n
 6. `## Order` section present and non-empty.
 7. The four body sections exist under their canonical H2 names, in order.
 8. No inline content copies in `context` — pointers only. (Resolved content belongs in the snapshot section, written at build time by the resolver, never pre-pasted by the steward.)
+9. The resolved `subject` is a **cellar-contained relative path** — no `..` segment, not absolute, no drive letter. `ack()` files a terminal ticket to `<cellar>/<subject>/tickets/`, so an unvalidated subject (`../…`, `/etc/…`) turns a routine ack into an arbitrary file write *outside* the cellar. Validated here so a malicious ticket never enqueues, and again at the ack write site as defense in depth. Subject may be absent (derived from a cellar context ref, or genuinely unfileable) — only a *present-and-unsafe* subject fails. *(Added 2026-07-10, adversarial-review finding C1: reproduced live — `subject: ../../outside` passed the then-8-rule Gate A 8/8 and escaped the cellar on ack.)*
 
 A Gate-A failure at enqueue bounces the ticket back to the steward with the failing rule numbers. A Gate-A failure at pull is logged and the ticket is parked `needs-context` — it should have been impossible, so it is also flagged as an adapter defect.
 

@@ -396,6 +396,7 @@ def ticket_lint(
             "## Order present and non-empty",
             "four canonical H2 sections, in order",
             "pointers only — no inline content in context",
+            "subject is a cellar-contained relative path (no traversal)",
         ]
         return LintResult([LintRule(i + 1, d, False, detail) for i, d in enumerate(descs)])
 
@@ -452,6 +453,17 @@ def ticket_lint(
 
     # Rule 8 — pointers only, no inline content copies in context.
     rules.append(LintRule(8, "pointers only — no inline content in context", all(not e.get("has_inline_content") for e in entries)))
+
+    # Rule 9 — the resolved subject is cellar-contained (path-traversal guard).
+    # `ack()` files a terminal ticket to `<cellar>/<subject>/tickets/`; an
+    # unvalidated subject (`../…`, absolute, drive-letter) turns a routine ack
+    # into an arbitrary file write OUTSIDE the cellar. Validated here so a
+    # malicious ticket never enqueues, and again at the ack write site as
+    # defense in depth. Subject may be absent (derived later or unfileable) —
+    # that is not a Gate-A failure; only a PRESENT-and-unsafe subject fails.
+    resolved_subject = _resolve_subject(text)
+    subject_ok = resolved_subject is None or _subject_is_safe(resolved_subject)
+    rules.append(LintRule(9, "subject is a cellar-contained relative path (no traversal)", subject_ok, f"subject={resolved_subject!r}"))
 
     return LintResult(rules)
 
@@ -810,6 +822,37 @@ def release(ticket_path: str | Path, *, now: Optional[str] = None) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _subject_is_safe(subject: str) -> bool:
+    """A subject is safe iff it is a NON-EMPTY relative POSIX path that stays
+    inside the cellar: not absolute, no Windows drive/UNC, no `..` segment, no
+    NUL. This is the structural (cellar-root-independent) half of the
+    path-traversal guard for `ack()`'s `<cellar>/<subject>/tickets/` filing;
+    `_dest_is_contained()` is the resolve-and-verify half at the write site."""
+    if not subject or "\x00" in subject:
+        return False
+    s = subject.strip()
+    if not s or s.startswith("/") or s.startswith("\\"):
+        return False
+    # Windows drive letter (C:) or UNC — reject on every platform for portability.
+    if len(s) >= 2 and s[1] == ":":
+        return False
+    segments = re.split(r"[\\/]+", s)
+    if any(seg == ".." for seg in segments):
+        return False
+    return True
+
+
+def _dest_is_contained(dest: Path, cellar_root: Path) -> bool:
+    """Defense-in-depth: the resolved filing destination must live under the
+    resolved cellar root. Catches anything the structural check missed
+    (symlinks in the cellar tree, unforeseen encodings)."""
+    try:
+        dest.resolve().relative_to(cellar_root.resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
 def _resolve_subject(text: str) -> Optional[str]:
     """Explicit `subject:` field first; else the first `cellar`-typed
     context source's ref, taken as its first TWO path segments
@@ -879,7 +922,15 @@ def ack(
     if subject is None:
         raise RailError(f"ack: cannot file {path.name} — no `subject:` field and no `type: cellar` context source to derive one from")
 
-    dest_dir = Path(cellar_root) / subject / "tickets"
+    # Path-traversal guard (defense in depth; Gate A rule 9 catches this at
+    # enqueue, but ack must never write outside the cellar even if a ticket
+    # reached a terminal state some other way).
+    if not _subject_is_safe(subject):
+        raise RailError(f"ack: refusing to file {path.name} — unsafe subject {subject!r} (must be a cellar-contained relative path)")
+    cellar_root = Path(cellar_root)
+    dest_dir = cellar_root / subject / "tickets"
+    if not _dest_is_contained(dest_dir, cellar_root):
+        raise RailError(f"ack: refusing to file {path.name} — subject {subject!r} resolves outside the cellar")
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / path.name
     dest.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
