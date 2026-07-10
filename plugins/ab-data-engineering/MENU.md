@@ -49,3 +49,11 @@ per the ab-managerial-accounting `base-model-covered/` pattern) queued:
   `sql-query-optimization`, not `pipeline-failure-triage`.
 - Manufacturing/process defect root-cause (Pareto/5-Whys/fishbone) → the operations
   brigade (`root-cause-analysis`), not this one.
+
+## The tasting
+
+**Status: no tasting set yet** *(contract pinned 2026-07-10 — see the factory's
+BRIGADE-INTERFACE.md)*. This brigade has no packaged soft-opening plates; its eval
+suites migrated to the house cellar 2026-07-10, so retiring a showcase subset is
+unblocked and queued. Until then: the eval evidence in [evals/](evals/) is the
+proof-of-lift; a tasting adds "it works HERE" once packaged.
