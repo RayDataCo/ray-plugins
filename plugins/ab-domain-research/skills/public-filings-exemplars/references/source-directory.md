@@ -58,7 +58,7 @@
 ## USPTO
 
 - **Authority tier**: T1 — USPTO is the issuing authority.
-- Issued patents — full text public.
+- Issued patents — public documents, reproducible except explicitly copyright-noticed portions (37 CFR 1.71(d)-(e)).
 - Serves: technical claim drafting, specification writing.
 
 ## GAO / CRS

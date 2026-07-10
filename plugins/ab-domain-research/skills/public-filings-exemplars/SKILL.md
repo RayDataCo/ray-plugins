@@ -22,7 +22,7 @@ real stakes, published as public records:
 | SAM.gov | Real RFPs, SOWs, PWS attached to opportunities | Sales/proposal work, project scoping, requirements writing |
 | Grants.gov / agency FOAs | Funding opportunity announcements + evaluation criteria | Proposal structure, evaluation-rubric design |
 | CourtListener / RECAP | Real briefs, motions, opinions | Legal argument and memo drafting |
-| USPTO | Issued patents (full text public) | Technical claim drafting, specification writing |
+| USPTO | Issued patents (public documents, reproducible except copyright-noticed portions per 37 CFR 1.71(d)-(e)) | Technical claim drafting, specification writing |
 | GAO / CRS | GAO reports, CRS reports — **T2** government analytic bodies (not T1; T1 is the primary authority itself), in-domain wherever the specific report's subject matches the fill domain | Findings-evidence-recommendation analytic writing |
 
 Full reference detail (repository access patterns, EDGAR API specifics): `references/source-directory.md`.
@@ -48,6 +48,7 @@ Classify each candidate's license/terms FIRST, before judging content quality. F
 | `public-domain` | US federal government works, statutory/regulatory text, court opinions, expired copyright — full text excerptable with citation |
 | `permissive-cc` | CC BY / CC BY-SA — excerpt + adapt with TASL attribution, record SA obligation |
 | `restrictive-cc` | CC BY-NC / -ND variants — `INCLUDE-WITH-RESTRICTION` (never demoted on account of the restriction alone — see §4b rule 3), record the exact restriction |
+| `public-record` | Privately authored, publicly filed (EDGAR exhibits, merger agreements, briefs) — author retains copyright; excerpt-and-cite only, never wholesale full-text (this station's extension class — see the split below) |
 | `copyrighted-accessible` | Publicly published, all-rights-reserved — facts/structure only, restate in own words, cite precisely |
 | `restricted` | Paywalled/ToS-restricted/undetermined terms — per §4b rule 5: explicit restriction on non-primary material → `EXCLUDE: license-restricted`; the narrow exception is the T1 primary authority itself with no open substitute → `POINTER-ONLY`; freely viewable material with NO stated license → `POINTER-ONLY` (viewable is not the same as licensed) |
 
@@ -89,7 +90,8 @@ primary.
 
 - `INCLUDE` — authoritative, license-clean; content lands in the cellar.
 - `INCLUDE-WITH-RESTRICTION` — authoritative but the license carries obligations/limits (NC,
-  SA, ND); lands WITH the restriction recorded in frontmatter.
+  SA, ND — and `public-record` sources, whose excerpt-and-cite obligation IS the recorded
+  restriction); lands WITH the restriction recorded in frontmatter.
 - `POINTER-ONLY` — worth knowing about but content may not be reproduced; only title + URL +
   one-line description land.
 - `EXCLUDE` — with exactly one `reason_class`: `license-restricted` · `not-authoritative` ·
@@ -207,7 +209,9 @@ never a crawl.
 
 7. **Land exemplars.** For each `INCLUDE` / `INCLUDE-WITH-RESTRICTION` candidate, write
    `$CELLAR_ROOT/competencies/<domain>/exemplars/<task>-<n>-<short-name>.md` with the
-   provenance frontmatter contract below, followed by the exemplar content or a clearly
+   provenance frontmatter contract below, followed by the exemplar content (full content
+   only for `public-domain`/`permissive-cc` classes; `public-record` sources get targeted
+   excerpts only, per section 2) or a clearly
    marked excerpt (state excerpting explicitly, e.g. "[excerpted; full document 47 pages,
    confidential-treatment redactions at §4.2 and Exhibit B]"). Counter-exemplars additionally
    get a "Named defects:" list.

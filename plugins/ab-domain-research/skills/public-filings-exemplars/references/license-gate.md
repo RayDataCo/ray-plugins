@@ -1,13 +1,15 @@
 # License gate — full table
 
-Classify license/terms FIRST, before judging content quality. This table is shared verbatim
-across all ab-domain-research stations.
+Classify license/terms FIRST, before judging content quality. The first five classes are
+shared in substance across all ab-domain-research stations; `public-record` is this
+station's extension class (defined in full in the split section below).
 
 | License class | Meaning | Allowed handling |
 |---|---|---|
 | `public-domain` | US federal government works (17 U.S.C. § 105), statutory/regulatory text, court opinions (edicts of government), expired copyright | Full text may be excerpted and landed, with citation |
 | `permissive-cc` | CC BY, CC BY-SA (record the SA obligation) | Excerpt + adapt with required attribution (TASL: title, author, source, license) |
 | `restrictive-cc` | CC BY-NC, CC BY-NC-SA, any -ND variant | `INCLUDE-WITH-RESTRICTION` only: record the exact restriction (NC = no commercial use; ND = no derivatives) so downstream consumers can honor it. A restriction is never a reason to downgrade to `POINTER-ONLY` or `EXCLUDE` (see boundary rule 3 below) |
+| `public-record` | Privately AUTHORED but publicly FILED documents (EDGAR contract exhibits, merger agreements, litigation briefs/motions) — author retains copyright; the filing makes it inspectable, not free | Targeted EXCERPTS with citation + `why_gold` analysis, or a pointer to the primary repository with excerpted highlights. Never wholesale full-text; never presented as our authorship |
 | `copyrighted-accessible` | Publicly published but all-rights-reserved (cert-body outlines, FASB Basic View, IFRS unaccompanied standards) | Extract FACTS and STRUCTURE, restate in own words, cite precisely. Never bulk-copy expression |
 | `restricted` | Paywalled, ToS-restricted platforms (subscription courseware, LinkedIn-style logged-in content), undetermined terms | Explicit restriction on non-primary material → `EXCLUDE: license-restricted`. Narrow carve-out: the source is the T1 primary authority itself with no open substitute → `POINTER-ONLY`. Freely viewable material with NO stated license → `POINTER-ONLY` (viewable ≠ licensed) |
 
