@@ -5,16 +5,26 @@
 # the check list. Edit checks here first.
 #
 # Engine: mise.py is vendored from ab-skill-factory canon
-# (sha256 6a680f22ded56e74b44b544cc1d302f958b3e79dc4daf52d85def8a65cbd3774,
-# 2026-07-09). Zero pip deps — runs on a bare python3. Relative targets resolve
-# against this file's own directory (skills/mise/), so the pack is portable with
-# no absolute paths.
+# (sha256 942a2d311fd0e5b415faf9da33c0258087b22d6a21eb2a504c59d790e4faa40d,
+# verified byte-identical to canon 2026-07-10; the 6a680f22… sha this header
+# previously cited was the pre-reconciliation house version). Zero pip deps —
+# runs on a bare python3. Relative targets resolve against this file's own
+# directory (skills/mise/), so the pack is portable with no absolute paths.
 #
 # Credentials: NONE. These are pure-computation finance stations — no external
 # API calls, no MCP servers, no connectors. (A discipline brigade that DID call a
 # connector — e.g. AB Data Engineering + a warehouse — would add an
 # executor="agent" reachability check here. This is where the onboarding gate
 # earns its keep once a pack has a system-of-record dependency.)
+
+[roots]
+# Rail + cellar read from the CELLAR_ROOT env var — the same var the walk's
+# invoking session supplies as cellar_root/rail_dir. Unset leaves the
+# placeholder literal, so the port checks below report with their remedies
+# instead of resolving somewhere wrong: an unwired deployment reads as
+# fire-only (honest), not broken.
+rail   = "${CELLAR_ROOT}/rail"
+cellar = "${CELLAR_ROOT}"
 
 # --- Stations present: every skill the expo can compose must be installed ---
 
@@ -100,3 +110,105 @@ type        = "file_parses_json"
 target      = "../../.claude-plugin/plugin.json"
 severity    = "FAIL"
 remedy      = "plugin.json is malformed — reinstall the plugin"
+
+# --- Rail half present (symmetry guarantee, AGENT-BRIGADE-STANDARD 2026-07-10):
+# a kitchen brigade without its walk is interface-incomplete — a missing
+# vendored file is pack damage (reinstall), not deployment posture ---
+
+[[checks]]
+id          = "walk-driver-present"
+description = "Walk driver present: skills/service/discipline-rail-walk.run.js (vendored canon)"
+executor    = "script"
+type        = "path_exists"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — the rail-walk driver is missing; the brigade's rail half is gone and the pack is interface-incomplete"
+
+[[checks]]
+id          = "rail-adapter-present"
+description = "Rail adapter present: skills/service/vendor/rail_adapter.py (vendored canon)"
+executor    = "script"
+type        = "path_exists"
+target      = "../service/vendor/rail_adapter.py"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — the vendored rail adapter is missing; the walk driver has nothing to shell rail mutations through"
+
+[[checks]]
+id          = "node-on-path"
+description = "node is on PATH — lint-time only, for `node --check` on the walk driver; the walk itself runs via the harness Workflow tool, not node"
+executor    = "script"
+type        = "command_on_path"
+target      = "node"
+severity    = "WARN"
+remedy      = "install node (e.g. `brew install node`) — only needed to lint-check discipline-rail-walk.run.js; the walk runtime does not require it"
+
+[[checks]]
+id          = "walk-driver-syntax"
+description = "../service/discipline-rail-walk.run.js parses as valid JS (node --check)"
+executor    = "script"
+type        = "node_syntax"
+target      = "../service/discipline-rail-walk.run.js"
+severity    = "WARN"
+remedy      = "fix the syntax error `node --check` reports in skills/service/discipline-rail-walk.run.js; if node is absent this check cannot run (see node-on-path)"
+
+# --- Vendored-from-canon drift (ADAPTER-SPEC / BRIGADE-INTERFACE "Adapter distribution") ---
+
+[[checks]]
+id           = "rail-adapter-vendor-stamp"
+description  = "skills/service/vendor/rail_adapter.py matches its vendoring stamp — no drift from canon, no hand-edit"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../service/vendor/rail_adapter.py"
+stamp_target = "../service/vendor/rail_adapter.py.stamp.json"
+severity     = "FAIL"
+remedy       = "re-vendor: copy ab-skill-factory/adapter/rail_adapter.py over the vendored copy verbatim and re-run its stamp subcommand — never hand-edit the vendored file"
+
+[[checks]]
+id           = "walk-driver-vendor-stamp"
+description  = "skills/service/discipline-rail-walk.run.js matches its vendoring stamp — no drift from canon, no hand-edit (per-brigade variance arrives via args, never edits)"
+executor     = "script"
+type         = "vendor_stamp"
+target       = "../service/discipline-rail-walk.run.js"
+stamp_target = "../service/discipline-rail-walk.run.js.stamp.json"
+severity     = "FAIL"
+remedy       = "re-vendor: copy ab-skill-factory/skills/service/discipline-rail-walk.run.js over the vendored copy verbatim and re-stamp — never hand-edit the vendored file"
+
+# --- Ports: rail + cellar (WARN, not FAIL — this brigade's primary path is
+# fire, which needs neither; an unwired port means fire-only mode, and the
+# remedy is configuration, not repair) ---
+
+[[checks]]
+id          = "rail-root-exists"
+description = "Rail reachable: rail dir exists (tickets live and travel here — rail path only)"
+executor    = "script"
+type        = "path_exists"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar path, then mkdir -p {rail} — until then the brigade serves fire-only"
+
+[[checks]]
+id          = "rail-root-writable"
+description = "Rail is writable — pull/lease/append/ack all write here"
+executor    = "script"
+type        = "path_writable"
+target      = "{rail}"
+severity    = "WARN"
+remedy      = "fix permissions on {rail} (chmod/chown) — the walk cannot lease or ack tickets on a read-only rail; fire path is unaffected"
+
+[[checks]]
+id          = "cellar-root-exists"
+description = "Cellar reachable: CELLAR_ROOT set and the dir exists (composed answers land here — rail path only)"
+executor    = "script"
+type        = "path_exists"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar directory to land answers on disk — until then the brigade serves fire-only, in-answer"
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar is writable — answer artifacts and filed tickets land here"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "fix permissions on {cellar} (chmod/chown) — answers cannot land on a read-only cellar; fire path is unaffected"

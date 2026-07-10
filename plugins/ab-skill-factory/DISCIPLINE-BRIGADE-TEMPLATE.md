@@ -84,10 +84,21 @@ environment" onboarding gate.
 
 ## Service skeleton (discipline kind)
 
-Thin: `start` (default) runs the mise gate and, if clean, declares the brigade open to
-`fire`; `status` re-runs mise; `end` stands down. `start` is **mise-gated** — any FAIL
-refuses service. No rail walk is required (fire is the primary path); a cellar deployment
-may walk a backlog of fired requests with the same lock-and-lease discipline.
+`start` (default) runs the mise gate and, if clean, opens the brigade; `status` re-runs
+mise; `end` stands down (stop flag, honored between tickets). `start` is **mise-gated** —
+any FAIL refuses service. **Both halves ship** (symmetry guarantee, 2026-07-10 —
+AGENT-BRIGADE-STANDARD.md, superseding this section's earlier "no rail walk is required"):
+
+- **fire path** (always available): requests go straight to the expo — the primary path in
+  a public-pack install where no rail/cellar is wired.
+- **rail path** (house deployments): `service start` walks the rail via the vendored canon
+  driver `skills/service/discipline-rail-walk.run.js` (byte-identical copy of the factory's
+  canon, stamped) + the vendored `skills/service/vendor/rail_adapter.py`. The driver
+  pulls-with-lease scoped to the menu's live artifact types, hands each Order to the expo,
+  lands the answer at `{cellar}/{subject}/artifacts/`, and acks on the discipline exit
+  mapping (answered/partial-with-gaps -> advance · needs-clarification ->
+  reroute-to-steward · out-of-scope -> kill). Where the rail/cellar ports are unwired,
+  mise reports them as unconfigured-with-remedy and fire-only is the honest mode.
 
 ## Menu skeleton (discipline kind)
 
@@ -103,7 +114,13 @@ any brigade menu.
   **consumption exit surface** (`answered · needs-clarification · partial-with-gaps ·
   out-of-scope`), NOT the build exit-set.
 - `mise.toml` has one station-present check **per station in the roster** (derived, not
-  hand-listed), plus expo/menu/manifest checks; `mise.py` is a stamped vendored copy.
+  hand-listed), plus expo/menu/manifest checks AND the rail-half checks (vendored driver +
+  adapter present with fresh stamps; rail/cellar port checks at WARN severity with
+  configure-remedies so an unwired deployment reads as fire-only, not broken); `mise.py`
+  is a stamped vendored copy.
 - `service start` is mise-gated (refuses on any FAIL) — verified by a live run returning
   exit 1 when a station is hidden.
+- The rail half is present: `skills/service/discipline-rail-walk.run.js` +
+  `skills/service/vendor/rail_adapter.py`, both byte-identical to canon and stamped
+  (symmetry guarantee — a discipline brigade without its walk is interface-incomplete).
 - `plugin.json` carries `name: ab-<domain>` + `displayName: AB <Domain>`.
