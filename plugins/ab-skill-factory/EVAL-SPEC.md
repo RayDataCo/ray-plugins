@@ -87,12 +87,19 @@ caught only by a zero-context reviewer reading the actual regulation. Therefore:
 
 ## Fixture supply (who replenishes the suite)
 
-Retiring fixtures for tasting and burning defective ones consumes the suite. The
-`station-fixture-hardener` exists for exactly this: regenerating and hardening fixture
-sets against the current grounding. Suites are replenished by hardener tickets, not by
-hand-editing keys — key edits without a run and a dated rationale are indistinguishable
-from grade-rigging, and the append-only `runs/` history is what keeps the evidence
-honest.
+Retiring fixtures for tasting and burning defective ones consumes the suite, so
+replenishment is a named responsibility with two hands:
+
+- **New fixtures** are authored by the factory's **tests station** (the same station that
+  authors every suite at build time), via a factory ticket carrying the current grounding
+  — that keeps new oracles defensible from source, exactly like a build.
+- **Calibration of existing fixtures** is the `station-fixture-hardener`'s job — its
+  documented scope is difficulty-adjusting fixtures that prior eval RESULTS showed to be
+  non-discriminating (it requires those results in hand and does not invent new fixtures).
+
+Neither path is hand-editing keys — key edits without a run and a dated rationale are
+indistinguishable from grade-rigging, and the append-only `runs/` history is what keeps
+the evidence honest.
 
 ## Grading modes (both proven 2026-07-10)
 

@@ -1,15 +1,18 @@
 # The Brigade Interface — Spec
 
-> Every Agent Brigade exposes the **same five standard commands**, regardless of domain. This is the
-> brigade's public surface — what a steward, an operator, or another agent can rely on being there.
-> A brigade that implements these five (plus its stations à la carte) is interface-complete; anything
-> else it exposes is house-specific extension.
+> Every Agent Brigade exposes the **same standard command surface**, regardless of domain. This is
+> the brigade's public surface — what a steward, an operator, or another agent can rely on being
+> there. A brigade that implements the required commands (plus its stations à la carte) is
+> interface-complete; anything else it exposes is house-specific extension.
 >
-> **Naming status (2026-07-03):** all five **founder-approved** (`mise`/`service`/`fire` "I like
-> those names"; `runner` "Runner too - I like that", iMessage 2026-07-03). All five are also now
-> SETTLED in implementation terms: three built, two ruled no-build (see the table).
+> **Naming status:** `menu`/`mise`/`service`/`fire` founder-approved 2026-07-03 (`runner` was
+> approved then too, later dropped as a role — its duty became the close-out contract). `tasting`
+> contract-pinned 2026-07-10 (founder-directed docs-first pass). Implementation terms: three built
+> (menu/mise/service), fire + tasting are invocation modes of the expo (no separate build; tasting's
+> packaged showcase set is a queued build ticket), close-out is a pinned contract absorbed into the
+> steward.
 
-## The five commands
+## The commands
 
 | command | answers | kitchen reading | status today |
 |---|---|---|---|
@@ -22,7 +25,7 @@
 
 ## Two brigade kinds — kitchen brigades and house roles *(amendment 2026-07-06, with the ab-registrar extraction)*
 
-The five commands above describe a **kitchen brigade** — a thing that cooks: stations behind an
+The commands above describe a **kitchen brigade** — a thing that cooks: stations behind an
 expo, a walk that leases tickets, a menu it answers discovery with. The house also has
 **house roles**: install units that coordinate or keep records but never work a ticket. A house
 role ships `mise` + its role verbs and NOTHING kitchen-shaped — no `service` (it takes no rail
@@ -230,15 +233,18 @@ is a queued build ticket, sequenced after the founder's P1 port validates and be
 
 **The meta rule (founder, 2026-07-03): the factory must structurally be unable to emit an
 interface-incomplete brigade.** An `artifact: brigade` (or `add-station` re-wire) build is not done
-until the new brigade ships the five commands: its menu published, a `service` skill wrapping *its*
-walk with the standard verbs + declared-deps manifest, and mise/fire/runner at minimum spec'd in its
-README with honest status markers. Enforcement lands in two places:
+until the new brigade ships the required surface: its menu published, a `service` skill wrapping
+*its* walk with the standard verbs + declared-deps manifest, and mise spec'd/vendored — with fire,
+tasting, and close-out at minimum spec'd in its README with honest status markers (fire and tasting
+are invocation modes of the expo and need no separate build; tasting's packaged showcase set ships
+only once its build ticket runs — a brigade without one simply has no tasting set yet, which its
+README states honestly). Enforcement lands in two places:
 
 1. **Acceptance contract** — the brigade acceptance checklist gains interface-completeness checks
-   (five commands present, service manifest declares the walk runtime, rail adapter is a stamped
+   (required commands present, service manifest declares the walk runtime, rail adapter is a stamped
    vendor copy of canon — see "Adapter distribution" above). *(Wired into MENU.md's
    `artifact: brigade` entry as of this commit.)*
-2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing any of the five →
+2. **Lint rule** — a deterministic critic-axis check (brigade artifact missing a required command →
    FAIL). *Status: documented here, code wiring in the critic queued — do not claim it fires yet.*
 
 **Kind-specific checks (2026-07-09, [DISCIPLINE-BRIGADE-TEMPLATE.md](./DISCIPLINE-BRIGADE-TEMPLATE.md)).** A brigade is not interface-complete until its expo matches its kind:
@@ -250,7 +256,7 @@ README with honest status markers. Enforcement lands in two places:
 - **Station rosters, gates, critic axes** — per-brigade, published via `menu`.
 - **Polling cadence / concurrency** — deployment-profile concerns (see the deployment matrix,
   the brigade deployment matrix).
-- **Requester notification channels** — driven adapters behind `runner`, chosen per deployment.
+- **Requester notification channels** — driven adapters behind the close-out contract (né `runner`), chosen per deployment.
 
 ## Cross-references
 
