@@ -44,6 +44,13 @@ delivery channel, not the discipline.
 | `email-telemarketing-compliance-review` | strict +0.20 → 53% (2 emission stubs) → **67%** (+6 lift) | On emitted fixtures it grades ~91% per-element; the longest fixture (17 elements, dual email+script tables) still produced a summarize-instead-of-emit answer under eval conditions despite hardened contract language. Named residual: long-output emission reliability |
 | `digital-disclosure-review` | strict +0.20 → 86% (+25) → **81%** (+25) | Lift meets the bar (+25pts) but accuracy hovers 81-86% across rounds — recurring single-element ABSENT-vs-DEFICIENT/N-A severity calls on hyperlink-adequacy and repetition elements. Named residual: severity-boundary variance |
 
+## The tasting
+
+A packaged soft opening lives in [tasting/](tasting/): retired eval fixtures (input +
+expected coverage/rubric + grading), run by the expo in YOUR environment after mise —
+the same machinery and the same bar the eval evidence reports. See tasting/README.md
+for which stations have plates.
+
 ## Out of scope
 
 Legal advice or compliance determinations (structural stations report coverage; counsel

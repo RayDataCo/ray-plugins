@@ -38,6 +38,13 @@ and the expo synthesizes one answer.
   fallback band must lie *below* standard. Ships once refired + re-verified. This is the
   critic-advises/expo-decides gate working: the eval passed, the critic caught the defect.
 
+## The tasting
+
+A packaged soft opening lives in [tasting/](tasting/): retired eval fixtures (input +
+expected coverage/rubric + grading), run by the expo in YOUR environment after mise —
+the same machinery and the same bar the eval evidence reports. See tasting/README.md
+for which stations have plates.
+
 ## Out of scope (route to counsel)
 
 Legal *judgment* — is this term fair, should I sign, what's my risk, is this processing

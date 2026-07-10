@@ -58,6 +58,13 @@ transfers unchanged.
 - Every run: `SOURCING-DECISIONS-<date>.md` beside its artifacts — the full per-candidate
   decision sheet. `CELLAR_ROOT` unset → the brigade serves in-answer (mise WARNs).
 
+## The tasting
+
+A packaged soft opening lives in [tasting/](tasting/): retired eval fixtures (input +
+expected coverage/rubric + grading), run by the expo in YOUR environment after mise —
+the same machinery and the same bar the eval evidence reports. See tasting/README.md
+for which stations have plates.
+
 ## Out of scope
 
 Company-centric research (jobs/filings/GitHub about a COMPANY) → that is a
