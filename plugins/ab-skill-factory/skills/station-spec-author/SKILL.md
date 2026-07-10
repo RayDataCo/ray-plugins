@@ -17,8 +17,8 @@ Dispatched by a domain workflow command (e.g. `/build-haiku-generator`, `/build-
 
 - `domain` - the slug (e.g. `haiku-generator`)
 - `founder_ask` - the raw input (topic, brief, constraint)
-- `spec_template_path` - absolute path to the markdown template at `~/rdco-vault/01-projects/skill-pipelines/templates/<domain>-spec.md` (or per-domain override from config)
-- `run_dir` - absolute path to the per-run scratch dir at `~/rdco-vault/01-projects/skill-pipelines/runs/<domain>-<timestamp>/`
+- `spec_template_path` - absolute path to the domain's spec template markdown, supplied by the parent workflow (from its per-domain config or its own template store)
+- `run_dir` - absolute path to the per-run scratch dir the parent workflow created for this pass (typically `<runs-root>/<domain>-<timestamp>/`)
 - `iteration` - integer; on iteration 0 this is a fresh spec, on iteration N > 0 the station receives critic feedback and refines the spec
 
 Per architecture doc section 3.1A, dispatch is one parallel-call-able Agent subagent per station, NOT inline Skill chaining. The spec author sees ONLY the founder ask and the template - it never sees test artifacts, code artifacts, or critic diagnostics from prior iterations except as scoped to spec-refinement guidance.
@@ -79,9 +79,8 @@ path: <run_dir>/spec.md | summary: <one-line description of what was specced> | 
 
 ## Related
 
-- [[../../rdco-vault/01-projects/skill-pipelines/2026-05-12-multi-agent-pipeline-architecture]] - the architecture doc that defines this station's role
-- [[../../rdco-vault/02-sops/2026-05-12-multi-agent-pipeline-config-schema]] - the schemas this station reads from
-- [[../../rdco-vault/06-reference/concepts/2026-05-12-rdco-pipeline-rlhf-shaped]] - the RLHF-topology framing; this station is part of the "policy" in the RLHF mapping
+- Architecture principle: spec/tests/code separation exists so no station can rubber-stamp its own work — the spec author never sees how tests or code will be written. (In the RLHF-topology framing of this pipeline, this station is part of the "policy"; the critic is the reward model.)
+- The per-domain config schema (template paths, structural checks, critic axes) is owned by the parent workflow that dispatches this station.
 - [[station-test-author]] - downstream station consuming this station's output
 - [[station-code-author]] - further downstream station
 - [[station-critic]] - the critic that evaluates the final artifact against the spec

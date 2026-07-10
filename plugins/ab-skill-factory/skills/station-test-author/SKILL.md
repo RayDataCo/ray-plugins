@@ -19,6 +19,7 @@ Dispatched by the domain workflow command via Agent tool with `subagent_type: ge
 
 - `domain` - the slug
 - `spec_path` - absolute path to `<run_dir>/spec.md` written by the spec-author station
+- `config_path` - absolute path to the per-domain config (YAML), supplied by the parent workflow; declares the `structural_checks` list and `critic_axes`
 - `run_dir` - same per-run scratch dir as the rest of the pass
 - `iteration` - integer; on iteration > 0 the station may receive critic feedback indicating tests need to be tightened or expanded
 
@@ -27,7 +28,7 @@ The test-author MUST NOT receive code artifacts as input parameters. Filesystem 
 ## Process
 
 1. **Read the spec** at `spec_path`. Absorb every load-bearing requirement, every constraint, every tension flagged in the spec's `## Tensions` section.
-2. **Read the per-domain config's `structural_checks` list** at `~/rdco-vault/01-projects/skill-pipelines/configs/<domain>.yaml`. These are the deterministic checks the workflow runs before any critic fires; the tests artifact MUST cover them explicitly so coverage is auditable, even though their execution is mechanical.
+2. **Read the per-domain config's `structural_checks` list** at `config_path`. These are the deterministic checks the workflow runs before any critic fires; the tests artifact MUST cover them explicitly so coverage is auditable, even though their execution is mechanical.
 3. **Enumerate success conditions** for each spec requirement. Map every requirement to either:
    - A structural assertion (matches a `structural_checks` entry from the config)
    - A judgment criterion (will be evaluated by a fuzzy critic axis)
@@ -39,7 +40,7 @@ The test-author MUST NOT receive code artifacts as input parameters. Filesystem 
 ## Reads
 
 - `<spec_path>` - the spec artifact (this station's only direct input from upstream)
-- `~/rdco-vault/01-projects/skill-pipelines/configs/<domain>.yaml` - to know which structural checks and critic axes are in play
+- `<config_path>` - the per-domain config, to know which structural checks and critic axes are in play
 - `run_dir/critic-feedback-iter-<N-1>.md` - only on iteration > 0
 
 The test-author NEVER reads:
@@ -61,10 +62,8 @@ path: <run_dir>/tests.md | summary: <N criteria across M axes> | confidence: hig
 
 ## Related
 
-- [[../../rdco-vault/01-projects/skill-pipelines/2026-05-12-multi-agent-pipeline-architecture]] - architecture doc
-- [[../../rdco-vault/02-sops/2026-05-12-multi-agent-pipeline-config-schema]] - schemas
-- [[../../rdco-vault/06-reference/concepts/2026-05-12-rdco-pipeline-rlhf-shaped]] - RLHF framing; tests are the labeling target that the critic compares against
-- [[../../rdco-vault/06-reference/2026-05-12-zach-lloyd-warp-verify-then-build-test-harness-agentic-coding]] - the test-harness-first discipline this station operationalizes
+- Architecture principle: tests are authored blind to the code (spec-only view) so they measure against ground truth, not against what the code happens to do. In the pipeline's RLHF framing, the tests are the labeling target the critic compares against.
+- The test-harness-first discipline here follows Zach Lloyd's (Warp) verify-then-build case study: generate the canonical reference set separately from the code under test so the oracle stays uncontaminated.
 - [[station-spec-author]] - upstream station
 - [[station-code-author]] - downstream station (which does NOT see this station's output directly, only via the spec)
 - [[station-critic]] - uses the tests artifact as the verification checklist

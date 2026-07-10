@@ -11,14 +11,14 @@ Per the architecture doc section 3.3A and Lloyd's mermaid-to-svg sharded-fleet p
 
 ## Purpose
 
-Evaluate the code-author's artifact across every critic axis the per-domain config names, in parallel-isolated subagents, then aggregate the verdicts into a single PASS/FAIL+confidence for the convergence loop. This station is the "reward model" in the RLHF mapping from [[../../rdco-vault/06-reference/concepts/2026-05-12-rdco-pipeline-rlhf-shaped]] - each axis fragment is one principle in the constitutional-AI shape.
+Evaluate the code-author's artifact across every critic axis the per-domain config names, in parallel-isolated subagents, then aggregate the verdicts into a single PASS/FAIL+confidence for the convergence loop. In the pipeline's RLHF framing this station is the "reward model" - each axis fragment is one principle in the constitutional-AI shape.
 
 ## When invoked
 
 Dispatched by the domain workflow command via Agent tool with `subagent_type: general-purpose` after `station-code-author` returns successfully AND after the workflow has run the deterministic `structural_checks` from the per-domain config (which short-circuit before this station fires if they fail). Parameters:
 
 - `domain` - the slug
-- `config_path` - absolute path to `~/rdco-vault/01-projects/skill-pipelines/configs/<domain>.yaml`
+- `config_path` - absolute path to the per-domain config (YAML), supplied by the parent workflow
 - `run_dir` - per-run scratch dir
 - `iteration` - integer
 - `artifact_paths` - list of paths to the artifact files in `<run_dir>/code/`
@@ -27,7 +27,7 @@ The critic station ITSELF receives spec + tests + artifact + config. Its sub-axi
 
 ## Process
 
-1. **Read the per-domain config** at `config_path`. Enumerate `critic_axes`. Load each axis fragment file at `~/rdco-vault/01-projects/skill-pipelines/axes/<name>.yaml`.
+1. **Read the per-domain config** at `config_path`. Enumerate `critic_axes`. Load each axis fragment file from the config's declared `axes_dir` (paths resolved relative to the config file when not absolute).
 2. **Read the spec, tests, and artifact paths** for context that may be needed when constructing the per-axis subagent prompts.
 3. **Fan out N parallel critic-axis subagents** in ONE batched Agent-tool dispatch (per architecture doc section 3.3A). Each subagent receives:
    - The single axis fragment file content
@@ -43,13 +43,13 @@ The critic station ITSELF receives spec + tests + artifact + config. Its sub-axi
 6. **Write the critic verdict** to `<run_dir>/critic-feedback-iter-<N>.md` containing the aggregated decision plus per-axis breakdowns. This is the file the next code-author iteration reads if the loop runs again.
 7. **Tiered-failure handling** per section 3.6D:
    - If `iteration == floor(max_iterations / 2)` AND overall verdict is not PASS: append a warning entry to `<run_dir>/warnings.md` noting the convergence loop has hit its midpoint without progress. The workflow continues iterating.
-   - If `iteration == max_iterations` AND overall verdict is not PASS: archive the run dir, spawn a `/decisions/<date>-<domain>-build-stalled.html` page in `~/rdco-hq/public/decisions/` with the 4-option click-back rail (APPROVE+context / ARCHIVE / SPLIT / DEFER), append the decision-page URL to the run dir's `final-state.md`, and return a terminal FAIL to the workflow.
+   - If `iteration == max_iterations` AND overall verdict is not PASS: archive the run dir, write a stalled-build decision artifact with the 4-option rail (APPROVE+context / ARCHIVE / SPLIT / DEFER) to the location the per-domain config's `decision_surface_dir` names — or, if the config declares none, to `<run_dir>/DECISION-NEEDED.md` — append the decision artifact's path/URL to the run dir's `final-state.md`, and return a terminal FAIL to the workflow.
 8. **Return** the structured handoff line.
 
 ## Reads
 
 - `<config_path>` - the per-domain config (to enumerate axes)
-- `~/rdco-vault/01-projects/skill-pipelines/axes/<name>.yaml` - one per axis listed in `critic_axes`
+- `<axes_dir>/<name>.yaml` - one axis fragment per entry in `critic_axes`, from the config's declared axes directory
 - `<run_dir>/spec.md`, `<run_dir>/tests.md`, `<run_dir>/code/*` - the full artifact set the critic evaluates
 - `reference_artifacts_path` (from config) - the canonical exemplars fuzzy axes compare against
 
@@ -65,7 +65,7 @@ The per-axis subagents do NOT read the spec or tests artifacts directly - the ax
 - `<run_dir>/critic-feedback-iter-<N>.md` - per-iteration verdict file (the artifact the next code-author iteration reads)
 - `<run_dir>/warnings.md` - appended-to on N/2 stall
 - `<run_dir>/final-state.md` - written on terminal pass or terminal fail
-- `~/rdco-hq/public/decisions/<date>-<domain>-build-stalled.html` - only at max_iterations terminal failure
+- The stalled-build decision artifact (config's `decision_surface_dir`, else `<run_dir>/DECISION-NEEDED.md`) - only at max_iterations terminal failure
 
 ## Returns
 
@@ -73,13 +73,10 @@ The per-axis subagents do NOT read the spec or tests artifacts directly - the ax
 path: <run_dir>/critic-feedback-iter-<N>.md | summary: <PASS|FAIL|PASS+weak with axis breakdown> | confidence: PASS|PASS+weak|FAIL
 ```
 
-In the bootstrap case (when the per-domain config sets `bootstrap: true`), the critic returns the aggregated verdict but flags every axis as advisory; the workflow command surfaces the verdict to the founder via the channel reply tool and waits for the founder's label before continuing. Founder labels increment the relevant axis fragment's `label_count` per the schema in [[../../rdco-vault/02-sops/2026-05-12-multi-agent-pipeline-config-schema]].
+In the bootstrap case (when the per-domain config sets `bootstrap: true`), the critic returns the aggregated verdict but flags every axis as advisory; the workflow command surfaces the verdict to the operator and waits for their label before continuing. Operator labels increment the relevant axis fragment's `label_count` field.
 
 ## Related
 
-- [[../../rdco-vault/01-projects/skill-pipelines/2026-05-12-multi-agent-pipeline-architecture]] - architecture doc; sections 3.3 (parallel fan-out), 3.4 (PASS+confidence), 3.6 (tiered failure)
-- [[../../rdco-vault/02-sops/2026-05-12-multi-agent-pipeline-config-schema]] - the axis fragment and per-domain config schemas this station reads
-- [[../../rdco-vault/06-reference/concepts/2026-05-12-rdco-pipeline-rlhf-shaped]] - RLHF framing; this station IS the reward model in the topology
-- [[../../rdco-vault/06-reference/2026-05-12-zach-lloyd-warp-verify-then-build-test-harness-agentic-coding]] - the sharded-critic-fleet pattern this station implements
-- [[../../rdco-vault/06-reference/concepts/2026-05-11-hq-as-decision-surface-notion-as-data-store]] - the decision-page surface used at tiered-failure
+- Architecture principles operationalized here: parallel per-axis fan-out (one subagent per axis, batched dispatch), PASS+confidence aggregation, and tiered failure (midpoint warning, terminal decision artifact). The sharded-critic-fleet pattern follows Zach Lloyd's (Warp) mermaid-to-svg case study — axis isolation is what prevents one axis's diagnosis from contaminating another's.
+- The axis fragment and per-domain config schemas are owned by the parent workflow that dispatches this station; the config is the single source for axes, reference paths, bootstrap mode, and the decision surface.
 - [[station-spec-author]], [[station-test-author]], [[station-code-author]] - the three policy stations this station evaluates
