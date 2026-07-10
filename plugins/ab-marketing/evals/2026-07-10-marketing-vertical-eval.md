@@ -85,3 +85,57 @@ re-critic → full re-eval on the SAME oracles; skills fixed to oracles, never t
   per-element accuracy joins the reported evidence beside the strict fixture bar.
 
 Method unchanged: sonnet arms, in-answer-only, strict grading, oracle keys private.
+
+## Rounds 3 + 3b — the per-element bar (founder-ruled) and the claims turnaround
+
+Founder ruling (2026-07-10 ~10:21 ET): "measure skill quality, not carbon copy." From
+round 3 onward, grading is PER-ELEMENT (each element status the arm gets right counts;
+an omitted element or a summarize-instead-of-emit answer scores 0 for missing elements).
+**Pre-registered ship bar, stated before the run: per-element accuracy ≥90% AND lift
+≥+20pts over base.** Strict all-element match is still reported for continuity.
+Applied prospectively; rounds 1-2 numbers stand as recorded.
+
+**Round 3 (54 agents, 0 errors):**
+
+| station | per-element (base → skill) | strict | verdict |
+|---|---|---|---|
+| advertising-claims-endorsement-review | 33% → **93%** (+60) | 4/5 | **SHIPS** — critic advance, every round-2 defect verified fixed; the turnaround came from an emit-in-full output contract + explicit element-status boundary rules |
+| digital-disclosure-review | 61% → 86% (+25) | 2/5 | holds — lift at bar, accuracy 4 elements short |
+| email-telemarketing-compliance-review | 65% → 53% (−12) | 1/5 | ARTIFACT: two arms emitted meta-stubs ("report above") zeroing 24/49 elements; on emitted fixtures the skill graded ~92%. Not a content regression |
+
+**Round 3b (36 agents, 0 errors)** — targeted emission-contract + boundary fixes for the
+two stragglers, porting the claims skill's proven emission mechanism:
+
+| station | per-element (base → skill) | verdict |
+|---|---|---|
+| email-telemarketing-compliance-review | 61% → 67% (+6) | holds — 4 of 5 fixtures emitted correctly (~91% on emitted); the longest fixture (17 elements, dual tables) still stubbed. Named residual: long-output emission reliability under eval conditions |
+| digital-disclosure-review | 56% → 81% (+25) | holds — recurring single-element severity calls (ABSENT vs DEFICIENT/N-A on hyperlink-adequacy, repetition) |
+
+**Expo decision:** ship the round-3 passer; PARK the two held stations with this
+4-round trail rather than grind more same-day iterations — both critics are clean and
+content quality on emitted reports is ~90%; the residual defect is increasingly the
+eval delivery channel (long structured-output answers) rather than the discipline.
+Revisit alongside eval-harness work (e.g. chunked emission or a delivery-mode check),
+not with another same-oracle round.
+
+## Post-review correction (2026-07-10, pre-merge): the 255.6 citation defect
+
+The zero-context merge reviewer verified every encoded CFR section against the actual
+regulation and found the skill's "255.6" element FABRICATED: the real 16 CFR 255.6 covers
+**endorsements directed to children**; the intermediary/fake-review liability content the
+skill had filed under 255.6 belongs to **16 CFR Part 465** (Consumer Reviews and
+Testimonials Rule, 2024). Traced upstream: the cellar grounding file carried the error
+WITH a false "verified against primary text: yes" stamp — the fill station hallucinated
+the element, and the skill author plus two independent critics propagated it because each
+verified against the same tainted intermediate. Fixed pre-merge in both the shipped skill
+(255.6 → child-directed, conditional; Part 465 → its own correctly-cited element;
+fabricated quotable line deleted; all "quote" framings relabeled as verified paraphrases)
+and the cellar source (with a dated correction note).
+
+Eval-evidence impact, stated honestly: the round-3 oracles and BOTH arms shared the same
+mislabeled citation, so the relative lift (33% → 93%) stands as evidence of the skill's
+element-coverage discipline — but one element of the fixture set was graded under a wrong
+citation convention. Fixture keys flagged for the hardener pass. Process lesson adopted:
+fill stations' "verified against primary text" self-stamps require INDEPENDENT primary-
+source spot-checks; regulatory-fact verification against the actual CFR is now a mandatory
+fresh-eyes dimension for any standards-derived skill.

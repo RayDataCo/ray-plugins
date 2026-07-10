@@ -4,7 +4,7 @@
 # vendored from ab-skill-factory canon, zero pip deps. Relative targets resolve
 # against this file's own directory (skills/mise/), so the pack is portable.
 #
-# Three live stations as of 0.2.0 (only eval-passers ship; three held-for-refire
+# Four live stations as of 0.3.0 (only eval-passers ship; two held-for-refire
 # stations are menu rows, not installed skills — mise gains a station-present
 # check per station as each refire lands). Credentials: NONE.
 
@@ -36,6 +36,15 @@ type        = "path_exists"
 target      = "../marketing-brief-draft/SKILL.md"
 severity    = "FAIL"
 remedy      = "reinstall the plugin — marketing-brief-draft station is missing"
+
+[[checks]]
+id          = "station-advertising-claims-endorsement-review"
+description = "Station present: advertising-claims-endorsement-review"
+executor    = "script"
+type        = "path_exists"
+target      = "../advertising-claims-endorsement-review/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — advertising-claims-endorsement-review station is missing"
 
 # --- Deciding agent + roster present ---
 

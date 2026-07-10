@@ -1,8 +1,8 @@
 # ab-marketing — Menu
 
-**Status:** live · 3 generative stations shipped (the marketplace's first exemplar-graded
-generative skills, all eval-proven across two rounds) · 3 structural stations
-held-for-refire with real measured evidence and named defects · **drafting +
+**Status:** live · 4 stations shipped (3 generative — the marketplace's first
+exemplar-graded generative skills — + 1 structural, eval-proven under the per-element
+bar) · 2 structural stations held with a 4-round evidence trail · **drafting +
 coverage-review skills; never legal advice**
 
 This is the packaged menu (source of truth, versioned with the plugin). It is the
@@ -29,20 +29,20 @@ stations below).
 | Draft a campaign-effectiveness narrative or measurement plan — objectives tied to measurable outcomes, methodology stated, evidence marshaled honestly (incl. null results), limitations named, recommendations traceable to findings | `effectiveness-narrative-draft` | **win +1.00**: base 0/5 → skill 5/5 on rubric criteria derived from real GAO campaign-evaluation gold structure. Base failed every fixture incl. the null-result and activity-metrics-only traps; the skill's findings-evidence-recommendation discipline passed all five |
 | Draft a brand-positioning narrative of investor/board grade — category definition, target customer, differentiated value, quantified proof points vs named baselines, moat/durability | `positioning-narrative-draft` | **win +0.80 (r2) / +1.00 (r1)**: base 0/10 → skill 9/10 across two rounds on rubrics derived from real S-1 positioning gold. Round-2 critic verified all four round-1 defects fixed (incl. the caught license violation). Residual: the hardest thin-input fixture graded 8/12 criteria in r2 — refusal-to-fabricate discipline held but coverage dipped |
 | Draft a complete marketing brief from a business scenario — objective, STP, single-minded proposition, channel strategy, success metrics, mandatories | `marketing-brief-draft` | **win +0.80 both rounds**: base 0/10 → skill 8/10. The two misses across rounds were one content miss (regulated-industry scenario, r1) and one delivery artifact (the arm described its brief instead of emitting it, r2) — the emit-in-full residual is documented |
+| Review marketing content (ad copy, influencer briefs, testimonials, social posts) against FTC 16 CFR Part 255 endorsement + substantiation duties — per-element PRESENT/ABSENT/DEFICIENT coverage, never legal advice | `advertising-claims-endorsement-review` | **win +60pts per-element** (round 3, the founder-ruled measure-skill-quality bar): base 33% → skill 93% element accuracy (strict 4/5), critic advance with every prior defect verified fixed — the round-3 turnaround came from an emit-in-full output contract + precise element-status boundary rules |
 
-## Held for refire (real measured evidence, named defects — do not ship, do not improvise)
+## Held (2 structural stations — 4-round evidence trail, honest residuals)
 
-All three structural stations improved in round 2 and show a consistent NEAR-MISS profile:
-correct schemas, correct trigger determinations, high per-element accuracy — failing the
-strict all-element set-match bar on 1-2 elements per fixture. Round 3 will refire against
-the newly-named defects below (and is the right place to decide whether per-element
-accuracy belongs in the reported evidence alongside the strict fixture bar).
+Both critics are clean (advance) and content quality on actually-emitted reports runs
+~90% per-element; both stations sit just under the pre-registered ship bar (≥90%
+per-element accuracy AND ≥+20pts over base) for named, residual reasons. Parked rather
+than ground through more same-day rounds — the marginal defect is now partly the eval
+delivery channel, not the discipline.
 
-| station | evidence (r1 → r2) | why held |
+| station | evidence (r2 → r3 → r3b, per-element where measured) | residual |
 |---|---|---|
-| `email-telemarketing-compliance-review` | +0.20 → **+0.40** (skill 2/5) | Closest to the bar. Newly-named defect: the verdict-ordering guidance contradicts itself (prose says rule out stricter categories first; the numbered list puts NOT APPLICABLE first) — reproduced in SKILL.md and both references. Plus one emit-in-full miss and two single-row precision misses |
-| `digital-disclosure-review` | +0.20 → +0.20 (skill 1/5) | 7 of 8 named round-1 defects verified fixed (incl. the invented health/safety scope — removed); one defect item survived (critic-verified), plus recurring single-element severity calls (DEFICIENT vs ABSENT on unavoidability-class elements) |
-| `advertising-claims-endorsement-review` | 0.00 → 0.00 (skill 0/5) | Qualitatively transformed but not yet passing: round-2 answers use the correct 8-element schema, exact trigger determinations, and mostly-correct statuses (5/6 elements on several fixtures) — every fixture fails on 1-2 element statuses or severity calls under strict set-match. All round-1 defects (heavy output contract, template filenames, trap rules) verified fixed by the critic (advance); held purely on eval evidence |
+| `email-telemarketing-compliance-review` | strict +0.20 → 53% (2 emission stubs) → **67%** (+6 lift) | On emitted fixtures it grades ~91% per-element; the longest fixture (17 elements, dual email+script tables) still produced a summarize-instead-of-emit answer under eval conditions despite hardened contract language. Named residual: long-output emission reliability |
+| `digital-disclosure-review` | strict +0.20 → 86% (+25) → **81%** (+25) | Lift meets the bar (+25pts) but accuracy hovers 81-86% across rounds — recurring single-element ABSENT-vs-DEFICIENT/N-A severity calls on hyperlink-adequacy and repetition elements. Named residual: severity-boundary variance |
 
 ## Out of scope
 
