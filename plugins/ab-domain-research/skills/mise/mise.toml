@@ -1,0 +1,96 @@
+# mise.toml — AB Domain Research brigade readiness declaration.
+#
+# Single source of truth for "is this brigade ready to serve". Engine: mise.py
+# vendored from ab-skill-factory canon, zero pip deps. Relative targets resolve
+# against this file's own directory (skills/mise/), so the pack is portable.
+#
+# This is a FILL brigade — its stations land artifacts in a cellar. The cellar
+# location reads from the CELLAR_ROOT env var ([roots] below); an unset var
+# leaves the placeholder literal so the check reports with its remedy instead
+# of resolving somewhere wrong. Cellar reachability is WARN, not FAIL: without
+# a cellar the brigade still serves, returning fills in-answer (degraded but
+# honest); the expo states this up front.
+#
+# Credentials: NONE. Stations source from public repositories via ordinary
+# fetch tools; no API keys, no MCP servers, no connectors.
+
+[roots]
+cellar = "${CELLAR_ROOT}"
+
+# --- Stations present: every live station the expo can compose ---
+
+[[checks]]
+id          = "station-cert-body-sourcing"
+description = "Station present: cert-body-sourcing"
+executor    = "script"
+type        = "path_exists"
+target      = "../cert-body-sourcing/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — cert-body-sourcing station is missing"
+
+[[checks]]
+id          = "station-standards-regulatory-sourcing"
+description = "Station present: standards-regulatory-sourcing"
+executor    = "script"
+type        = "path_exists"
+target      = "../standards-regulatory-sourcing/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — standards-regulatory-sourcing station is missing"
+
+[[checks]]
+id          = "station-academic-ocw-sourcing"
+description = "Station present: academic-ocw-sourcing"
+executor    = "script"
+type        = "path_exists"
+target      = "../academic-ocw-sourcing/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — academic-ocw-sourcing station is missing"
+
+[[checks]]
+id          = "station-public-filings-exemplars"
+description = "Station present: public-filings-exemplars"
+executor    = "script"
+type        = "path_exists"
+target      = "../public-filings-exemplars/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — public-filings-exemplars station is missing"
+
+# --- Deciding agent + roster present ---
+
+[[checks]]
+id          = "expo-present"
+description = "Expo present: the composing coordinator"
+executor    = "script"
+type        = "path_exists"
+target      = "../expo/SKILL.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — expo is missing; the brigade cannot compose stations"
+
+[[checks]]
+id          = "menu-present"
+description = "Menu present: the station roster the expo reads"
+executor    = "script"
+type        = "path_exists"
+target      = "../../MENU.md"
+severity    = "FAIL"
+remedy      = "reinstall the plugin — MENU.md is missing"
+
+[[checks]]
+id          = "manifest-parses"
+description = "Plugin manifest is valid JSON"
+executor    = "script"
+type        = "file_parses_json"
+target      = "../../.claude-plugin/plugin.json"
+severity    = "FAIL"
+remedy      = "plugin.json is malformed — reinstall the plugin"
+
+# --- Landing target (the fill destination) ---
+
+[[checks]]
+id          = "cellar-root-writable"
+description = "Cellar reachable: CELLAR_ROOT set and writable (where fills land)"
+executor    = "script"
+type        = "path_writable"
+target      = "{cellar}"
+severity    = "WARN"
+remedy      = "set CELLAR_ROOT to your cellar directory to land fills on disk; without it the brigade serves in-answer only"

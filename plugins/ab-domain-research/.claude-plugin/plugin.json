@@ -1,0 +1,10 @@
+{
+  "name": "ab-domain-research",
+  "displayName": "AB Domain Research",
+  "description": "Domain-research agent brigade — the FILL brigade that stocks a knowledge cellar with domain competency and gold exemplars for generative-skill builds: the standard brigade surface — mise (readiness gate incl. the CELLAR_ROOT landing-target check), expo (the composing coordinator that decomposes a domain-fill order and fires the sourcing stations it needs), service (the on/off switch) — over 4 eval-proven sourcing stations: cert-body-sourcing (+0.60), standards-regulatory-sourcing (+1.00), academic-ocw-sourcing (+0.60, CC-licensed-only), public-filings-exemplars (+0.40-0.60, the gold-exemplar station: EDGAR/SAM.gov/courts/patents/GAO). Every station enforces license-gate-before-content, authority tiering, per-source dispositions with reason classes, provenance frontmatter, and untrusted-data discipline (embedded instructions => injection-suspect). Curation, never bulk scraping. Eval reports in evals/.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Ray Data Co",
+    "url": "https://raydata.co"
+  }
+}
