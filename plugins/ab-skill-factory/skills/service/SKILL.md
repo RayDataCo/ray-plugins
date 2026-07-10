@@ -40,7 +40,9 @@ already held, in which case report "already in service" (lock holder, since when
    gate alone is not the whole gate.
 3. **Take the lock:** write `{brigade, started_at, session, walker}` JSON to the lock path.
 4. **Walk:** invoke the Workflow tool on [rail-walk.run.js](./rail-walk.run.js) in bounded cycles
-   (one backlog sweep per invocation). Between cycles, check for the stop flag
+   (one backlog sweep per invocation). `args.plugin_dir` is REQUIRED — pass this plugin's
+   installed root (the directory containing `adapter/rail_adapter.py`); the script fails fast
+   without it rather than guessing a machine-specific path. Between cycles, check for the stop flag
    (`<rail>/.service/ab-skill-factory.stop`); absent → sweep again after the polling interval.
 5. **On any exit** (stop flag, error, session end): release per step "end" below — never leave the
    lock behind.

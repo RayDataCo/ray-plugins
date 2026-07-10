@@ -25,8 +25,16 @@ export const meta = {
   ],
 }
 
-const SKILL_PATH = '${HOME}/Projects/ray-plugins/plugins/ab-managerial-accounting/skills/variance-analysis'
-const N = 3 // samples per arm (skill-creator default; raise for high-variance fixtures)
+/* DEFENSIVE ARGS PARSE (verified live 2026-07-03): the harness delivers `args`
+ * to workflow scripts as a JSON-encoded string even when the tool call passes
+ * an object. Accept both forms. */
+let A = {}
+if (typeof args === 'string') { try { A = JSON.parse(args) } catch (e) { A = {} } }
+else if (args && typeof args === 'object') { A = args }
+
+const SKILL_PATH = A.skill_path
+if (!SKILL_PATH) throw new Error('args.skill_path is required: absolute path to the skill directory under test, e.g. {plugins-root}/ab-managerial-accounting/skills/variance-analysis. No baked-in default: install locations differ per machine.')
+const N = A.samples_per_arm || 3 // samples per arm (skill-creator default; raise for high-variance fixtures)
 
 // Each fixture: a prompt (identical to both arms) + the gradeable answer keys.
 // `expect` values are normalized (uppercase, alphanumerics only) before compare.
@@ -137,7 +145,7 @@ Return your final answer as the requested figures (name/value pairs), using EXAC
 // (base-M vs M+skill); lift = how much the skill lifts model M. Pass
 // args = { models: ['haiku','sonnet'] } to sweep tiers; default = session model.
 // A weaker model has headroom, so that's where a procedure skill should show lift.
-const MODELS = (args && Array.isArray(args.models) && args.models.length) ? args.models : ['haiku', 'sonnet']
+const MODELS = (Array.isArray(A.models) && A.models.length) ? A.models : ['haiku', 'sonnet']
 const arms = ['with_skill', 'without_skill']
 
 // ---- Phase: run both arms, N samples each, for every fixture, per model ----

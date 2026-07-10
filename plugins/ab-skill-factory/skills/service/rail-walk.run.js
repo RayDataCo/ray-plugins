@@ -64,7 +64,8 @@ else if (args && typeof args === 'object') { A = args }
 
 const RAIL_DIR = A.rail_dir || (process.env.CELLAR_ROOT ? process.env.CELLAR_ROOT + '/rail' : '${CELLAR_ROOT}/rail')
 const CELLAR_ROOT = A.cellar_root || process.env.CELLAR_ROOT || '${CELLAR_ROOT}'
-const PLUGIN_DIR = A.plugin_dir || '${HOME}/Projects/ray-plugins/plugins/ab-skill-factory'
+const PLUGIN_DIR = A.plugin_dir
+if (!PLUGIN_DIR) throw new Error('args.plugin_dir is required: absolute path to the ab-skill-factory plugin root (the directory containing adapter/rail_adapter.py). The invoking service session knows where the plugin is installed; a baked-in default would be wrong on every other machine.')
 const WORKER = A.worker || 'rail-walk-reference'
 const NOW = A.now || 'unstamped' // ISO string, log-only — see NOTE above
 const MAX_TICKETS = A.max_tickets || 10

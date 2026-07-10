@@ -58,9 +58,7 @@ path: <run_dir>/code/ | summary: <one-line description of what was built> | conf
 
 ## Related
 
-- [[../../rdco-vault/01-projects/skill-pipelines/2026-05-12-multi-agent-pipeline-architecture]] - architecture doc
-- [[../../rdco-vault/02-sops/2026-05-12-multi-agent-pipeline-config-schema]] - schemas
-- [[../../rdco-vault/06-reference/concepts/2026-05-12-rdco-pipeline-rlhf-shaped]] - RLHF framing; this station is the "policy" in the RLHF mapping that gets iterated by critic feedback
+- Architecture principle: the code-author is permanently isolated from reference exemplars (anti-overfit) and from its own prior iterations (fresh-write, so flaws can't be incrementally smoothed past the critic). In the pipeline's RLHF framing, this station is the "policy" that critic feedback iterates.
 - [[station-spec-author]] - upstream
 - [[station-test-author]] - upstream
 - [[station-critic]] - downstream
