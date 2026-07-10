@@ -49,9 +49,11 @@
   CourtListener/RECAP is the primary public-access repository for the docket.
 - Real briefs, motions, opinions from federal (and many state) court dockets.
 - Serves: legal argument and memo drafting.
-- Court opinions are `public-domain` (edicts of government); briefs/motions filed by private
-  parties are public record but not government-authored — still land under `public-domain`
-  handling per the filed-document rule, cited to the real drafting party.
+- Court opinions are `public-domain` (edicts of government); briefs/motions filed by
+  private parties are `public-record` — publicly inspectable but author-copyrighted — and
+  land as excerpt-and-cite exemplars (or pointers to the docket with excerpted highlights),
+  cited to the real drafting party. See the public-record vs public-domain split in
+  [license-gate.md](license-gate.md).
 
 ## USPTO
 

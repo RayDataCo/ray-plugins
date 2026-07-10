@@ -11,7 +11,7 @@ harder than authority or content quality. No stated open license = no landed con
 full stop, regardless of how good the source looks. Equally hard: an EXPLICIT restriction
 (login gate, paywall, ToS all-rights-reserved) is an EXCLUDE, not a consolation pointer.
 
-## Non-negotiable inherited discipline (from `_cross-cutting-discipline.md`)
+## Non-negotiable inherited discipline (shared across all ab-domain-research stations)
 
 Apply all of this before anything station-specific:
 
@@ -77,13 +77,14 @@ downstream commercial consumer knows exactly what they inherit.
 ## Station-specific rule 1b: the nine §4b boundary rules, applied to this class
 
 These decide every hard call in this station and must be applied in this order, every
-candidate, before finalizing a disposition. (Full text: `_cross-cutting-discipline.md`
-§4b.) Round-1 got several of these wrong for this exact class — the OCW-specific
-instantiation below is not optional color, it is the fix.
+candidate, before finalizing a disposition. (The same nine rules govern every
+ab-domain-research station; the sibling stations' `references/license-table.md` /
+`license-gate.md` files carry the general statement.) The OCW-specific instantiation
+below is not optional color — apply it as written.
 
 1. **Authority screens first.** A prep-vendor course, exam-dump site, or "top 10 free
    courses in X" listicle is `EXCLUDE(not-authoritative)` regardless of any license claim
-   it makes — untiered sources never earn a `POINTER-ONLY` consolation. (Round-1 defect:
+   it makes — untiered sources never earn a `POINTER-ONLY` consolation. (Common failure mode:
    an untiered prep-vendor course was given `POINTER-ONLY`. Wrong — `EXCLUDE`.)
 2. **T3 ceiling is POINTER-ONLY.** A reputable blog or publication reviewing/summarizing an
    OCW course is `POINTER-ONLY` toward the primary course page — it never lands as
@@ -96,7 +97,7 @@ instantiation below is not optional color, it is the fix.
 4. **A stated item license overrides its platform's default.** edX, Coursera, or a
    similar normally-ToS-restricted platform can still host one specific course carrying
    its own explicit CC badge (e.g., CC BY-SA on the course's own syllabus page). Judge
-   THAT course on its stated license, not the platform's usual terms. (Round-1 defect: a
+   THAT course on its stated license, not the platform's usual terms. (Common failure mode: a
    specific course's stated CC BY-SA license was distrusted because its platform is
    normally closed. Wrong — the item license wins: `INCLUDE-WITH-RESTRICTION`, SA
    recorded, no NC since none was stated.)
@@ -104,7 +105,7 @@ instantiation below is not optional color, it is the fix.
    Coursera / Udemy / LinkedIn Learning / a login-gated edX course with no item-level CC
    override: these are explicit restrictions on non-primary material →
    `EXCLUDE(license-restricted)`, full stop, no `POINTER-ONLY` entry for "the course
-   exists." (Round-1 defect: these were given `POINTER-ONLY` to "signal domain training
+   exists." (Common failure mode: these were given `POINTER-ONLY` to "signal domain training
    coverage exists." Wrong — that is exactly the consolation-pointer pattern rule 5
    forbids.) The ONLY carve-out: the source is the T1 primary authority itself with no
    open substitute available anywhere (rare in this class — OCW almost always has an open

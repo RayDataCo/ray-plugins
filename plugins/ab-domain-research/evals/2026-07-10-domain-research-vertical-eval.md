@@ -22,8 +22,10 @@ superseded versions. Grading is all-or-nothing per fixture: ONE mis-dispositione
 fails the arm.
 
 **The base-model story:** base arms passed 1 of 20 fixtures in round 1 and 0 of 20 in
-round 2. This discipline is not latent in the base model — which is the brigade's reason
-to exist.
+round 2 (20 = 5 fixtures × 4 stations per round; the "base 0/10" in the
+public-filings-exemplars row below pools that one station's 5 round-1 + 5 round-2
+fixtures). This discipline is not latent in the base model — which is the brigade's
+reason to exist.
 
 ## Shipped (eval evidence)
 

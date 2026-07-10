@@ -57,12 +57,26 @@ reference:
 
 ## How this applies to public-filings-exemplars specifically
 
-- SEC filings, court records, patents, federal procurement documents, GAO/CRS reports:
-  `public-domain` — public records / US-government-published documents.
-- Filed private-party documents (contracts, briefs, exhibits attached to a filing) are
-  public records made available for public inspection — they may be landed, quoted, and
-  analyzed with citation under `public-domain` handling. They are NEVER presented as our
-  authorship; exemplar frontmatter always names the real drafting context (filer, filing,
+**Public record ≠ public domain.** A public record is lawfully INSPECTABLE; public domain
+means UNCOPYRIGHTED. Only government-authored material gets `public-domain` handling, so
+this station splits its sources:
+
+- **`public-domain` (government-authored):** court OPINIONS (edicts of government), GAO/CRS
+  reports, statutes/regulations, agency-drafted procurement documents (a government-authored
+  SOW/PWS/NOFO), and US-government works generally (17 U.S.C. § 105) — full text may be
+  excerpted and landed with citation. Issued patents: the patent DOCUMENT is conventionally
+  reproducible (37 CFR 1.71(d)-(e) lets an applicant claim copyright in portions only via an
+  explicit notice that itself authorizes facsimile reproduction of the document) — treat as
+  freely reproducible EXCEPT any portion carrying such a notice.
+- **`public-record` (privately authored, publicly filed) — this station's extension class:**
+  contracts filed as EDGAR exhibits, merger agreements, litigation briefs/motions,
+  private-party material in a procurement file. The AUTHOR retains copyright; filing makes
+  the document inspectable, not free. Handling: land exemplars as targeted EXCERPTS with
+  citation and analysis (the `why_gold` annotation is our authorship; the excerpts are
+  quotation), or as a POINTER to the primary repository (accession number / docket) with
+  excerpted highlights — never wholesale full-text reproduction, NEVER presented as our
+  authorship. Frontmatter carries `license: {class: public-record, terms: author retains
+  copyright; excerpt-and-cite only}` and names the real drafting context (filer, filing,
   date).
 - Aggregator re-posts of filings (LawInsider-style contract mirrors, filing-scraper sites)
   are not a separate license class to gate on — per boundary rule 1 they are `EXCLUDE:

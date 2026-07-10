@@ -84,7 +84,7 @@ independently even when bundled in one product — see `references/license-table
 - **T3** — secondary commentary: law-firm client alerts, compliance-vendor blogs,
   consultancy summaries, prep-course vendors. Usable as POINTERS toward the primary text
   only — never as the landed basis of a requirement, never treated as authoritative. Being
-  T3 is not the same as being untiered — see section 4b rule 2, this is where round-1 broke.
+  T3 is not the same as being untiered — see section 4b rule 2 — the most common failure mode on this call.
 - **Untiered/SEO** — content farms, exam-dump sites, scraped statute mirrors of unknown
   provenance, "study guide"/"exam prep" framing regardless of how comprehensive or
   well-ranked it presents itself. `EXCLUDE` always.
@@ -101,7 +101,7 @@ T3 never grounds a landing plan — only T1/T2 populate `authority_tier` on a la
 - `POINTER-ONLY` — worth knowing about but content may not be reproduced. Only
   name/publisher/url/notes land in the decision sheet — no landing plan is written. See
   section 4b rules 1, 2, and 5 for exactly which candidates land here (it is a narrower
-  bucket than round-1 treated it as).
+  bucket than a naive read treats it as).
 - `EXCLUDE` — with exactly one `reason` from this fixed set, never blank, never multiple:
   - `license-restricted` — terms forbid the handling this station needs, and the candidate
     doesn't clear the narrow `POINTER-ONLY` carve-out in rule 5 either
@@ -117,7 +117,7 @@ T3 never grounds a landing plan — only T1/T2 populate `authority_tier` on a la
 
 ## 4b. Disposition boundary rules (apply in this order — these decide the hard calls)
 
-Round-1 misses on this station clustered entirely here: T3 wrongly excluded instead of
+Untrained misses on this class cluster entirely here: T3 wrongly excluded instead of
 pointed, a restrictive-CC source wrongly demoted, a proposed rule wrongly pointer-only'd
 instead of landed-as-context, an on-topic-but-narrow W3C note wrongly called off-domain, and
 a generic `not-authoritative` used where `stale-superseded` was the decisive defect. Apply
@@ -252,7 +252,7 @@ enumeration of the primary rule it discusses — see section 6).
    cut. For a candidate carried forward from a prior run with no change to the underlying
    instrument, re-confirm rather than re-derive, and say so in `notes`.
 
-8. **Write the decision sheet** at `$CELLAR_ROOT/SOURCING-DECISIONS-<run_date>.md` covering
+8. **Write the decision sheet** at `$CELLAR_ROOT/competencies/<domain>/SOURCING-DECISIONS-<run_date>.md` covering
    ALL candidates considered, one row each:
    `source_name | publisher | url | authority_tier | license_class | disposition | reason (if EXCLUDE) | notes`.
    `reason` is populated iff `disposition = EXCLUDE`, exactly one value from the fixed set in

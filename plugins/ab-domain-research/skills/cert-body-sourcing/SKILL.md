@@ -43,7 +43,7 @@ applies.
 
 Work every candidate in the bundle through these gates, in this order, before writing
 anything. Do not skip ahead to content judgment before license is settled, and do not skip
-the boundary rules before assigning a disposition — round-1 misses on this station
+the boundary rules before assigning a disposition — untrained misses on this class
 clustered entirely on skipped or misapplied boundary rules, not on the license/authority
 gates themselves.
 
@@ -95,7 +95,7 @@ paragraph.
 
 ### 3. Disposition boundary rules (apply in this order — these decide every hard call)
 
-These nine rules are where round-1 broke: a GAO report wrongly excluded, a landing block
+These nine rules decide the commonly-missed calls: a GAO report wrongly excluded, a landing block
 wrongly skipped, a restrictive-CC source wrongly demoted. Apply all nine, in order, before
 finalizing any disposition below.
 
@@ -162,7 +162,7 @@ values. Assign only after running the candidate through the nine boundary rules 
 
 ### 5. Write the decision sheet
 
-`$CELLAR_ROOT/SOURCING-DECISIONS-<YYYY-MM-DD>.md`, covering EVERY candidate in the bundle,
+`$CELLAR_ROOT/competencies/<domain>/SOURCING-DECISIONS-<YYYY-MM-DD>.md`, covering EVERY candidate in the bundle,
 in the order given. Open with a one-paragraph domain summary stating whether the domain
 has a strong T1 credentialing anchor (name it, per `references/canonical-bodies.md`) or an
 explicit "weak/no anchor" statement.

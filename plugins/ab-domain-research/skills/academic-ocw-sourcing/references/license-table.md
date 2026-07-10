@@ -34,4 +34,4 @@ consumer of the cellar knows what they inherit, not just that "SA applies."
    `POINTER-ONLY`, not `INCLUDE`).
 2. Treating "explicit restriction" (login gate, paywall, ARR ToS) the same as "no license
    stated" (it's `EXCLUDE(license-restricted)`, not `POINTER-ONLY`). These are different
-   facts about a source and get different dispositions — round-1 conflated them.
+   facts about a source and get different dispositions — do not conflate them.

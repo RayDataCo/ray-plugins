@@ -47,6 +47,14 @@ plugins/ab-data-engineering/          # discipline brigade: mise + expo + servic
   MENU.md
   skills/mise/ + skills/expo/ + skills/service/   # the standard brigade surface
   skills/pipeline-failure-triage/     # first eval-proven DE station
+plugins/ab-legal/                     # discipline brigade: structural (never advisory) legal review
+  MENU.md + skills/mise|expo|service/ # the standard brigade surface
+  skills/regulatory-notice-coverage/ + skills/contract-clause-coverage/   # eval-proven stations
+  evals/                              # two-arm execution-eval evidence
+plugins/ab-domain-research/           # FILL brigade: stocks a cellar with domain competency + gold exemplars
+  MENU.md + skills/mise|expo|service/ # the standard surface (mise incl. CELLAR_ROOT check)
+  skills/cert-body-sourcing/ + standards-regulatory-sourcing/ + academic-ocw-sourcing/ + public-filings-exemplars/
+  evals/                              # two-arm execution-eval evidence (both rounds)
 ```
 
 ## Plugins

@@ -54,14 +54,20 @@ Classify each candidate's license/terms FIRST, before judging content quality. F
 A source whose terms cannot be determined is never landed as content — default to
 `POINTER-ONLY`.
 
-For this station specifically: SEC filings, court records, patents, federal procurement
-documents, and GAO/CRS reports are public records / US-government-published documents.
-Filed private-party documents (contracts, briefs) are public records made available for
-public inspection — they may be landed, quoted, and analyzed with citation, but are NEVER
-presented as our authorship; exemplar frontmatter always names the real drafting context
-(filer, filing, date). Aggregator re-posts (LawInsider-style mirrors, filing-scraper sites)
-are `EXCLUDE: not-authoritative` — go to the primary repository instead. Some mirrors layer
-their own ToS on top of public documents; sidestep entirely by sourcing primary.
+For this station specifically, split PUBLIC RECORD from PUBLIC DOMAIN (they are different
+facts — inspectable vs uncopyrighted; full split in `references/license-gate.md`):
+government-AUTHORED material (court opinions, GAO/CRS reports, statutes/regs, agency-drafted
+SOW/PWS/NOFOs; patents except explicitly copyright-noticed portions per 37 CFR 1.71(d)-(e))
+is `public-domain`. Privately-AUTHORED filed documents (EDGAR contract exhibits, merger
+agreements, litigation briefs/motions) are `public-record` — the author retains copyright;
+land them as targeted EXCERPTS with citation + `why_gold` analysis, or as pointers to the
+primary repository with excerpted highlights — never wholesale full-text reproduction, and
+NEVER presented as our authorship; frontmatter names the real drafting context (filer,
+filing, date) and carries `license: {class: public-record, terms: author retains copyright;
+excerpt-and-cite only}`. Aggregator re-posts (LawInsider-style mirrors, filing-scraper
+sites) are `EXCLUDE: not-authoritative` — go to the primary repository instead. Some
+mirrors layer their own ToS on top of public documents; sidestep entirely by sourcing
+primary.
 
 ### 3. Authority tiering
 
@@ -95,7 +101,7 @@ of it.
 
 ### 4b. Disposition boundary rules (apply in this order — these decide the hard calls)
 
-These resolve exactly the calls round-1 got wrong. Apply in order; where more than one could
+These resolve exactly the commonly-missed calls. Apply in order; where more than one could
 plausibly fire, the earlier-numbered rule governs.
 
 1. **Authority screens first.** A source that fails authority entirely (untiered: content
@@ -214,7 +220,7 @@ never a crawl.
    publisher:
    url:
    retrieved: <run_date>
-   license: {class: <one of the 5 classes>, terms: <exact restriction text, or "none" for public-domain>}
+   license: {class: <one of the 6 classes incl. public-record>, terms: <exact restriction text; "author retains copyright; excerpt-and-cite only" for public-record; "none" for public-domain>}
    authority_tier: T1|T2|T3
    version_or_date:        # filing/effective date
    accession_or_citation:
