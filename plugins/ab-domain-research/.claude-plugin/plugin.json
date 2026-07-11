@@ -1,8 +1,8 @@
 {
   "name": "ab-domain-research",
   "displayName": "AB Domain Research",
-  "description": "Domain-research agent brigade \u2014 the FILL brigade that stocks a knowledge cellar with domain competency and gold exemplars for generative-skill builds: mise (readiness gate incl. the CELLAR_ROOT landing-target check), expo (composing coordinator for domain-fill orders), service \u2014 over 6 eval-proven stations: cert-body-sourcing (+0.60), standards-regulatory-sourcing (+1.00), academic-ocw-sourcing (+0.60, CC-licensed-only), public-filings-exemplars (+0.40-0.60, EDGAR/SAM.gov/courts/patents/GAO gold exemplars), award-case-study-exemplars (+0.60, juried-award libraries), freshness-watch (99% per-element \u2014 primary-source re-verification of landed grounding, routes factory refire tickets). Every station enforces license-gate-before-content, authority tiering, per-source dispositions, provenance frontmatter, untrusted-data discipline. Includes a packaged tasting set. Curation, never bulk scraping. Eval reports in evals/.",
-  "version": "0.4.0",
+  "description": "Domain-research agent brigade — the FILL brigade that stocks a knowledge cellar with domain competency and gold exemplars for generative-skill builds: mise (readiness gate incl. the CELLAR_ROOT landing-target check), expo (composing coordinator for domain-fill orders), service — over 6 eval-proven stations: cert-body-sourcing (+0.60), standards-regulatory-sourcing (+1.00), academic-ocw-sourcing (+0.60, CC-licensed-only), public-filings-exemplars (+0.40-0.60, EDGAR/SAM.gov/courts/patents/GAO gold exemplars), award-case-study-exemplars (+0.60, juried-award libraries), freshness-watch (99% per-element — primary-source re-verification of landed grounding, routes factory refire tickets). Every station enforces license-gate-before-content, authority tiering, per-source dispositions, provenance frontmatter, untrusted-data discipline. Includes a packaged tasting set. Curation, never bulk scraping. Eval reports in evals/.",
+  "version": "0.5.0",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"

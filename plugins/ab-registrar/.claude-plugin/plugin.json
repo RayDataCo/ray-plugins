@@ -2,7 +2,7 @@
   "name": "ab-registrar",
   "displayName": "AB Registrar",
   "description": "The registrar — the house's coordinator and record-keeper (front of house as its own install unit). Owns everything before a ticket hangs and after it files: intake and context curation (steward), the menu registry (who can do what — scan-on-demand over published menus), and the open-orders report (what's queued, leased, parked, aging on the rail). Never cooks: no expo, no stations, no service verb, no rail lock — the first 'house role' brigade kind (BRIGADE-INTERFACE.md). Vendors the canon rail adapter + the five specs it binds to (stamped, sha256-verified) so it installs wherever the rail and cellar are reachable, factory present or not.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"

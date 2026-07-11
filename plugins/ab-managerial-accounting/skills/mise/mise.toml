@@ -212,3 +212,15 @@ type        = "path_writable"
 target      = "{cellar}"
 severity    = "WARN"
 remedy      = "fix permissions on {cellar} (chmod/chown) — answers cannot land on a read-only cellar; fire path is unaffected"
+
+# --- Walk port (WALK-SPEC.md, 2026-07-11 convergence) ---
+
+[[checks]]
+id          = "walk-reference-vendor-stamp"
+description = "skills/service/vendor/walk.py (the walk port's Python REFERENCE adapter) matches its .stamp.json — vendored and fresh; this brigade's default driver is the harness-native Workflow adapter, the reference is what it is measured against"
+executor    = "script"
+type        = "vendor_stamp"
+target      = "../service/vendor/walk.py"
+stamp_target = "../service/vendor/walk.py.stamp.json"
+severity    = "FAIL"
+remedy      = "re-vendor from ab-skill-factory/adapter/walk.py and re-stamp — never hand-edit the vendored copy"

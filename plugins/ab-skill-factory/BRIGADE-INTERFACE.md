@@ -123,15 +123,24 @@ already held, in which case say "already in service" and do nothing (founder-spe
   work-log is the resume state. Then: drop lock + flag, journal the session (tickets processed).
 - **`status`**: read-only — in service? current ticket + phase, processed count, stop pending?
 
-**Service is a CONTRACT, the walk is per-brigade.** The verbs, lock, mise precondition, and
-teardown semantics above are identical across every house brigade; the walk *implementation* is the
-brigade's own (this factory: [skills/service/rail-walk.run.js](./skills/service/rail-walk.run.js),
-a Workflow script — packaged inside the skill; the domain brigades: their Python `rail_walk`/pass
-drivers, wrapped by their own `service` skills, queued). Each brigade's service skill **declares its
-runtime dependencies** in a manifest table — that manifest is exactly what `mise` checks.
-*(Impl-language fork decided in dialogue 2026-07-03: contract-standard / per-brigade-implementation
-[option A] recommended over one-canonical-JS-runner [option B]; note — the factory's walk runs via
-the harness Workflow tool, not `node`, which is itself the best argument for declared-deps-per-brigade.)*
+**Service is a CONTRACT, the walk is a PORT** *(amended 2026-07-11, walk-port convergence —
+[WALK-SPEC.md](./WALK-SPEC.md) is the contract)*. The verbs, lock, mise precondition, and
+teardown semantics above are identical across every house brigade; the walk role now has a
+written 7-step contract with two adapters: the **Python in-process REFERENCE**
+([adapter/walk.py](./adapter/walk.py), vendored+stamped into every brigade — deterministic steps
+never laundered through an LLM, agent invoked only for dispatch) and the **harness-native
+Workflow adapter** ([skills/service/discipline-rail-walk.run.js](./skills/service/discipline-rail-walk.run.js)
+— agents as command executors reporting adapter-CLI output verbatim, the script owning every
+judgment). A brigade's own driver (the Gen-A `rail_walk`/pass wrappers) delegates its rail
+mechanics to the same vendored canon the reference rides. Each brigade's service skill
+**declares its runtime dependencies** in a manifest table — that manifest is exactly what
+`mise` checks; the vendored walk copies' stamp freshness is a mechanical mise check
+(`walk-reference-vendor-stamp`), while WHICH adapter a deployment actually wires is
+declared in the service SKILL.md's manifest prose (not yet a mechanical check — honest
+gap, same class as the service lock being advisory).
+*(This supersedes the 2026-07-03 impl-language fork note: option A [per-brigade implementation]
+stands, but the implementations now share one canon walk contract instead of growing apart —
+the Gen-A/Gen-B divergence that motivated the convergence.)*
 
 ### `fire` — ad-hoc direct request *(settled 2026-07-03: an INVOCATION MODE of the expo, not a build)*
 
