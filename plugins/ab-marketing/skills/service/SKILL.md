@@ -33,6 +33,17 @@ symmetry guarantee ship here — fireable and queueable.
   each Order to the expo, lands the answer at `{cellar_root}/{subject}/artifacts/`, and
   acks per the mapping below.
 
+**Walk port (2026-07-11 convergence — factory WALK-SPEC.md):** pass `allowed_artifacts`
+(the MENU's live artifact-type strings) in the driver args — the invoking session reads
+MENU.md anyway to gate service; without the arg the driver spends one agent call deriving
+it. This Workflow driver is the walk port's HARNESS-NATIVE adapter (agents execute the
+vendored adapter CLI and report its output verbatim; the script owns every judgment). The
+port's Python REFERENCE adapter is vendored at [vendor/walk.py](./vendor/walk.py) — a
+deployment with a Python process should prefer it (`Walk(WalkConfig)` +
+`make_expo_dispatcher(run_agent, ...)` per its module docstring); mise checks both copies'
+stamps.
+
+
 ## Discipline exit mapping (expo exit → rail ack)
 
 | expo exit | ack |

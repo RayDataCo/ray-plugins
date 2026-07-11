@@ -94,9 +94,9 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Sequence
 
-ADAPTER_VERSION = "1.2.0"
+ADAPTER_VERSION = "1.3.0"
 
 # Where `pull()` claims a ticket to: `<rail_dir>/.claimed/<worker>/<same filename>`.
 # The rename IS the check-and-claim (POSIX rename(2) is indivisible) — see `pull()`'s
@@ -110,6 +110,7 @@ CANON_NAME = "ab-skill-factory/adapter/rail_adapter.py"
 # the wrong files. Keyed by basename; `stamp(..., canon=...)` overrides.
 CANON_PATHS = {
     "rail_adapter.py": "ab-skill-factory/adapter/rail_adapter.py",
+    "walk.py": "ab-skill-factory/adapter/walk.py",
     "mise.py": "ab-skill-factory/skills/mise/mise.py",
     "discipline-rail-walk.run.js": "ab-skill-factory/skills/service/discipline-rail-walk.run.js",
     "rail-walk.run.js": "ab-skill-factory/skills/service/rail-walk.run.js",
@@ -774,6 +775,7 @@ def pull(
     now: Optional[str] = None,
     allowed_artifacts: Optional[Iterable[str]] = None,
     brigade: Optional[str] = None,
+    ticket_id: Optional[str] = None,
 ) -> Optional[TicketHandle]:
     """Lease the next workable ticket: the oldest-mtime `queued` ticket
     (rail-dir root), or — failing that — the oldest-mtime `leased`/
@@ -804,7 +806,24 @@ def pull(
     reconcile asynchronously against a remote copy — a "local" rename can
     be atomic on-disk and still race another client's equally "atomic"
     rename against its own stale local view. See ADAPTER-SPEC.md's "Claim
-    model" section."""
+    model" section.
+
+    `ticket_id` (v1.3.0, walk-port convergence) scopes the scan to that ONE
+    ticket instead of the whole rail — the multi-phase driver's resume
+    primitive (ab-assessment's `pass_driver`): once an inner-rail fan-out
+    has enqueued micro-tickets onto the SAME rail, a plain pull could
+    non-deterministically grab a micro-ticket instead of the parent the
+    driver is resuming. An explicit id is a deliberate act, so the
+    `allowed_artifacts`/`brigade` walker-scope filter is SKIPPED for it.
+
+    Workable states (v1.3.0 adds the third):
+      - `queued` — normal claim.
+      - `leased`/`in-build` with an EXPIRED lease — reclaim (abandonment
+        made visible via the `lease-reclaimed` work-log line).
+      - `in-build` with NO lease — a multi-phase ticket between phases
+        (`ack(advance, terminal=False)` clears the lease and leaves status
+        `in-build`); immediately re-workable for its next phase. Unreachable
+        for single-phase brigades: their ack never writes `in-build`."""
     rail_dir = Path(rail_dir)
     if not rail_dir.exists():
         return None
@@ -822,12 +841,18 @@ def pull(
             text = p.read_text(encoding="utf-8")
         except FileNotFoundError:
             continue  # vanished between the glob snapshot and the read — already lost
-        if not walker_scope_ok(text, allowed_artifacts, brigade):
+        if ticket_id is not None:
+            if (get_field(text, "ticket") or p.name.removesuffix(".ticket.md")) != ticket_id:
+                continue
+        elif not walker_scope_ok(text, allowed_artifacts, brigade):
             continue
         status = get_field(text, "status")
+        lease = get_lease(text)
         if status == "queued":
             reclaim = False
-        elif status in ("leased", "in-build") and _lease_expired(get_lease(text), now_val):
+        elif status == "in-build" and lease is None:
+            reclaim = False  # multi-phase between-phase state, workable now
+        elif status in ("leased", "in-build") and _lease_expired(lease, now_val):
             reclaim = True
         else:
             continue
@@ -979,6 +1004,10 @@ def ack(
     cellar_root: str | Path,
     *,
     now: Optional[str] = None,
+    terminal: bool = True,
+    phases: Optional[Sequence[str]] = None,
+    phase_field: str = "current_phase",
+    artifact_refs: Optional[Iterable[str]] = None,
 ) -> Path:
     """Close out a lease with the expo's terminal disposition
     (TICKET-CONTRACT's five-exit set): `advance -> done`, `kill ->
@@ -1000,23 +1029,88 @@ def ack(
     dir. A ticket that was never claimed (already at rail-dir root) is
     left in place — `_return_to_rail_root` is a no-op for it.
 
+    MULTI-PHASE EXTENSIONS (v1.3.0, walk-port convergence — the parameters
+    every prior caller omits, leaving behavior byte-identical):
+
+      - `terminal=False` on an `advance` is the multi-phase case (one ticket
+        spanning N sequential phase stations behind a `current_phase` field,
+        ab-assessment's shape): status -> `in-build` (NOT `done`), the
+        `phase_field` advances to the next entry of `phases` (required in
+        this case), `refire_round` resets to 0, the lease clears, and the
+        ticket returns to the rail root — workable again for its next phase
+        (`pull()`'s in-build/no-lease state). Nothing files.
+      - `refire-to-author` (the five-exit set's same-station re-run budget)
+        is now a rail disposition: status -> `queued`, `refire_round`
+        increments, lease clears, ticket returns to the rail root. The
+        `STATUS_BY_EXIT` constant is deliberately unchanged (it maps the
+        dispositions whose STATUS is fixed); `reroute-to-spec` remains
+        unhandled here (adversarial finding M3, open by design).
+      - `artifact_refs`, when supplied, are appended to `## Artifacts` as
+        part of this same call (public-API parity with ab-assessment's
+        DEFECT #11 fix — callers driving the rail directly need a public
+        way to land refs).
+
     Returns the ticket's path after this call: the filed destination on a
     terminal exit, or its (possibly moved-back) rail-root path otherwise."""
-    if exit not in STATUS_BY_EXIT:
-        raise RailError(f"ack: unknown exit {exit!r}; expected one of {sorted(STATUS_BY_EXIT)}")
+    known_exits = set(STATUS_BY_EXIT) | {"refire-to-author"}
+    if exit not in known_exits:
+        raise RailError(f"ack: unknown exit {exit!r}; expected one of {sorted(known_exits)}")
+    if exit == "advance" and not terminal and not phases:
+        raise RailError("ack: advance with terminal=False requires `phases` (the multi-phase sequence)")
 
     path = Path(ticket_path)
-    new_status = STATUS_BY_EXIT[exit]
     now_val = _now_iso(now)
 
     text = path.read_text(encoding="utf-8")
+
+    if artifact_refs:
+        refs = [r for r in artifact_refs if r]
+        if refs:
+            text = _append_to_section(text, "## Artifacts", "\n".join(f"- cellar: `{r}`" for r in refs))
+
+    phase_note = ""
+    if exit == "advance" and not terminal:
+        new_status = "in-build"
+        current = (get_field(text, phase_field) or (phases[0] if phases else "")).strip()
+        seq = list(phases or [])
+        nxt = seq[min(seq.index(current) + 1, len(seq) - 1)] if current in seq else current
+        text = set_field(text, phase_field, nxt)
+        text = set_field(text, "refire_round", "0")
+        phase_note = f" ({phase_field} {current} -> {nxt})"
+    elif exit == "refire-to-author":
+        new_status = "queued"
+        rnd = int(get_field(text, "refire_round") or 0) + 1
+        text = set_field(text, "refire_round", str(rnd))
+        phase_note = f" (refire_round {rnd})"
+    else:
+        new_status = STATUS_BY_EXIT[exit]
+        # Any non-refire disposition closes the current refire loop: reset the
+        # budget counter when the ticket tracks one (multi-phase parity with
+        # ab-assessment's own table — a steward rework or a kill never
+        # inherits a stale round count).
+        if get_field(text, "refire_round") is not None:
+            text = set_field(text, "refire_round", "0")
+
     text = set_field(text, "status", new_status)
     text = set_field(text, "lease", "null")
-    path.write_text(text, encoding="utf-8")
-    append(path, f"ack: {exit} → status {new_status}", now=now_val)
 
     if new_status not in FILES_TO_SUBJECT_STATUSES:
-        return _return_to_rail_root(path)
+        # MOVE-FIRST ordering (fresh-eyes finding, 2026-07-11): a non-terminal
+        # disposition may write a WORKABLE status (in-build/no-lease, queued) —
+        # writing that while the file still sits under `.claimed/<worker>/`
+        # opens a window where a concurrent walker's scan can legally
+        # rename-steal it mid-ack. Rename back to the rail root BEFORE any
+        # write (mirrors `release()`'s own ordering; the content read above is
+        # unaffected by the rename). Residual window after the status write =
+        # the same one `release()` has always had, bounded by the advisory
+        # service lock.
+        path = _return_to_rail_root(path)
+        path.write_text(text, encoding="utf-8")
+        append(path, f"ack: {exit} → status {new_status}{phase_note}", now=now_val)
+        return path
+
+    path.write_text(text, encoding="utf-8")
+    append(path, f"ack: {exit} → status {new_status}{phase_note}", now=now_val)
 
     subject = _resolve_subject(path.read_text(encoding="utf-8"))
     if subject is None:
@@ -1126,6 +1220,15 @@ def _cli(argv: Optional[list[str]] = None) -> int:
     p_lint.add_argument("ticket_path")
     p_lint.add_argument("--rail-dir", default=None)
     p_lint.add_argument("--cellar-root", default=None)
+    p_lint.add_argument(
+        "--allowed-artifact",
+        action="append",
+        default=None,
+        dest="allowed_artifacts",
+        help="repeat per allowed artifact type (the TARGET brigade's menu live set; "
+        "omitting all falls back to THIS brigade's factory defaults — the documented "
+        "trap for domain tickets)",
+    )
 
     p_enqueue = sub.add_parser("enqueue", help="Gate A + place a ticket file onto the rail")
     p_enqueue.add_argument("rail_dir")
@@ -1189,8 +1292,12 @@ def _cli(argv: Optional[list[str]] = None) -> int:
                 print(p)
         elif args.op == "lint":
             text = Path(args.ticket_path).read_text(encoding="utf-8")
-            rail_files = [f.name for f in Path(args.rail_dir).glob("*.ticket.md")] if args.rail_dir else []
-            result = ticket_lint(text, rail_files, cellar_root=args.cellar_root)
+            rail_files = []
+            if args.rail_dir:
+                rail_dir = Path(args.rail_dir)
+                rail_files = [f.name for f in rail_dir.glob("*.ticket.md")]
+                rail_files += [p.name for p in _claimed_ticket_paths(rail_dir)]
+            result = ticket_lint(text, rail_files, allowed_artifacts=args.allowed_artifacts, cellar_root=args.cellar_root)
             for r in result.rules:
                 print(f"rule {r.n}: {'PASS' if r.passed else 'FAIL'} — {r.description} ({r.detail})")
             print(result.summary())

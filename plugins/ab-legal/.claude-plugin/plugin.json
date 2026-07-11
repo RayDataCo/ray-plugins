@@ -2,7 +2,7 @@
   "name": "ab-legal",
   "displayName": "AB Legal",
   "description": "Legal-review agent brigade (structural, not advisory): the standard brigade surface — mise (readiness gate), expo (the composing coordinator that decomposes a review request and fires the stations it needs, incl. compound asks like reviewing a contract AND its privacy notice), service (the on/off switch) — over eval-proven structural legal-review stations. Two live: regulatory-notice-coverage (GDPR Art.13/14 + CCPA/CPRA disclosure-element coverage; +0.60 lift) and contract-clause-coverage (standard expected clause set by contract type; +1.00 lift, base missed all 5). One held-for-refire (redline-against-playbook). Every station checks a document against an explicit enumerated standard and reports coverage/gaps — it never gives legal advice, opines on fairness/lawfulness, or makes a compliance determination. Eval reports in evals/.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Ray Data Co",
     "url": "https://raydata.co"
