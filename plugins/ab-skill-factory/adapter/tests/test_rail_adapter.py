@@ -1107,3 +1107,62 @@ def test_find_unclosed_recognizes_signature_written_via_append(tmp_path):
     assert ticket in ra.find_unclosed(cellar_root)
     ra.append(ticket, "close-out: requester notified via iMessage (test)")
     assert ticket not in ra.find_unclosed(cellar_root)
+
+
+# ===========================================================================
+# Resolver — snapshot mechanism + static/live/lazy partition (BUNDLE-SPEC)
+# ===========================================================================
+
+
+def test_plan_resolution_partitions_static_live_lazy(tmp_path):
+    src = tmp_path / "comp.md"
+    src.write_text("competency body\n")
+    ctx = (
+        context_entry(str(src), eid="comp", type_="file", when="always — static")
+        + context_entry("https://example.com/x", eid="fresh", type_="url", when="always — live")
+        + context_entry(str(src), eid="later", type_="file", when="when drafting")
+    )
+    text = make_ticket(context_lines=ctx, subject="companies/acme")
+    plan = ra.plan_resolution(text)
+    assert [e["id"] for e in plan["static"]] == ["comp"]
+    assert [e["id"] for e in plan["live"]] == ["fresh"]
+    assert [e["id"] for e in plan["lazy"]] == ["later"]
+    # static source got a real integrity sha
+    assert plan["static"][0]["resolved"] is True
+    assert len(plan["static"][0]["sha256"]) == 64
+
+
+def test_snapshot_source_static_writes_integrity_line(tmp_path):
+    src = tmp_path / "comp.md"
+    src.write_text("x\n")
+    text = make_ticket(context_lines=context_entry(str(src), eid="comp"), subject="companies/acme")
+    tp = tmp_path / "t.ticket.md"
+    tp.write_text(text)
+    ra.snapshot_source(tp, entry_id="comp", source_type="file", ref=str(src), sha256="a" * 64, now="2026-07-10T20:00:00-04:00")
+    body = tp.read_text()
+    snap = body.split("## Resolved-context snapshot")[1].split("## Work log")[0]
+    assert "**comp** (file:" in snap
+    assert "sha256 aaaaaaaa" in snap
+    # append-only: Gate A rule 7 (four sections) still holds after the write
+    assert ra.ticket_lint(body, [], allowed_artifacts={"skill"}).rules[6].passed
+
+
+def test_snapshot_source_live_freezes_content(tmp_path):
+    text = make_ticket(context_lines=context_entry("https://x", eid="fresh", type_="url"), subject="companies/acme")
+    tp = tmp_path / "t.ticket.md"
+    tp.write_text(text)
+    ra.snapshot_source(tp, entry_id="fresh", source_type="url", ref="https://x", content="frozen line 1\nline 2", now="2026-07-10T20:00:00-04:00")
+    snap = tp.read_text().split("## Resolved-context snapshot")[1]
+    assert "frozen line 1" in snap and "line 2" in snap
+
+
+def test_resolve_static_source_reads_file_and_cellar(tmp_path):
+    f = tmp_path / "f.md"
+    f.write_text("file bytes\n")
+    cellar = tmp_path / "cellar"
+    (cellar / "companies" / "acme").mkdir(parents=True)
+    (cellar / "companies" / "acme" / "p.md").write_text("cellar bytes\n")
+    assert ra.resolve_static_source({"type": "file", "ref": str(f)}, None) == b"file bytes\n"
+    assert ra.resolve_static_source({"type": "cellar", "ref": "companies/acme/p.md"}, cellar) == b"cellar bytes\n"
+    # live type is not the adapter's to resolve
+    assert ra.resolve_static_source({"type": "url", "ref": "https://x"}, None) is None

@@ -102,6 +102,23 @@ for (let i = 0; i < MAX_TICKETS; i++) {
 
   if (!pulled || !pulled.found) { log('walk: rail dry after ' + served + ' ticket(s)' + (pulled && pulled.note ? ' (' + pulled.note + ')' : '')); break }
 
+  // Resolve context BEFORE serving (BUNDLE-SPEC reproducibility): freeze the
+  // ticket's eager sources into its ## Resolved-context snapshot so the build
+  // runs against a snapshot, not a live re-fetch. Static (file/cellar) sources
+  // are snapshotted with an integrity sha by the adapter; live (url/mcp/qmd)
+  // sources are fetched by this agent (it has the tools the adapter lacks) and
+  // frozen verbatim. Best-effort: a resolution miss is logged, not fatal — the
+  // expo's Gate B still judges sufficiency.
+  await agent(
+    'Freeze this ticket\'s eager context into its snapshot section for replayability.\n' +
+    '1. Run: python3 ' + ADAPTER + ' plan-resolution ' + pulled.ticket_path + ' --cellar-root ' + CELLAR_ROOT + '\n' +
+    '   It returns JSON with static[] (file/cellar, already sha-computed), live[] (url/mcp/qmd), lazy[] (skip — they resolve mid-build).\n' +
+    '2. For EACH static source: python3 ' + ADAPTER + ' snapshot ' + pulled.ticket_path + ' --id {id} --type {type} --ref {ref} --sha256 {sha256}\n' +
+    '3. For EACH live source: fetch it with your tools (url -> WebFetch, qmd -> the qmd query tool, mcp -> the named MCP), write the fetched body to a temp file, then: python3 ' + ADAPTER + ' snapshot ' + pulled.ticket_path + ' --id {id} --type {type} --ref {ref} --content-file {tempfile}. If a live fetch fails, append a work-log line noting the miss and continue — do not fabricate content.\n' +
+    'Return a one-line summary of what you snapshotted.',
+    { label: 'resolve:' + (i + 1), phase: 'Walk', model: MODEL }
+  )
+
   let serve = null
   try {
     serve = await agent(

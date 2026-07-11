@@ -105,6 +105,16 @@ ADAPTER_VERSION = "1.2.0"
 CLAIM_DIRNAME = ".claimed"
 CANON_NAME = "ab-skill-factory/adapter/rail_adapter.py"
 
+# Canon home per vendored filename — a stamp must point at the file's OWN canon,
+# not the adapter's, or drift detection (which now follows the pointer) compares
+# the wrong files. Keyed by basename; `stamp(..., canon=...)` overrides.
+CANON_PATHS = {
+    "rail_adapter.py": "ab-skill-factory/adapter/rail_adapter.py",
+    "mise.py": "ab-skill-factory/skills/mise/mise.py",
+    "discipline-rail-walk.run.js": "ab-skill-factory/skills/service/discipline-rail-walk.run.js",
+    "rail-walk.run.js": "ab-skill-factory/skills/service/rail-walk.run.js",
+}
+
 DEFAULT_LEASE_TTL_MIN = 60
 
 # This brigade's own live artifact types (MENU.md) — the DEFAULT for
@@ -330,6 +340,96 @@ def _ref_resolves(entry: dict[str, Any], cellar_root: Optional[str | Path]) -> b
             return True  # can't verify without a cellar root — documented limitation
         return (Path(cellar_root) / ref).exists()
     return expanded.exists()  # type == "file", bare relative — best-effort against cwd
+
+
+# ---------------------------------------------------------------------------
+# Resolver — the port that snapshots a ticket's context for replayability
+# (BUNDLE-SPEC "Reproducibility"). Split by who can do the work:
+#   - STATIC sources (file/cellar) are reproducible by re-reading the ref, so the
+#     adapter records an integrity sha (detects a source changing under a replay).
+#   - LIVE sources (url/mcp/qmd) are fetched fresh each time, so they MUST be
+#     snapshotted to freeze the build — but fetching needs harness tools
+#     (WebFetch/MCP/retrieval) the pure-stdlib adapter does not have. The walk
+#     agent resolves those and calls `snapshot_source()` to write them in.
+# The adapter owns the WRITE primitive + static integrity; the walk owns live
+# fetching. That division is the resolver's implementation contract.
+# ---------------------------------------------------------------------------
+
+LIVE_SOURCE_TYPES = frozenset({"url", "mcp", "qmd"})
+_SNAPSHOT_SECTION = "## Resolved-context snapshot"
+
+
+def resolve_static_source(entry: dict[str, Any], cellar_root: Optional[str | Path]) -> Optional[bytes]:
+    """Read the bytes for a STATIC (`file`/`cellar`) source — the resolution the
+    pure adapter can do without network/tools. Returns None for live types (the
+    walk agent resolves those) or when the ref cannot be read. Mirrors
+    `_ref_resolves`' path handling (~ expansion, absolute, cellar-relative)."""
+    t = entry.get("type")
+    ref = entry.get("ref") or ""
+    if t not in _LOCALLY_RESOLVABLE_TYPES or not ref:
+        return None
+    expanded = Path(ref).expanduser()
+    if t == "cellar" and not expanded.is_absolute():
+        if not cellar_root:
+            return None
+        expanded = Path(cellar_root) / ref
+    try:
+        return expanded.read_bytes()
+    except OSError:
+        return None
+
+
+def snapshot_source(
+    ticket_path: str | Path,
+    *,
+    entry_id: str,
+    source_type: str,
+    ref: str,
+    sha256: Optional[str] = None,
+    content: Optional[str] = None,
+    now: Optional[str] = None,
+) -> None:
+    """Write one resolved source into the ticket's `## Resolved-context snapshot`
+    section (append-only; the section is written at build time, never pre-pasted
+    by the steward — Gate A rule 8). A STATIC source records an integrity line
+    (`sha256`); a LIVE source records the fetched `content` verbatim so the build
+    is replayable against the frozen bytes, not a re-fetch."""
+    path = Path(ticket_path)
+    text = path.read_text(encoding="utf-8")
+    stamp = _now_iso(now)
+    header = f"- **{entry_id}** ({source_type}: {ref}) — resolved {stamp}"
+    if sha256:
+        header += f" · sha256 {sha256[:16]}…"
+    block = header
+    if content is not None:
+        fence = "~~~"
+        block += f"\n\n  {fence}\n" + "\n".join("  " + ln for ln in content.splitlines()) + f"\n  {fence}"
+    path.write_text(_append_to_section(text, _SNAPSHOT_SECTION, block), encoding="utf-8")
+
+
+def plan_resolution(text: str, cellar_root: Optional[str | Path] = None) -> dict[str, list[dict[str, Any]]]:
+    """Partition a ticket's EAGER sources into what the adapter snapshots now
+    (static, with a computed integrity sha) and what the walk agent must fetch
+    (live). Lazy sources are returned separately — they resolve only when their
+    `when` fires mid-build. The walk calls this before dispatch, snapshots the
+    static set via `snapshot_source`, resolves the live set via its tools, and
+    snapshots those too. Result keys: `static`, `live`, `lazy`."""
+    static: list[dict[str, Any]] = []
+    live: list[dict[str, Any]] = []
+    lazy: list[dict[str, Any]] = []
+    for e in parse_context_entries(text):
+        if not _is_eager(e):
+            lazy.append(e)
+            continue
+        if e.get("type") in LIVE_SOURCE_TYPES:
+            live.append(e)
+        else:
+            data = resolve_static_source(e, cellar_root)
+            rec = dict(e)
+            rec["sha256"] = hashlib.sha256(data).hexdigest() if data is not None else None
+            rec["resolved"] = data is not None
+            static.append(rec)
+    return {"static": static, "live": live, "lazy": lazy}
 
 
 # ---------------------------------------------------------------------------
@@ -983,18 +1083,20 @@ def find_unclosed(cellar_root: str | Path, since_days: int = 30) -> list[Path]:
 # ---------------------------------------------------------------------------
 
 
-def stamp(path: str | Path, *, version: Optional[str] = None, stamped_at: Optional[str] = None) -> Path:
+def stamp(path: str | Path, *, canon: Optional[str] = None, version: Optional[str] = None, stamped_at: Optional[str] = None) -> Path:
     """Write `<path>.stamp.json` recording this file's canon identity,
     version, and content hash — what `mise`'s `vendor_stamp` check type
-    compares a vendored copy against to detect drift. `stamped_at` is
-    accepted from the caller rather than derived internally wherever
+    compares a vendored copy against to detect drift. The canon path is
+    inferred from the filename (CANON_PATHS) so a driver stamp points at
+    the driver's canon, not the adapter's — `canon=` overrides. `stamped_at`
+    is accepted from the caller rather than derived internally wherever
     practical, so a vendoring build's own timestamp is the single source
     of truth (this is a build-time tool, so an internal default is fine
     when the caller doesn't have one)."""
     p = Path(path)
     data = {
         "file": p.name,
-        "canon": CANON_NAME,
+        "canon": canon or CANON_PATHS.get(p.name, CANON_NAME),
         "version": version or ADAPTER_VERSION,
         "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
         "stamped_at": stamped_at or _now_iso(),
@@ -1064,6 +1166,20 @@ def _cli(argv: Optional[list[str]] = None) -> int:
 
     p_stamp = sub.add_parser("stamp", help="write a vendoring provenance stamp")
     p_stamp.add_argument("path")
+    p_stamp.add_argument("--canon", default=None, help="canon path override (default: inferred from filename)")
+
+    p_plan = sub.add_parser("plan-resolution", help="partition a ticket's eager sources into static/live/lazy (JSON)")
+    p_plan.add_argument("ticket_path")
+    p_plan.add_argument("--cellar-root", default=None)
+
+    p_snap = sub.add_parser("snapshot", help="write one resolved source into the ## Resolved-context snapshot section")
+    p_snap.add_argument("ticket_path")
+    p_snap.add_argument("--id", required=True, dest="entry_id")
+    p_snap.add_argument("--type", required=True, dest="source_type")
+    p_snap.add_argument("--ref", required=True)
+    p_snap.add_argument("--sha256", default=None)
+    p_snap.add_argument("--content-file", default=None,
+                        help="path to a file holding the live-fetched content to freeze (url/mcp/qmd); omit for static integrity-only")
 
     args = parser.parse_args(argv)
 
@@ -1106,7 +1222,18 @@ def _cli(argv: Optional[list[str]] = None) -> int:
             for p in find_unclosed(args.cellar_root, since_days=args.since_days):
                 print(p)
         elif args.op == "stamp":
-            print(f"stamped -> {stamp(args.path)}")
+            print(f"stamped -> {stamp(args.path, canon=args.canon)}")
+        elif args.op == "plan-resolution":
+            plan = plan_resolution(Path(args.ticket_path).read_text(encoding="utf-8"), cellar_root=args.cellar_root)
+            slim = {k: [{"id": e.get("id"), "type": e.get("type"), "ref": e.get("ref"),
+                         "sha256": e.get("sha256"), "resolved": e.get("resolved")} for e in v]
+                    for k, v in plan.items()}
+            print(json.dumps(slim, indent=2))
+        elif args.op == "snapshot":
+            content = Path(args.content_file).read_text(encoding="utf-8") if args.content_file else None
+            snapshot_source(args.ticket_path, entry_id=args.entry_id, source_type=args.source_type,
+                            ref=args.ref, sha256=args.sha256, content=content)
+            print(f"snapshot: wrote {args.entry_id} ({args.source_type}) into {args.ticket_path}")
     except (RailError, GateAError) as exc:
         print(f"rail_adapter: {exc}", file=sys.stderr)
         return 1
