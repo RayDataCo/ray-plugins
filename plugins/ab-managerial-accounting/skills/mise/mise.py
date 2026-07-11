@@ -345,13 +345,36 @@ def check_vendor_stamp(target: Path, stamp_target: Path) -> tuple[str, str]:
     if not recorded:
         return "broken", f"stamp file has no 'sha256' field: {stamp_target}"
     actual = hashlib.sha256(target.read_bytes()).hexdigest()
-    if actual == recorded:
-        return "ok", f"stamp matches canon (sha256 {actual[:12]}...)"
-    return (
-        "broken",
-        f"stamp mismatch — vendored copy has drifted from canon "
-        f"(recorded {recorded[:12]}..., actual {actual[:12]}...)",
-    )
+
+    # Integrity: the vendored file must match its own stamp. A mismatch means the
+    # copy was hand-edited (or edited without re-stamping) since it was vendored.
+    if actual != recorded:
+        return (
+            "broken",
+            f"integrity fail — vendored copy edited since it was stamped "
+            f"(stamp {recorded[:12]}..., file {actual[:12]}...); re-vendor from canon, never hand-edit",
+        )
+
+    # Drift: the recorded sha IS canon's sha at vendor time (byte-identical copy),
+    # so if canon is reachable we can detect canon MOVING AHEAD — the case the
+    # old check silently reported "ok" for. Canon lives at <plugins_root>/<stamp.canon>;
+    # find the `plugins/` ancestor of this vendored file. When canon is absent
+    # (a partial install without ab-skill-factory) say so honestly rather than
+    # claiming a canon comparison we didn't make.
+    canon_rel = stamp_data.get("canon")
+    plugins_root = next((p for p in target.resolve().parents if p.name == "plugins"), None)
+    if canon_rel and plugins_root is not None:
+        canon_path = plugins_root / canon_rel
+        if canon_path.exists():
+            canon_sha = hashlib.sha256(canon_path.read_bytes()).hexdigest()
+            if canon_sha != recorded:
+                return (
+                    "broken",
+                    f"CANON DRIFT — canon {canon_rel} is now {canon_sha[:12]}... but this copy was "
+                    f"vendored at {recorded[:12]}...; re-vendor + re-stamp (iterate-brigade)",
+                )
+            return "ok", f"integrity + canon verified (sha {actual[:12]}..., canon reachable)"
+    return "ok", f"integrity ok (sha {actual[:12]}...); canon not reachable — drift unchecked (standalone pack)"
 
 
 def check_menu_freshness(packaged: Path, published: Path) -> tuple[str, str]:

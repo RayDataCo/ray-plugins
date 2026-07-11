@@ -202,13 +202,57 @@ def test_vendor_stamp_pass_when_hash_matches(mise, tmp_path):
 
 
 def test_vendor_stamp_fail_when_hash_mismatches(mise, tmp_path):
+    # File no longer matches its own stamp = integrity failure (hand-edited since
+    # stamping). Distinct from canon drift (canon moved ahead) — see the canon
+    # test below.
     target = tmp_path / "vendored.py"
     target.write_text("print('hi')\n")
     stamp = tmp_path / "vendored.py.stamp.json"
     stamp.write_text(json.dumps({"sha256": "0" * 64, "canon_version": "1.0.0"}))
     state, detail = mise.check_vendor_stamp(target, stamp)
     assert state == "broken"
-    assert "drifted from canon" in detail
+    assert "integrity fail" in detail
+
+
+def test_vendor_stamp_detects_canon_drift(mise, tmp_path):
+    # The stamp matches the vendored FILE (integrity ok), but canon at
+    # <plugins>/<stamp.canon> has moved ahead — the case the old check reported
+    # "ok" for. Must now flag CANON DRIFT.
+    import hashlib
+    plugins = tmp_path / "plugins"
+    canon = plugins / "ab-skill-factory" / "adapter" / "rail_adapter.py"
+    canon.parent.mkdir(parents=True)
+    canon.write_text("CANON v2 — advanced\n")
+    vend = plugins / "ab-marketing" / "skills" / "service" / "vendor" / "rail_adapter.py"
+    vend.parent.mkdir(parents=True)
+    vend.write_text("CANON v1\n")  # older; matches its own stamp below
+    stamp = vend.with_suffix(".py.stamp.json")
+    stamp.write_text(json.dumps({
+        "sha256": hashlib.sha256(b"CANON v1\n").hexdigest(),
+        "canon": "ab-skill-factory/adapter/rail_adapter.py",
+        "version": "1.0.0",
+    }))
+    state, detail = mise.check_vendor_stamp(vend, stamp)
+    assert state == "broken"
+    assert "CANON DRIFT" in detail
+
+
+def test_vendor_stamp_ok_when_canon_absent_is_honest(mise, tmp_path):
+    # Standalone pack (no ab-skill-factory canon reachable): integrity passes,
+    # but the message must NOT claim a canon comparison it didn't make.
+    import hashlib
+    vend = tmp_path / "plugins" / "ab-marketing" / "vendor" / "rail_adapter.py"
+    vend.parent.mkdir(parents=True)
+    vend.write_text("standalone\n")
+    stamp = vend.with_suffix(".py.stamp.json")
+    stamp.write_text(json.dumps({
+        "sha256": hashlib.sha256(b"standalone\n").hexdigest(),
+        "canon": "ab-skill-factory/adapter/rail_adapter.py",
+        "version": "1.0.0",
+    }))
+    state, detail = mise.check_vendor_stamp(vend, stamp)
+    assert state == "ok"
+    assert "drift unchecked" in detail
 
 
 def test_vendor_stamp_fail_when_target_missing_but_stamp_present(mise, tmp_path):
