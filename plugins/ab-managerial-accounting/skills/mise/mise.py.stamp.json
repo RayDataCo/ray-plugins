@@ -1,7 +1,7 @@
 {
   "file": "mise.py",
-  "canon": "ab-skill-factory/adapter/rail_adapter.py",
+  "canon": "ab-skill-factory/skills/mise/mise.py",
   "version": "1.2.0",
   "sha256": "be764aa71e131e1361c18f6567df88ce86ccc0d9ae318cd7186a125a2eca2bea",
-  "stamped_at": "2026-07-10T20:14:29-04:00"
+  "stamped_at": "2026-07-10T20:22:10-04:00"
 }
