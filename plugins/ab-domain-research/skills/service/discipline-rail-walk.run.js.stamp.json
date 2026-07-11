@@ -1,7 +1,7 @@
 {
   "file": "discipline-rail-walk.run.js",
   "canon": "ab-skill-factory/skills/service/discipline-rail-walk.run.js",
-  "version": "1.3.0",
-  "sha256": "8ff958e384fba50982b09dfa9b02c1102be3cd77aa9bec87b00dfb7947a30563",
-  "stamped_at": "2026-07-11T05:15:39-04:00"
+  "version": "1.3.1",
+  "sha256": "85e265d1d148a1aea8e263833036206bc5123cfe5765162b0970c0e85db2f3c7",
+  "stamped_at": "2026-07-11T08:53:42-04:00"
 }

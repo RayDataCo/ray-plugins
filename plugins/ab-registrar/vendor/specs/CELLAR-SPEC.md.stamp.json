@@ -1,7 +1,7 @@
 {
   "file": "CELLAR-SPEC.md",
   "canon": "ab-skill-factory/CELLAR-SPEC.md",
-  "version": "1.0.0",
-  "sha256": "51296af139c688ee77e6dcc3be6e1d6880cd771c592a4bcc3824dad27b5bf02a",
-  "stamped_at": "2026-07-06T14:30:23-04:00"
+  "version": "1.3.1",
+  "sha256": "c79e857fa8a01a792cb37067c21a304c3478932f26f823b72e0e19c777cb2013",
+  "stamped_at": "2026-07-11T09:02:51-04:00"
 }

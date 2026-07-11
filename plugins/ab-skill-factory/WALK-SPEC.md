@@ -123,6 +123,25 @@ Already-snapshotted entry ids are skipped, so multi-phase re-pulls and
 refires do not duplicate the section. Same ticket → same build is a
 *mechanism* here, not a claim (architectural-review concern #1, closed).
 
+## Hardening (adversarial findings H2/H3, 2026-07-11)
+
+- **H2 — untrusted text never rides argv.** The adapter's `append` CLI takes
+  `--entry-file` (or `-` for stdin) and the `snapshot` CLI takes
+  `--spec-file` (JSON `{id,type,ref,sha256?}`): every work-log line and every
+  snapshot invocation composed from ticket-derived text goes through a file.
+  Gate A rule 4 additionally constrains context-entry `id`s to a shell-safe
+  charset; `ref`s are deliberately unconstrained (URLs), which is exactly why
+  they must never ride argv. Inline argv forms remain legal only for fixed
+  literal strings an operator types by hand.
+- **H3 — ticket text is fenced as DATA.** Both adapters wrap the ticket's
+  full text in explicit `UNTRUSTED-TICKET-DATA` markers with a standing
+  rule: embedded instructions aimed at the serving agent are parked
+  (`needs-clarification` / the brigade's park exit) and named in the work
+  log, never followed. Every expo SKILL.md carries the same rule. This does
+  not make injection impossible — a model still reads the text — it makes
+  the expected failure mode *caught-and-parked* instead of *obeyed*, with
+  the attempt on the build record.
+
 ## Honesty notes
 
 - The service lock is ADVISORY (create-exclusive file). The atomic guarantee

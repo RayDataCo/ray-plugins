@@ -42,7 +42,15 @@ resolve_bundle(ref) -> { manifest, resolved_sources[] }
 
 ### Reproducibility — snapshot live sources
 
-`file` sources are static. `url` / `mcp` / `qmd` sources are **live** — so at kickoff the resolver **resolves-and-snapshots** them into the versioned bundle. The build then runs against the snapshot, so `same ticket → same skill` even though some sources were fetched live. Want fresh context? Re-resolve = a new snapshot.
+`file` / `cellar` sources are static (reproducible by re-reading the ref). `url` / `mcp` / `qmd` sources are **live** — fetched fresh — so at kickoff the resolver **resolves-and-snapshots** them into the ticket's `## Resolved-context snapshot`, and the build runs against the frozen bytes, so `same ticket → same skill`. Want fresh context? Re-resolve = a new snapshot.
+
+**Implementation contract (built 2026-07-10 — the resolver is a mechanism now, not just a port name).** Resolution splits by who can do the work:
+
+- **Static sources (`file`/`cellar`)** — the adapter resolves them (`resolve_static_source`) and records an **integrity sha** in the snapshot (`snapshot_source`, sha-only). Replay re-reads the ref and the sha detects a source that changed under it.
+- **Live sources (`url`/`mcp`/`qmd`)** — fetching needs harness tools (WebFetch / MCP / retrieval) the pure-stdlib adapter does not have, so the **walk agent** fetches them and calls `snapshot_source` to freeze the fetched bytes verbatim.
+- **Lazy sources** (`when` doesn't start with "always") are skipped at kickoff; they resolve only if their `when` fires mid-build.
+
+The adapter owns the **write primitive + static integrity** (`plan_resolution` partitions eager sources into static/live/lazy; `snapshot_source` writes under the snapshot section, append-only per Gate A rule 8; CLI: `plan-resolution`, `snapshot`). The **walk** owns live fetching and calls the primitive. The discipline walk driver (`skills/service/discipline-rail-walk.run.js`) runs this as a resolution phase before the expo serves. *(Gap being closed: the Gen-A Python walks — ab-assessment, ab-company-research, ab-sales-collateral — don't yet run the resolution phase; that lands with the Python-walk-reference convergence.)*
 
 ## How the brigade consumes it
 
@@ -52,7 +60,7 @@ resolve_bundle(ref) -> { manifest, resolved_sources[] }
 
 ## Where bundles come from
 
-The **steward** ([ab-registrar/skills/steward/](../ab-registrar/skills/steward/)) — the brigade's front-of-house role — produces the payload: pairing the request to the use-case catalog, gathering + curating from files, URLs, MCP, retrieval (vault-first, careful-external second). All the retrieval smarts live there — **inside** the steward, behind the ticket-contract port — not in the brigade. The brigade only ever reads a resolved payload. That boundary is what keeps the brigade domain-agnostic.
+The **steward** ([skills/steward/](../ab-registrar/skills/steward/)) — the brigade's front-of-house role — produces the payload: pairing the request to the use-case catalog, gathering + curating from files, URLs, MCP, retrieval (vault-first, careful-external second). All the retrieval smarts live there — **inside** the steward, behind the ticket-contract port — not in the brigade. The brigade only ever reads a resolved payload. That boundary is what keeps the brigade domain-agnostic.
 
 ## What this is NOT
 

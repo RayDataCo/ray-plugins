@@ -8,6 +8,7 @@ real cellar/rail. Run via
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -449,3 +450,130 @@ def test_make_expo_dispatcher_adapts_agent_runner(tmp_path):
     text = filed.read_text()
     assert "station skill: partial-with-gaps — answered 3 of 4 — gaps: no Q3 data" in text
     assert "- cellar: `companies/acme/artifacts/agent-serve-answer.md`" in text
+
+
+# ===========================================================================
+# 4. H2 hardening (2026-07-11): append --entry-file — untrusted text must
+# never ride argv. CLI-level tests (subprocess, the real injection surface).
+# ===========================================================================
+
+import subprocess
+import sys as _sys
+
+_ADAPTER = Path(__file__).resolve().parent.parent / "rail_adapter.py"
+_HOSTILE = 'hostile $(rm -rf /) `backticks` "quotes" and\nsecond line'
+
+
+def test_append_entry_file_lands_hostile_text_inert(tmp_path):
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    p = _place(rail, make_ticket(ticket_id="h2-file", context_lines=context_entry(str(src))), "h2-file")
+    ef = tmp_path / "entry.txt"
+    ef.write_text(_HOSTILE, encoding="utf-8")
+
+    r = subprocess.run([_sys.executable, str(_ADAPTER), "append", str(p), "--entry-file", str(ef)], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    text = p.read_text()
+    assert 'hostile $(rm -rf /) `backticks` "quotes" and second line' in text  # newline folded, bytes inert
+
+
+def test_append_entry_file_stdin(tmp_path):
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    p = _place(rail, make_ticket(ticket_id="h2-stdin", context_lines=context_entry(str(src))), "h2-stdin")
+    r = subprocess.run([_sys.executable, str(_ADAPTER), "append", str(p), "--entry-file", "-"], input=_HOSTILE, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "hostile $(rm -rf /)" in p.read_text()
+
+
+def test_append_rejects_both_or_neither_entry_forms(tmp_path):
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    p = _place(rail, make_ticket(ticket_id="h2-forms", context_lines=context_entry(str(src))), "h2-forms")
+    ef = tmp_path / "e.txt"
+    ef.write_text("x")
+    both = subprocess.run([_sys.executable, str(_ADAPTER), "append", str(p), "inline", "--entry-file", str(ef)], capture_output=True, text=True)
+    neither = subprocess.run([_sys.executable, str(_ADAPTER), "append", str(p)], capture_output=True, text=True)
+    assert both.returncode != 0 and "exactly one" in both.stderr
+    assert neither.returncode != 0 and "exactly one" in neither.stderr
+
+
+def test_rule4_rejects_shell_metacharacter_entry_id(tmp_path):
+    src = _eager_source(tmp_path)
+    hostile = context_entry(str(src), eid="x$(touch /tmp/pwned)")
+    text = make_ticket(ticket_id="bad-id-ticket", context_lines=hostile)
+    result = ra.ticket_lint(text, rail_files=[])
+    r4 = next(r for r in result.rules if r.n == 4)
+    assert not r4.passed, "shell-metacharacter entry id must fail rule 4"
+    clean = ra.ticket_lint(make_ticket(ticket_id="good-id-ticket", context_lines=context_entry(str(src), eid="core-notes.v2")), rail_files=[])
+    assert next(r for r in clean.rules if r.n == 4).passed
+
+
+def test_snapshot_spec_file_and_mutual_exclusion(tmp_path):
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    p = _place(rail, make_ticket(ticket_id="spec-snap", context_lines=context_entry(str(src)), subject="companies/acme"), "spec-snap")
+    spec = tmp_path / "entry.json"
+    spec.write_text(json.dumps({"id": "core", "type": "url", "ref": "https://example.com/x?a=1&b=$(boom)"}))
+    body = tmp_path / "body.txt"
+    body.write_text("frozen content line")
+
+    ok = subprocess.run([_sys.executable, str(_ADAPTER), "snapshot", str(p), "--spec-file", str(spec), "--content-file", str(body)], capture_output=True, text=True)
+    assert ok.returncode == 0, ok.stderr
+    text = p.read_text()
+    assert "- **core** (url: https://example.com/x?a=1&b=$(boom))" in text
+    assert "frozen content line" in text
+
+    both = subprocess.run([_sys.executable, str(_ADAPTER), "snapshot", str(p), "--spec-file", str(spec), "--id", "z", "--type", "url", "--ref", "r"], capture_output=True, text=True)
+    assert both.returncode != 0 and "one form" in both.stderr
+    neither = subprocess.run([_sys.executable, str(_ADAPTER), "snapshot", str(p)], capture_output=True, text=True)
+    assert neither.returncode != 0
+
+
+def test_pull_never_steals_a_fresh_no_lease_file_from_a_claim_dir(tmp_path):
+    """The claim-steal window (fresh-eyes round 3): a queued-status file
+    inside another walker's claim dir is that walker's rename→lease-write
+    window (milliseconds), NOT workable. Only TTL-scale residency
+    (abandoned mid-claim crash) is reclaimable."""
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    claim = rail / ".claimed" / "worker-a"
+    claim.mkdir(parents=True)
+    # simulate worker-a's just-renamed, not-yet-leased claim: queued, fresh mtime
+    _place(claim, make_ticket(ticket_id="mid-claim", context_lines=context_entry(str(src))), "mid-claim")
+
+    assert ra.pull(rail, "worker-b") is None, "a fresh no-lease claim-dir file must not be stealable"
+
+    # age it past the TTL -> abandoned-claim reclaim kicks in, visibly
+    old = time.time() - 61 * 60
+    os.utime(claim / "mid-claim.ticket.md", (old, old))
+    handle = ra.pull(rail, "worker-b", ttl_min=60)
+    assert handle is not None and handle.id == "mid-claim"
+    assert "abandoned mid-claim" in handle.text
+
+
+def test_pull_skips_unparseable_candidate_without_crashing(tmp_path):
+    """Torn-read hardening (fresh-eyes round 4): a candidate that reads as
+    unparseable (mid-write tear, or a hand-authored draft) is SKIPPED —
+    the scan never crashes, and a good candidate behind it still claims."""
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    torn = rail / "torn-one.ticket.md"
+    torn.write_text("---\nticket: torn-one\nartifact: skill\nstatus: que", encoding="utf-8")  # truncated mid-write
+    time.sleep(0.02)
+    _place(rail, make_ticket(ticket_id="whole-one", context_lines=context_entry(str(src))), "whole-one")
+
+    handle = ra.pull(rail, "w1")
+    assert handle is not None and handle.id == "whole-one"
+    assert torn.exists()  # untouched, retried next scan
+
+
+def test_atomic_write_leaves_no_temp_residue(tmp_path):
+    rail = _rail(tmp_path)
+    src = _eager_source(tmp_path)
+    p = _place(rail, make_ticket(ticket_id="atomic-check", context_lines=context_entry(str(src))), "atomic-check")
+    ra.append(p, "one line")
+    ra.release(p)
+    leftovers = [f.name for f in rail.iterdir() if ".tmp-" in f.name]
+    assert leftovers == []
+    assert len(list(rail.glob("*.ticket.md"))) == 1

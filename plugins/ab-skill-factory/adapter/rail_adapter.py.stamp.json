@@ -1,7 +1,7 @@
 {
   "file": "rail_adapter.py",
   "canon": "ab-skill-factory/adapter/rail_adapter.py",
-  "version": "1.3.0",
-  "sha256": "6d9845e27001409f02a73c0bbf57282070cdecda3ae410499dee072a4eb08a8f",
-  "stamped_at": "2026-07-11T05:21:45-04:00"
+  "version": "1.3.1",
+  "sha256": "a243f04dcf75a86906982694420f6a733d49f4fa7dab4f9efb41a5c3179e14f5",
+  "stamped_at": "2026-07-11T09:12:39-04:00"
 }
