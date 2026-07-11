@@ -96,7 +96,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable, Optional, Sequence
 
-ADAPTER_VERSION = "1.3.0"
+ADAPTER_VERSION = "1.3.1"
 
 # Where `pull()` claims a ticket to: `<rail_dir>/.claimed/<worker>/<same filename>`.
 # The rename IS the check-and-claim (POSIX rename(2) is indivisible) — see `pull()`'s
@@ -166,6 +166,8 @@ SECTIONS: tuple[str, ...] = (
 )
 
 _TICKET_ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+# Context-entry ids must be shell-safe (rule 4; H2 hardening 2026-07-11).
+_ENTRY_ID_SAFE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _FM_RE = re.compile(r"^---\n(.*?)\n---\n", re.DOTALL)
 _H2_RE = re.compile(r"(?m)^(## .+?)[ \t]*$")
 _ENTRY_START_RE = re.compile(r"(?m)^[ \t]*-[ \t]+id:")
@@ -405,7 +407,7 @@ def snapshot_source(
     if content is not None:
         fence = "~~~"
         block += f"\n\n  {fence}\n" + "\n".join("  " + ln for ln in content.splitlines()) + f"\n  {fence}"
-    path.write_text(_append_to_section(text, _SNAPSHOT_SECTION, block), encoding="utf-8")
+    _atomic_write(path, _append_to_section(text, _SNAPSHOT_SECTION, block))
 
 
 def plan_resolution(text: str, cellar_root: Optional[str | Path] = None) -> dict[str, list[dict[str, Any]]]:
@@ -524,11 +526,18 @@ def ticket_lint(
     rules.append(LintRule(3, "status in enum; lease shape matches status", status_ok and lease_ok, f"status={status!r} lease={lease!r}"))
 
     # Rule 4 — ≥1 context source, all well-formed, registered resolver types.
+    # Entry `id` charset is SHELL-SAFE by contract (H2 hardening, 2026-07-11):
+    # ids travel into agent-composed contexts (snapshot headers, work-log
+    # lines, spec files) and a metacharacter-bearing id has no legitimate
+    # use. Refs are NOT charset-constrained (URLs legitimately carry ?&=) —
+    # which is exactly why refs must never ride argv (see the snapshot CLI's
+    # --spec-file).
     entries = parse_context_entries(text)
-    well_formed = len(entries) >= 1 and all(
+    ids_ok = all(_ENTRY_ID_SAFE_RE.match(e.get("id") or "") for e in entries)
+    well_formed = len(entries) >= 1 and ids_ok and all(
         e.get("id") and e.get("type") and e.get("ref") and e.get("when") and e.get("type") in types_ok for e in entries
     )
-    rules.append(LintRule(4, "≥1 context source, all well-formed, registered types", well_formed, f"sources={len(entries)}"))
+    rules.append(LintRule(4, "≥1 context source, all well-formed, registered types, shell-safe ids", well_formed, f"sources={len(entries)} ids_ok={ids_ok}"))
 
     # Rule 5 — eager sources resolve (file/cellar checked locally; url/mcp/qmd steward-side).
     eager = [e for e in entries if _is_eager(e)]
@@ -576,6 +585,30 @@ def ticket_lint(
 
 def _now_iso(now: Optional[str] = None) -> str:
     return now if now is not None else datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def _mtime_or_inf(p: Path) -> float:
+    """Sort key that survives a path vanishing mid-scan (rename-claim
+    contention): vanished paths sort last; downstream read guards skip
+    them. Never let ordinary contention crash a walker."""
+    try:
+        return p.stat().st_mtime
+    except OSError:
+        return float("inf")
+
+
+def _atomic_write(path: Path, text: str) -> None:
+    """Write a ticket file ATOMICALLY: temp file in the same directory,
+    then os.rename over the target. Path.write_text is open-truncate-write
+    — a concurrent scanner reading between the truncate and the write sees
+    a torn (unparseable) file; that torn-read crash was the THIRD captured
+    failure mode in the claim sequence (fresh-eyes round 4, 2026-07-11).
+    Same-directory rename keeps the operation on one filesystem, so every
+    reader sees either the old or the new complete content, never a tear.
+    The temp name never matches the rail's `*.ticket.md` glob."""
+    tmp = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    tmp.write_text(text, encoding="utf-8")
+    os.rename(tmp, path)
 
 
 def _lease_expired(lease: Optional[dict[str, Any]], now_val: str) -> bool:
@@ -630,7 +663,7 @@ def append(ticket_path: str | Path, entry: str, *, now: Optional[str] = None) ->
     path = Path(ticket_path)
     text = path.read_text(encoding="utf-8")
     line = f"- {_now_iso(now)} · {entry}"
-    path.write_text(_append_to_section(text, "## Work log", line), encoding="utf-8")
+    _atomic_write(path, _append_to_section(text, "## Work log", line))
 
 
 # ---------------------------------------------------------------------------
@@ -709,7 +742,7 @@ def enqueue(
     if path.exists() or any(p.name == path.name for p in _claimed_ticket_paths(rail_dir)):
         raise RailError(f"enqueue: {ticket_id!r} already has a file on the rail at {path}")
 
-    path.write_text(ticket_text if ticket_text.endswith("\n") else ticket_text + "\n", encoding="utf-8")
+    _atomic_write(path, ticket_text if ticket_text.endswith("\n") else ticket_text + "\n")
     append(path, f"steward: enqueued — {result.summary()}", now=now)
     return path
 
@@ -831,7 +864,12 @@ def pull(
 
     root_candidates = list(rail_dir.glob("*.ticket.md"))
     claimed_candidates = _claimed_ticket_paths(rail_dir)
-    candidates = sorted(root_candidates + claimed_candidates, key=lambda p: p.stat().st_mtime)
+    # _mtime_or_inf: a path can vanish between the glob snapshot and stat()
+    # (another walker's rename won it) — ordinary contention, not an error.
+    # An unguarded stat here crashed the LOSING walker ~1-in-7 under the H1
+    # race test (fresh-eyes finding, 2026-07-11); the vanished path sorts
+    # last and the read_text guard below skips it.
+    candidates = sorted(root_candidates + claimed_candidates, key=_mtime_or_inf)
 
     claim_dir = rail_dir / CLAIM_DIRNAME / worker
     claim_dir.mkdir(parents=True, exist_ok=True)
@@ -841,17 +879,43 @@ def pull(
             text = p.read_text(encoding="utf-8")
         except FileNotFoundError:
             continue  # vanished between the glob snapshot and the read — already lost
-        if ticket_id is not None:
-            if (get_field(text, "ticket") or p.name.removesuffix(".ticket.md")) != ticket_id:
+        try:
+            if ticket_id is not None:
+                if (get_field(text, "ticket") or p.name.removesuffix(".ticket.md")) != ticket_id:
+                    continue
+            elif not walker_scope_ok(text, allowed_artifacts, brigade):
                 continue
-        elif not walker_scope_ok(text, allowed_artifacts, brigade):
+            status = get_field(text, "status")
+            lease = get_lease(text)
+        except RailError:
+            # Torn read: the file was mid-write when we read it (this
+            # module's writers are atomic now, but hand-authored or
+            # third-party writers may not be) — unparseable RIGHT NOW is
+            # not unparseable forever; the next scan sees it whole. Skip,
+            # never crash the walker.
             continue
-        status = get_field(text, "status")
-        lease = get_lease(text)
-        if status == "queued":
-            reclaim = False
-        elif status == "in-build" and lease is None:
-            reclaim = False  # multi-phase between-phase state, workable now
+        if status == "queued" or (status == "in-build" and lease is None):
+            # No-lease workable states are claimable FROM THE RAIL ROOT only
+            # (fresh-eyes finding, 2026-07-11): a no-lease file inside a
+            # claim dir is almost always another walker's milliseconds-wide
+            # rename→lease-write window — claiming it there steals a claim
+            # already won and crashes the winner mid-write. The one
+            # legitimate exception is a walker that CRASHED between its
+            # rename and its lease write, stranding the file; that is
+            # distinguishable by age — claim-dir residency far exceeding the
+            # in-flight window (we use the lease TTL as the bar) is
+            # abandonment, reclaimable with the same visibility a stale
+            # lease gets.
+            if _is_claimed_path(p):
+                try:
+                    age_min = (time.time() - p.stat().st_mtime) / 60.0
+                except OSError:
+                    continue  # vanished — lost to the legitimate winner
+                if age_min <= float(ttl_min):
+                    continue  # someone's in-flight claim, not ours to take
+                reclaim = "abandoned"
+            else:
+                reclaim = False
         elif status in ("leased", "in-build") and _lease_expired(lease, now_val):
             reclaim = True
         else:
@@ -866,16 +930,34 @@ def pull(
             # Contention, not a defect — try the next candidate.
             continue
 
-        text = dest.read_text(encoding="utf-8")
-        text = set_field(text, "status", "leased")
-        text = set_field(text, "lease", json.dumps({"worker": worker, "at": now_val, "ttl_min": ttl_min}))
-        dest.write_text(text, encoding="utf-8")
+        # Restart the abandonment clock at claim entry: rename preserves
+        # mtime, so a ticket that sat idle at root past TTL would otherwise
+        # read as "abandoned" the instant it was claimed (fresh-eyes round 4
+        # demonstrated the spurious steal). utime is explicit and
+        # platform-independent where ctime semantics are not.
+        try:
+            os.utime(dest)
+        except OSError:
+            continue  # vanished already — lost after all
 
-        if reclaim:
-            append(dest, f"rail: lease-reclaimed — prior lease expired, worker={worker}", now=now_val)
-        append(dest, f"rail: lease — worker={worker}, ttl_min={ttl_min}", now=now_val)
+        try:
+            text = dest.read_text(encoding="utf-8")
+            text = set_field(text, "status", "leased")
+            text = set_field(text, "lease", json.dumps({"worker": worker, "at": now_val, "ttl_min": ttl_min}))
+            _atomic_write(dest, text)
 
-        final_text = dest.read_text(encoding="utf-8")
+            if reclaim == "abandoned":
+                append(dest, f"rail: lease-reclaimed — abandoned mid-claim (no lease, claim-dir residency past TTL), worker={worker}", now=now_val)
+            elif reclaim:
+                append(dest, f"rail: lease-reclaimed — prior lease expired, worker={worker}", now=now_val)
+            append(dest, f"rail: lease — worker={worker}, ttl_min={ttl_min}", now=now_val)
+
+            final_text = dest.read_text(encoding="utf-8")
+        except OSError:
+            # Belt-and-suspenders vanish guard: any residual interleaving
+            # that moves the file out from under us after our rename
+            # degrades to "lost the race", never an uncaught crash.
+            continue
         return TicketHandle(id=get_field(final_text, "ticket") or dest.stem.removesuffix(".ticket"), path=dest, text=final_text)
 
     return None
@@ -938,7 +1020,7 @@ def release(ticket_path: str | Path, *, now: Optional[str] = None) -> None:
     text = path.read_text(encoding="utf-8")
     text = set_field(text, "status", "queued")
     text = set_field(text, "lease", "null")
-    path.write_text(text, encoding="utf-8")
+    _atomic_write(path, text)
     append(path, "rail: release — lease cleared, back to queued", now=now)
 
 
@@ -1105,11 +1187,11 @@ def ack(
         # the same one `release()` has always had, bounded by the advisory
         # service lock.
         path = _return_to_rail_root(path)
-        path.write_text(text, encoding="utf-8")
+        _atomic_write(path, text)
         append(path, f"ack: {exit} → status {new_status}{phase_note}", now=now_val)
         return path
 
-    path.write_text(text, encoding="utf-8")
+    _atomic_write(path, text)
     append(path, f"ack: {exit} → status {new_status}{phase_note}", now=now_val)
 
     subject = _resolve_subject(path.read_text(encoding="utf-8"))
@@ -1127,7 +1209,7 @@ def ack(
         raise RailError(f"ack: refusing to file {path.name} — subject {subject!r} resolves outside the cellar")
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / path.name
-    dest.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+    _atomic_write(dest, path.read_text(encoding="utf-8"))
     path.unlink()
     return dest
 
@@ -1253,7 +1335,16 @@ def _cli(argv: Optional[list[str]] = None) -> int:
 
     p_append = sub.add_parser("append", help="append one work-log entry")
     p_append.add_argument("ticket_path")
-    p_append.add_argument("entry")
+    p_append.add_argument("entry", nargs="?", default=None)
+    p_append.add_argument(
+        "--entry-file",
+        default=None,
+        help="read the entry text from this file instead of argv ('-' = stdin). "
+        "THE H2 DISCIPLINE (adversarial finding, hardened 2026-07-11): any entry "
+        "text derived from ticket content or other untrusted sources MUST arrive "
+        "via --entry-file, never as a shell-quoted argument — text on a command "
+        "line is one quoting mistake away from shell injection.",
+    )
 
     p_ack = sub.add_parser("ack", help="close out a lease with a terminal disposition")
     p_ack.add_argument("ticket_path")
@@ -1277,10 +1368,19 @@ def _cli(argv: Optional[list[str]] = None) -> int:
 
     p_snap = sub.add_parser("snapshot", help="write one resolved source into the ## Resolved-context snapshot section")
     p_snap.add_argument("ticket_path")
-    p_snap.add_argument("--id", required=True, dest="entry_id")
-    p_snap.add_argument("--type", required=True, dest="source_type")
-    p_snap.add_argument("--ref", required=True)
+    p_snap.add_argument("--id", required=False, default=None, dest="entry_id")
+    p_snap.add_argument("--type", required=False, default=None, dest="source_type")
+    p_snap.add_argument("--ref", required=False, default=None)
     p_snap.add_argument("--sha256", default=None)
+    p_snap.add_argument(
+        "--spec-file",
+        default=None,
+        help="read {id,type,ref,sha256?} from this JSON file instead of argv. "
+        "THE H2 DISCIPLINE (2026-07-11): entry ids/refs come from ticket "
+        "content — untrusted — and refs legitimately carry shell "
+        "metacharacters (URLs), so agent-composed snapshot commands MUST use "
+        "--spec-file, never inline --id/--type/--ref.",
+    )
     p_snap.add_argument("--content-file", default=None,
                         help="path to a file holding the live-fetched content to freeze (url/mcp/qmd); omit for static integrity-only")
 
@@ -1320,7 +1420,14 @@ def _cli(argv: Optional[list[str]] = None) -> int:
             )
             print("rail is dry" if handle is None else f"pulled {handle.id} ({handle.path})")
         elif args.op == "append":
-            append(args.ticket_path, args.entry)
+            if (args.entry is None) == (args.entry_file is None):
+                raise RailError("append: pass exactly one of ENTRY (argv) or --entry-file")
+            if args.entry_file is not None:
+                raw = sys.stdin.read() if args.entry_file == "-" else Path(args.entry_file).read_text(encoding="utf-8")
+                entry_text = " ".join(raw.strip().splitlines())  # work-log entries are one line
+            else:
+                entry_text = args.entry
+            append(args.ticket_path, entry_text)
         elif args.op == "ack":
             print(f"acked -> {ack(args.ticket_path, args.exit, args.cellar_root)}")
         elif args.op == "release":
@@ -1337,10 +1444,23 @@ def _cli(argv: Optional[list[str]] = None) -> int:
                     for k, v in plan.items()}
             print(json.dumps(slim, indent=2))
         elif args.op == "snapshot":
+            inline = [args.entry_id, args.source_type, args.ref]
+            if args.spec_file is not None:
+                if any(v is not None for v in inline) or args.sha256 is not None:
+                    raise RailError("snapshot: --spec-file replaces --id/--type/--ref/--sha256 — pass one form, not both")
+                spec = json.loads(Path(args.spec_file).read_text(encoding="utf-8"))
+                entry_id, source_type, ref = spec.get("id"), spec.get("type"), spec.get("ref")
+                sha256 = spec.get("sha256")
+                if not (entry_id and source_type and ref):
+                    raise RailError("snapshot: spec file must carry id, type and ref")
+            else:
+                if not all(v is not None for v in inline):
+                    raise RailError("snapshot: pass --spec-file, or all of --id/--type/--ref")
+                entry_id, source_type, ref, sha256 = args.entry_id, args.source_type, args.ref, args.sha256
             content = Path(args.content_file).read_text(encoding="utf-8") if args.content_file else None
-            snapshot_source(args.ticket_path, entry_id=args.entry_id, source_type=args.source_type,
-                            ref=args.ref, sha256=args.sha256, content=content)
-            print(f"snapshot: wrote {args.entry_id} ({args.source_type}) into {args.ticket_path}")
+            snapshot_source(args.ticket_path, entry_id=entry_id, source_type=source_type,
+                            ref=ref, sha256=sha256, content=content)
+            print(f"snapshot: wrote {entry_id} ({source_type}) into {args.ticket_path}")
     except (RailError, GateAError) as exc:
         print(f"rail_adapter: {exc}", file=sys.stderr)
         return 1

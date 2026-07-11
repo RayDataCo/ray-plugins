@@ -77,7 +77,7 @@ Conflating these was a v1 bug (RAIL-SPEC's old lifecycle mixed them); they are n
 1. `ticket` id present, kebab-case, unique on the rail.
 2. `artifact` is a type the **target brigade's menu** offers (`menu` itself is universal — every brigade answers discovery). *(Amended 2026-07-02, stress-test finding SF-1: the original rule hardcoded this brigade's own enum `{skill, brigade, menu}` into the supposedly-universal envelope — a company-research ticket like `artifact: company-jobs-snapshot` failed a contract it should satisfy. Artifact vocabularies belong to menus; the envelope only checks the pairing.)*
 3. `status` ∈ { `queued`, `leased`, `in-build`, `needs-context`, `escalated`, `done`, `killed` }; `lease` is null unless status is `leased`/`in-build`, and well-formed (`worker`, `at`, `ttl_min`) when set.
-4. `context` has ≥ 1 source; every source has `id`, `type`, `ref`, `when`; every `type` is a registered resolver type.
+4. `context` has ≥ 1 source; every source has `id`, `type`, `ref`, `when`; every `type` is a registered resolver type; every `id` is shell-safe (`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$` — H2 hardening 2026-07-11: ids travel into agent-composed contexts and a metacharacter-bearing id has no legitimate use; `ref` is deliberately NOT charset-constrained, which is why refs never ride argv — the adapter's `snapshot --spec-file` / `append --entry-file` exist for exactly that).
 5. Every **eager** source (`when` starts with "always") resolves at enqueue-time — the steward must verify the pointers aren't dead before hanging the ticket.
 6. `## Order` section present and non-empty.
 7. The four body sections exist under their canonical H2 names, in order.
